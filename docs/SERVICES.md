@@ -94,6 +94,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 ## portal (`services/portal.ts`)
 | function | state |
 |---|---|
-| `myOverview()` (subscriptions, open invoices, balance) | ⬜ |
-| `subscribe(planId, quantity, variantId?)` | ⬜ |
-| `subscriptionAction(id, 'pause' \| 'resume' \| 'cancel')` | ⬜ |
+| `myOverview()` (customer record, subscriptions without drafts, open invoices, balance, overdue) | ✅ |
+| `listMyInvoices({ page })` (no drafts), `listPortalPlans()` (open for sign-up today, with variants and tax rate) | ✅ |
+| `subscribe(state, formData)` → `portal_subscribe`, lands on the first invoice (`services/portal-actions.ts`) | ✅ |
+| `subscriptionAction(state, formData)` (`id`, `action`: pause / resume / cancel) | ✅ |
+| `updateMyProfile(state, formData)` (name, phone, company, address, city, GSTIN; not email) | ✅ |

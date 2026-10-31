@@ -52,9 +52,9 @@ add a row to Requests instead of editing it.
 | T2.3 | Discounts list + editor, attach to subscriptions | B | ✅ |
 | T2.4 | Billing run page: run now, result report, history | B | ✅ |
 | T2.5 | Finance dashboard: KPIs, charts, date range | B | ✅ |
-| T2.6 | Customer portal: overview, subscriptions, invoices | B | ⬜ |
-| T2.7 | Portal: subscribe to a plan | B | ⬜ |
-| T2.8 | Portal: pay invoice online (Razorpay test) | B | ⬜ |
+| T2.6 | Customer portal: overview, subscriptions, invoices | B | ✅ (plus profile) |
+| T2.7 | Portal: subscribe to a plan | B | ✅ |
+| T2.8 | Portal: pay invoice online (Stripe test) | B | ⬜ needs Stripe test keys |
 | T2.9 | Overdue view + payments list | B | ✅ (aging on Payments; list filter on Invoices) |
 
 ## Tier 3: what makes it memorable

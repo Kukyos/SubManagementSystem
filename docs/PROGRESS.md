@@ -4,6 +4,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Customer portal: overview with balance and pause / resume / cancel (cancel
+  asks twice), invoices with the same printable document as the console
+  (moved to `components/sales/invoice-document.tsx`), plans with one-step
+  subscribe, and profile. Drafts never show in the portal.
+- **Decision: Stripe instead of Razorpay** for online payment (T2.8).
 - **Decision: no chart library.** The dashboard's charts are hand-drawn SVG
   (`components/reports/bar-chart.tsx`): grouped monthly bars with a hover
   tooltip and a table view. Invoiced is the accent violet, collected a darker
