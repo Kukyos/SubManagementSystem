@@ -14,10 +14,9 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
   no "preview next month's invoices" yet.
 
 - **Landing on mobile** hasn't been checked on a real phone yet (P7).
-- **Shard field cost.** ~5,200 instances (1,600 on small screens), with
-  position, hover and edge colour all updated on the CPU each frame. Fine on a
-  laptop; if a low-end phone stutters, move the morph into a vertex shader
-  or drop the count further.
+- **Shard field cost.** ~5,200 instances (1,600 on small screens) plus 250
+  background shards, all placed in the vertex shader; the CPU only sets
+  uniforms each frame. If a low-end phone still struggles, drop the count.
 
 ## Ideas
 
@@ -46,3 +45,10 @@ _Add them as they happen, in the same push as the fix._
   staff were fixed by hand. `inviteStaff` has to set `profiles.role` itself
   after creating the user (and drop the stray customer row), or the trigger
   should also run on update of `raw_app_meta_data`.
+- Per-instance CPU loops jank the whole page, not just the canvas. The shard
+  field updated ~5,400 matrices and colours in JavaScript every frame, which
+  held the main thread and made scrolling and CSS animations stutter. Moving
+  the work into the vertex shader made frames a flat 16.7ms.
+- Kill test servers by port, not by command line. A stale `next start` kept
+  answering on the test port with an old build manifest, so a fresh build
+  looked broken (500 on its CSS).

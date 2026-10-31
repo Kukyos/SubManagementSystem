@@ -12,6 +12,9 @@ import { useEffect, useRef } from "react";
   mouse swings them wider in that direction and widens the area it reaches.
   A separate layer of larger, dimmer shards floats behind and slides against
   the pointer with depth parallax.
+
+  All per-shard work runs in the vertex shader. The CPU only updates a handful
+  of uniforms per frame, so the main thread stays free for scrolling.
 */
 
 type Pose = { scatter: number; x: number; scale: number };
@@ -39,6 +42,7 @@ const HOVER_GROW = 0.75;
 const ORBIT = 0.22;
 const DRAG = 0.35;
 const PARALLAX = 0.25;
+const FOG: [number, number] = [7, 17];
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
@@ -51,6 +55,113 @@ function pickColor(): string {
   }
   return PALETTE[0][0];
 }
+
+const SHARED_GLSL = /* glsl */ `
+  float sm(float t) { t = clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
+  mat3 rotAxis(vec3 a, float ang) {
+    float s = sin(ang), c = cos(ang), oc = 1.0 - c;
+    return mat3(
+      oc * a.x * a.x + c,       oc * a.x * a.y + a.z * s, oc * a.z * a.x - a.y * s,
+      oc * a.x * a.y - a.z * s, oc * a.y * a.y + c,       oc * a.y * a.z + a.x * s,
+      oc * a.z * a.x + a.y * s, oc * a.y * a.z - a.x * s, oc * a.z * a.z + c
+    );
+  }
+`;
+
+const RING_VERTEX = /* glsl */ `
+  attribute vec3 aLoop;
+  attribute vec3 aScatter;
+  attribute vec3 aNormal;
+  attribute vec3 aColor;
+  attribute vec4 aSpin;   // xyz tumble axis, w tumble speed
+  attribute vec4 aMisc;   // x size, y scatter delay, z orbit radius, w orbit speed
+  attribute float aPhase;
+
+  uniform float uTime;
+  uniform float uScatter;
+  uniform float uPresence;
+  uniform float uReach;
+  uniform float uGrow;
+  uniform vec2 uSwing;
+  uniform vec3 uRayO;
+  uniform vec3 uRayD;
+  uniform vec3 uRight;
+  uniform vec3 uUp;
+  uniform vec3 uEye;
+  uniform vec3 uRim;
+
+  varying vec3 vColor;
+  varying float vDepth;
+
+  ${SHARED_GLSL}
+
+  void main() {
+    // each shard leaves and returns at its own moment, so the shape tears rather than fades
+    float s = sm(uScatter * 1.6 - aMisc.y * 0.6);
+    vec3 p = mix(aLoop, aScatter, s);
+
+    float near = 0.0;
+    if (uPresence > 0.001) {
+      vec3 o = p - uRayO;
+      float d = length(o - uRayD * dot(o, uRayD));
+      near = sm(1.0 - d / uReach) * uPresence * (1.0 - s);
+      // circle in the screen plane; a flick stretches the circle along the flick
+      float a = uTime * aMisc.w + aPhase;
+      p += (uRight * sin(a) * (aMisc.z + uSwing.x) + uUp * cos(a) * (aMisc.z + uSwing.y)) * near;
+    }
+
+    // edge-on shards go amber; the band fades as the loop breaks up
+    vec3 v = uEye - p;
+    float facing = abs(dot(aNormal, v)) / length(v);
+    float rim = sm((0.5 - facing) / 0.35) * 0.85 * (1.0 - s);
+    vColor = mix(aColor, uRim, rim);
+
+    float scale = aMisc.x * (1.0 + s * 0.35 + near * uGrow);
+    vec3 local = rotAxis(aSpin.xyz, uTime * aSpin.w + aPhase) * position * scale + p;
+    vec4 mv = modelViewMatrix * vec4(local, 1.0);
+    vDepth = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const BG_VERTEX = /* glsl */ `
+  attribute vec3 aPos;
+  attribute vec3 aAxis;
+  attribute vec3 aColor;
+  attribute vec4 aBg;   // x parallax depth, y drift radius, z rate, w size
+
+  uniform float uTime;
+  uniform vec2 uDrift;
+
+  varying vec3 vColor;
+  varying float vDepth;
+
+  ${SHARED_GLSL}
+
+  void main() {
+    float w = aBg.z * 0.5;
+    vec3 p = aPos;
+    p.xy += -uDrift * aBg.x * 4.0 + vec2(sin(uTime * w), cos(uTime * w)) * aBg.y;
+    vec3 local = rotAxis(aAxis, uTime * aBg.z * 0.15) * position * aBg.w + p;
+    vColor = aColor;
+    vec4 mv = modelViewMatrix * vec4(local, 1.0);
+    vDepth = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const FRAGMENT = /* glsl */ `
+  uniform float uOpacity;
+  uniform vec2 uFog;
+  varying vec3 vColor;
+  varying float vDepth;
+
+  void main() {
+    float fog = smoothstep(uFog.x, uFog.y, vDepth);
+    gl_FragColor = vec4(vColor * (1.0 - fog), uOpacity);
+    #include <colorspace_fragment>
+  }
+`;
 
 export function ShardField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,11 +182,10 @@ export function ShardField() {
       const BG_COUNT = small ? 110 : 250;
 
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setSize(window.innerWidth, window.innerHeight, false);
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(0x000000, 7, 17);
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 60);
       camera.position.set(0, 0, 9);
 
@@ -88,96 +198,140 @@ export function ShardField() {
       tilt.add(spin);
       scene.add(rig);
 
-      const geometry = new THREE.TetrahedronGeometry(1, 0);
-      const material = new THREE.MeshBasicMaterial({
-        wireframe: true,
-        transparent: true,
-        opacity: 0.9,
-        depthWrite: false,
-      });
-      const mesh = new THREE.InstancedMesh(geometry, material, COUNT);
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      spin.add(mesh);
-
-      const loop = new Float32Array(COUNT * 3);
-      const scatter = new Float32Array(COUNT * 3);
-      const size = new Float32Array(COUNT);
-      const delay = new Float32Array(COUNT);
-      const rot = new Float32Array(COUNT * 3);
-      const rotSpeed = new Float32Array(COUNT * 3);
-      const normal = new Float32Array(COUNT * 3);
-      const base = new Float32Array(COUNT * 3);
-      const orbitAmp = new Float32Array(COUNT);
-      const orbitRate = new Float32Array(COUNT);
-      const phase = new Float32Array(COUNT);
-
-      const R = 2.35;
+      const tetra = new THREE.TetrahedronGeometry(1, 0);
       const color = new THREE.Color();
       const amber = new THREE.Color("#ffb829");
-      const RIM = [amber.r, amber.g, amber.b];
+      const randomAxis = (out: Float32Array, at: number) => {
+        const z = Math.random() * 2 - 1;
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.sqrt(1 - z * z);
+        out[at] = r * Math.cos(a);
+        out[at + 1] = r * Math.sin(a);
+        out[at + 2] = z;
+      };
+
+      // Ring: per-shard data lives in instanced attributes, written once.
+      const loop = new Float32Array(COUNT * 3);
+      const scatter = new Float32Array(COUNT * 3);
+      const normal = new Float32Array(COUNT * 3);
+      const tint = new Float32Array(COUNT * 3);
+      const spinData = new Float32Array(COUNT * 4);
+      const misc = new Float32Array(COUNT * 4);
+      const phase = new Float32Array(COUNT);
+      const R = 2.35;
       for (let i = 0; i < COUNT; i++) {
         // torus shell, slightly thick so it reads as a volume
         const u = Math.random() * Math.PI * 2;
         const v = Math.random() * Math.PI * 2;
         const r = 0.62 * (0.82 + Math.random() * 0.22);
-        loop[i * 3] = (R + r * Math.cos(v)) * Math.cos(u);
-        loop[i * 3 + 1] = r * Math.sin(v);
-        loop[i * 3 + 2] = (R + r * Math.cos(v)) * Math.sin(u);
-        normal[i * 3] = Math.cos(v) * Math.cos(u);
-        normal[i * 3 + 1] = Math.sin(v);
-        normal[i * 3 + 2] = Math.cos(v) * Math.sin(u);
-
-        scatter[i * 3] = (Math.random() - 0.5) * 20;
-        scatter[i * 3 + 1] = (Math.random() - 0.5) * 12;
-        scatter[i * 3 + 2] = (Math.random() - 0.5) * 12 - 1;
-
-        size[i] = 0.022 + Math.random() * 0.036;
-        delay[i] = Math.random();
-        orbitAmp[i] = Math.random() * ORBIT;
-        orbitRate[i] = 1.5 + Math.random() * 3;
-        phase[i] = Math.random() * Math.PI * 2;
-
-        for (let k = 0; k < 3; k++) {
-          rot[i * 3 + k] = Math.random() * Math.PI * 2;
-          rotSpeed[i * 3 + k] = (Math.random() - 0.5) * 1.4;
-        }
-
+        const j = i * 3;
+        loop[j] = (R + r * Math.cos(v)) * Math.cos(u);
+        loop[j + 1] = r * Math.sin(v);
+        loop[j + 2] = (R + r * Math.cos(v)) * Math.sin(u);
+        normal[j] = Math.cos(v) * Math.cos(u);
+        normal[j + 1] = Math.sin(v);
+        normal[j + 2] = Math.cos(v) * Math.sin(u);
+        scatter[j] = (Math.random() - 0.5) * 20;
+        scatter[j + 1] = (Math.random() - 0.5) * 12;
+        scatter[j + 2] = (Math.random() - 0.5) * 12 - 1;
         color.set(pickColor());
-        mesh.setColorAt(i, color);
-        base[i * 3] = color.r;
-        base[i * 3 + 1] = color.g;
-        base[i * 3 + 2] = color.b;
+        tint[j] = color.r;
+        tint[j + 1] = color.g;
+        tint[j + 2] = color.b;
+        randomAxis(spinData, i * 4);
+        spinData[i * 4 + 3] = 0.3 + Math.random() * 0.9;
+        misc[i * 4] = 0.022 + Math.random() * 0.036;
+        misc[i * 4 + 1] = Math.random();
+        misc[i * 4 + 2] = Math.random() * ORBIT;
+        misc[i * 4 + 3] = 1.5 + Math.random() * 3;
+        phase[i] = Math.random() * Math.PI * 2;
       }
-      const colors = mesh.instanceColor!;
-      colors.setUsage(THREE.DynamicDrawUsage);
-      colors.needsUpdate = true;
+      const ringGeometry = new THREE.InstancedBufferGeometry();
+      ringGeometry.setAttribute("position", tetra.getAttribute("position"));
+      ringGeometry.setAttribute("aLoop", new THREE.InstancedBufferAttribute(loop, 3));
+      ringGeometry.setAttribute("aScatter", new THREE.InstancedBufferAttribute(scatter, 3));
+      ringGeometry.setAttribute("aNormal", new THREE.InstancedBufferAttribute(normal, 3));
+      ringGeometry.setAttribute("aColor", new THREE.InstancedBufferAttribute(tint, 3));
+      ringGeometry.setAttribute("aSpin", new THREE.InstancedBufferAttribute(spinData, 4));
+      ringGeometry.setAttribute("aMisc", new THREE.InstancedBufferAttribute(misc, 4));
+      ringGeometry.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phase, 1));
+      ringGeometry.instanceCount = COUNT;
+
+      const ringUniforms = {
+        uTime: { value: 0 },
+        uScatter: { value: 0 },
+        uPresence: { value: 0 },
+        uReach: { value: HOVER_RADIUS },
+        uGrow: { value: HOVER_GROW },
+        uSwing: { value: new THREE.Vector2() },
+        uRayO: { value: new THREE.Vector3() },
+        uRayD: { value: new THREE.Vector3(0, 0, -1) },
+        uRight: { value: new THREE.Vector3(1, 0, 0) },
+        uUp: { value: new THREE.Vector3(0, 1, 0) },
+        uEye: { value: new THREE.Vector3() },
+        uRim: { value: new THREE.Vector3(amber.r, amber.g, amber.b) },
+        uOpacity: { value: 0.9 },
+        uFog: { value: new THREE.Vector2(...FOG) },
+      };
+      const ringMaterial = new THREE.ShaderMaterial({
+        vertexShader: RING_VERTEX,
+        fragmentShader: FRAGMENT,
+        uniforms: ringUniforms,
+        wireframe: true,
+        transparent: true,
+        depthWrite: false,
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      // instances are placed in the shader, so the base geometry's bounds mean nothing
+      ring.frustumCulled = false;
+      spin.add(ring);
 
       // Background layer: larger, dimmer shards spread through the whole view, each with its own depth.
-      const bgMaterial = new THREE.MeshBasicMaterial({ wireframe: true, transparent: true, opacity: 0.7, depthWrite: false });
-      const bgMesh = new THREE.InstancedMesh(geometry, bgMaterial, BG_COUNT);
-      bgMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      scene.add(bgMesh);
       const bgPos = new Float32Array(BG_COUNT * 3);
-      const bgDepth = new Float32Array(BG_COUNT);
-      const bgDrift = new Float32Array(BG_COUNT);
-      const bgRate = new Float32Array(BG_COUNT);
-      const bgAxis: InstanceType<typeof THREE.Vector3>[] = [];
-      const bgSize = new Float32Array(BG_COUNT);
+      const bgAxis = new Float32Array(BG_COUNT * 3);
+      const bgTint = new Float32Array(BG_COUNT * 3);
+      const bgData = new Float32Array(BG_COUNT * 4);
       for (let i = 0; i < BG_COUNT; i++) {
+        const j = i * 3;
         const z = -7 + Math.random() * 10;
-        bgPos[i * 3] = (Math.random() - 0.5) * 24;
-        bgPos[i * 3 + 1] = (Math.random() - 0.5) * 14;
-        bgPos[i * 3 + 2] = z;
-        // nearer shards slide further with the pointer
-        bgDepth[i] = 0.2 + ((z + 7) / 10) * 0.8;
-        bgDrift[i] = 0.05 + Math.random() * 0.25;
-        bgRate[i] = 1 + Math.random() * 3;
-        bgAxis.push(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize());
-        bgSize[i] = 0.06 + Math.random() * 0.16;
+        bgPos[j] = (Math.random() - 0.5) * 24;
+        bgPos[j + 1] = (Math.random() - 0.5) * 14;
+        bgPos[j + 2] = z;
+        randomAxis(bgAxis, j);
         color.set(pickColor()).multiplyScalar(0.45);
-        bgMesh.setColorAt(i, color);
+        bgTint[j] = color.r;
+        bgTint[j + 1] = color.g;
+        bgTint[j + 2] = color.b;
+        // nearer shards slide further with the pointer
+        bgData[i * 4] = 0.2 + ((z + 7) / 10) * 0.8;
+        bgData[i * 4 + 1] = 0.05 + Math.random() * 0.25;
+        bgData[i * 4 + 2] = 1 + Math.random() * 3;
+        bgData[i * 4 + 3] = 0.06 + Math.random() * 0.16;
       }
-      bgMesh.instanceColor!.needsUpdate = true;
+      const bgGeometry = new THREE.InstancedBufferGeometry();
+      bgGeometry.setAttribute("position", tetra.getAttribute("position"));
+      bgGeometry.setAttribute("aPos", new THREE.InstancedBufferAttribute(bgPos, 3));
+      bgGeometry.setAttribute("aAxis", new THREE.InstancedBufferAttribute(bgAxis, 3));
+      bgGeometry.setAttribute("aColor", new THREE.InstancedBufferAttribute(bgTint, 3));
+      bgGeometry.setAttribute("aBg", new THREE.InstancedBufferAttribute(bgData, 4));
+      bgGeometry.instanceCount = BG_COUNT;
+      const bgUniforms = {
+        uTime: { value: 0 },
+        uDrift: { value: new THREE.Vector2() },
+        uOpacity: { value: 0.7 },
+        uFog: { value: new THREE.Vector2(...FOG) },
+      };
+      const bgMaterial = new THREE.ShaderMaterial({
+        vertexShader: BG_VERTEX,
+        fragmentShader: FRAGMENT,
+        uniforms: bgUniforms,
+        wireframe: true,
+        transparent: true,
+        depthWrite: false,
+      });
+      const bg = new THREE.Mesh(bgGeometry, bgMaterial);
+      bg.frustumCulled = false;
+      scene.add(bg);
 
       // Section anchors: document Y of each section's middle and its pose.
       let anchors: { y: number; pose: Pose }[] = [];
@@ -249,20 +403,17 @@ export function ShardField() {
         measure();
       };
 
-      const dummy = new THREE.Object3D();
       const raycaster = new THREE.Raycaster();
       const ndc = new THREE.Vector2();
       const toLocal = new THREE.Matrix4();
-      const eye = new THREE.Vector3();
-      const right = new THREE.Vector3();
-      const up = new THREE.Vector3();
       let last = performance.now();
+      let clock = 0;
 
       const frame = () => {
         const now = performance.now();
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
-        const t = now / 1000;
+        if (!reduceMotion) clock += dt;
         // per-frame easing factors from the reference, made frame-rate independent
         const f60 = dt * 60;
         const follow = 1 - Math.pow(1 - 0.075, f60);
@@ -288,102 +439,41 @@ export function ShardField() {
         drift.y += (PARALLAX * mouse.y - drift.y) * settle;
         presence += ((mouse.inside && !reduceMotion ? 1 : 0) - presence) * settle;
 
-        // Pointer ray, camera position and screen axes in the shards' own space, so per-shard work stays cheap.
+        // Pointer ray, camera position and screen axes in the ring's own space.
         camera.updateMatrixWorld();
-        mesh.updateWorldMatrix(true, false);
-        toLocal.copy(mesh.matrixWorld).invert();
-        eye.copy(camera.position).applyMatrix4(toLocal);
-        right.set(1, 0, 0).applyQuaternion(camera.quaternion).transformDirection(toLocal);
-        up.set(0, 1, 0).applyQuaternion(camera.quaternion).transformDirection(toLocal);
-        const hovering = presence > 0.001;
-        if (hovering) {
+        ring.updateWorldMatrix(true, false);
+        toLocal.copy(ring.matrixWorld).invert();
+        const u = ringUniforms;
+        u.uEye.value.copy(camera.position).applyMatrix4(toLocal);
+        u.uRight.value.set(1, 0, 0).applyQuaternion(camera.quaternion).transformDirection(toLocal);
+        u.uUp.value.set(0, 1, 0).applyQuaternion(camera.quaternion).transformDirection(toLocal);
+        if (presence > 0.001) {
           ndc.set(eased.x, eased.y);
           raycaster.setFromCamera(ndc, camera);
           raycaster.ray.applyMatrix4(toLocal);
+          u.uRayO.value.copy(raycaster.ray.origin);
+          u.uRayD.value.copy(raycaster.ray.direction);
         }
-        const { origin: ro, direction: rd } = raycaster.ray;
-        const reach = HOVER_RADIUS + HOVER_WIDEN * Math.max(Math.abs(flick.x), Math.abs(flick.y));
-        const swingX = flick.x * DRAG;
-        const swingY = flick.y * DRAG;
-        const col = colors.array as Float32Array;
-
-        for (let i = 0; i < COUNT; i++) {
-          // each shard leaves and returns at its own moment, so the shape tears rather than fades
-          const s = smooth(clamp01(current.scatter * 1.6 - delay[i] * 0.6));
-          const j = i * 3;
-          let px = loop[j] + (scatter[j] - loop[j]) * s;
-          let py = loop[j + 1] + (scatter[j + 1] - loop[j + 1]) * s;
-          let pz = loop[j + 2] + (scatter[j + 2] - loop[j + 2]) * s;
-
-          let near = 0;
-          if (hovering && s < 1) {
-            const ox = px - ro.x;
-            const oy = py - ro.y;
-            const oz = pz - ro.z;
-            const along = ox * rd.x + oy * rd.y + oz * rd.z;
-            const qx = ox - rd.x * along;
-            const qy = oy - rd.y * along;
-            const qz = oz - rd.z * along;
-            const d = Math.sqrt(qx * qx + qy * qy + qz * qz);
-            if (d < reach) {
-              near = smooth(1 - d / reach) * presence * (1 - s);
-              // circle in the screen plane; a flick stretches the circle along the flick
-              const a = t * orbitRate[i] + phase[i];
-              const cx = Math.sin(a) * (orbitAmp[i] + swingX) * near;
-              const cy = Math.cos(a) * (orbitAmp[i] + swingY) * near;
-              px += right.x * cx + up.x * cy;
-              py += right.y * cx + up.y * cy;
-              pz += right.z * cx + up.z * cy;
-            }
-          }
-          dummy.position.set(px, py, pz);
-
-          // Edge-on shards go amber; the band fades as the loop breaks up.
-          const vx = eye.x - px;
-          const vy = eye.y - py;
-          const vz = eye.z - pz;
-          const facing = Math.abs(normal[j] * vx + normal[j + 1] * vy + normal[j + 2] * vz) / Math.sqrt(vx * vx + vy * vy + vz * vz);
-          const rim = smooth(clamp01((0.5 - facing) / 0.35)) * 0.85 * (1 - s);
-          for (let c = 0; c < 3; c++) {
-            col[j + c] = base[j + c] + (RIM[c] - base[j + c]) * rim;
-          }
-
-          if (!reduceMotion) {
-            rot[j] += rotSpeed[j] * dt;
-            rot[j + 1] += rotSpeed[j + 1] * dt;
-            rot[j + 2] += rotSpeed[j + 2] * dt;
-          }
-          dummy.rotation.set(rot[j], rot[j + 1], rot[j + 2]);
-          dummy.scale.setScalar(size[i] * (1 + s * 0.35 + near * HOVER_GROW));
-          dummy.updateMatrix();
-          mesh.setMatrixAt(i, dummy.matrix);
-        }
-        mesh.instanceMatrix.needsUpdate = true;
-        colors.needsUpdate = true;
-
-        const bt = reduceMotion ? 0 : t;
-        for (let i = 0; i < BG_COUNT; i++) {
-          const j = i * 3;
-          const w = bgRate[i] * 0.5;
-          dummy.position.set(
-            bgPos[j] - drift.x * bgDepth[i] * 4 + Math.sin(bt * w) * bgDrift[i],
-            bgPos[j + 1] - drift.y * bgDepth[i] * 4 + Math.cos(bt * w) * bgDrift[i],
-            bgPos[j + 2],
-          );
-          dummy.quaternion.setFromAxisAngle(bgAxis[i], (bt * bgRate[i] * 0.15) % (Math.PI * 2));
-          dummy.scale.setScalar(bgSize[i]);
-          dummy.updateMatrix();
-          bgMesh.setMatrixAt(i, dummy.matrix);
-        }
-        bgMesh.instanceMatrix.needsUpdate = true;
+        u.uTime.value = clock;
+        u.uScatter.value = current.scatter;
+        u.uPresence.value = presence;
+        u.uReach.value = HOVER_RADIUS + HOVER_WIDEN * Math.max(Math.abs(flick.x), Math.abs(flick.y));
+        u.uSwing.value.set(flick.x * DRAG, flick.y * DRAG);
+        bgUniforms.uTime.value = clock;
+        bgUniforms.uDrift.value.set(reduceMotion ? 0 : drift.x, reduceMotion ? 0 : drift.y);
 
         renderer.render(scene, camera);
       };
 
       // Background tabs get no frames anyway; stop the loop so we don't burn the battery on return.
-      const onVisibility = () => renderer.setAnimationLoop(document.hidden ? null : frame);
+      const onVisibility = () => {
+        last = performance.now();
+        renderer.setAnimationLoop(document.hidden ? null : frame);
+      };
 
       measure();
+      // Compile both shaders now, under the intro loader, rather than on the first visible frame.
+      renderer.compile(scene, camera);
       // Fonts and images shift layout after first paint; re-measure once things settle.
       const remeasure = window.setTimeout(measure, 800);
       window.addEventListener("resize", onResize);
@@ -400,11 +490,11 @@ export function ShardField() {
         document.documentElement.removeEventListener("pointerleave", onLeave);
         document.removeEventListener("visibilitychange", onVisibility);
         renderer.setAnimationLoop(null);
-        geometry.dispose();
-        material.dispose();
+        tetra.dispose();
+        ringGeometry.dispose();
+        bgGeometry.dispose();
+        ringMaterial.dispose();
         bgMaterial.dispose();
-        mesh.dispose();
-        bgMesh.dispose();
         renderer.dispose();
       };
     })();
@@ -419,7 +509,7 @@ export function ShardField() {
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 h-screen w-screen opacity-0 transition-opacity duration-[1500ms]"
+      className="pointer-events-none fixed inset-0 z-0 h-screen w-screen opacity-0 transition-opacity duration-[1200ms]"
     />
   );
 }

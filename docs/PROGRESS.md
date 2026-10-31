@@ -34,6 +34,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Shard field moved onto the GPU: positions, tumble, hover orbit, scatter
+  and amber edges are computed in a vertex shader from instanced attributes
+  written once; the CPU only updates a few uniforms per frame. Same look,
+  but the main thread is free, so scrolling and CSS animations stop
+  stuttering. Shaders are compiled up front under the intro loader.
 - Landing nav links take the reference's hover: letters roll up one after
   another (18ms stagger) with a copy rolling in from below, and the colour
   eases from #9a9a9a to white over 0.5s. Screen readers get the plain label.
