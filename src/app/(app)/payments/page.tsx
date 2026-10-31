@@ -86,7 +86,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                     </span>
                   </div>
                   {/* Older debt reads hotter: amber through to pink. */}
-                  <div className="mt-1.5 h-1.5 rounded-full bg-white/[0.06]">
+                  <div className="mt-1.5 h-1.5 rounded-full bg-ink/[0.06]">
                     <div
                       className={`h-full rounded-full ${["bg-amber/60", "bg-amber", "bg-pink/70", "bg-pink"][i]}`}
                       style={{ width: `${(b.amount / worst) * 100}%` }}
@@ -156,7 +156,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
-                <tr key={p.id} className="hover:bg-white/[0.02]">
+                <tr key={p.id} className="hover:bg-ink/[0.02]">
                   <td className="px-5 py-3 text-muted">{date(p.paid_on)}</td>
                   <td className="px-5 py-3">
                     {p.invoice ? (

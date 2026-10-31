@@ -4,6 +4,14 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Light theme for the console and portal: a sun / moon button in the header,
+  remembered in a `theme` cookie and read on the server. Tokens switch on the
+  shell's `data-theme`; hard-coded `white/…` overlays became an `ink` token,
+  and the chart's gridlines and labels use tokens too. Landing and auth stay
+  dark.
+- Fixed a hydration mismatch on the dashboard charts: Node printed compact
+  money as `₹25.0L` and browsers as `₹25L`. `moneyCompact` now sets its
+  minimum fraction digits.
 - Overdue reminders: "Email reminders to N customers…" on the Payments
   overdue card (asks twice) sends each customer one email listing what's past
   due, oldest first, with a link to their invoices. Five at a time over a

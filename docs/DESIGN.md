@@ -27,7 +27,20 @@ triangles, the logo is a tetrahedron).
 
 ## Colour
 
-Dark first. The brand is black; a light theme is optional polish.
+Dark first. The brand is black. The console and portal also have a light
+theme, picked per person with the sun / moon button in the header and kept in
+a `theme` cookie so the server renders it with no flash. Landing and auth
+pages are always dark.
+
+Light values (`[data-theme="light"]` in `globals.css`): page `#F5F5F7`,
+surface `#FFFFFF`, surface-2 `#F0F0F3`, hairlines `rgba(10,10,20,0.09)` /
+`0.18`, text `#0B0B10`, muted 66%, faint 50%. Status colours deepen so text
+holds 4.5:1 on white: violet `#7444F5`, amber `#A86500`, teal `#0B8A68`, pink
+`#D0325C`, blue `#2F5FD6`.
+
+**`ink`** is the overlay colour: white in dark, near-black in light. Hovers,
+tracks and tints use `bg-ink/[0.03]` and friends, never `bg-white/…`, so they
+work in both themes.
 
 | token | value | use |
 |---|---|---|

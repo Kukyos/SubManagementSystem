@@ -11,6 +11,8 @@
   --color-fg: #ffffff;
   --color-muted: rgb(255 255 255 / 0.62);
   --color-faint: rgb(255 255 255 / 0.38);
+  /* Overlays and hovers: white on the dark canvas, near-black on the light one. */
+  --color-ink: #ffffff;
 
   --color-accent: #8052ff;
   --color-accent-hover: #9470ff;
@@ -48,6 +50,28 @@ body {
   color: var(--color-fg);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Light theme for the signed-in screens (console and portal), chosen per person
+   and stored in a cookie. Landing and auth pages stay dark: that is the brand.
+   Status colours are deepened so text keeps 4.5:1 on white. */
+[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #f5f5f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #f0f0f3;
+  --color-line: rgb(10 10 20 / 0.09);
+  --color-line-strong: rgb(10 10 20 / 0.18);
+  --color-fg: #0b0b10;
+  --color-muted: rgb(10 10 20 / 0.66);
+  --color-faint: rgb(10 10 20 / 0.5);
+  --color-ink: #0b0b10;
+  --color-accent: #7444f5;
+  --color-accent-hover: #5f30e0;
+  --color-amber: #a86500;
+  --color-teal: #0b8a68;
+  --color-pink: #d0325c;
+  --color-blue: #2f5fd6;
 }
 
 ::selection {

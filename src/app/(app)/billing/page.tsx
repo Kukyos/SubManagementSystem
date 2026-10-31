@@ -55,7 +55,7 @@ export default async function Page() {
               {runs.map((r) => {
                 const failed = Array.isArray(r.failed) ? r.failed.length : 0;
                 return (
-                  <tr key={r.id} className="hover:bg-white/[0.02]">
+                  <tr key={r.id} className="hover:bg-ink/[0.02]">
                     <td className="px-5 py-3">{when.format(new Date(r.created_at))}</td>
                     <td className="px-5 py-3 text-muted">{date(r.as_of)}</td>
                     <td className="px-5 py-3 text-muted">{r.ranBy ?? "Nightly job"}</td>

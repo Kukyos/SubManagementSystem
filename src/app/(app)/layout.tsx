@@ -1,5 +1,6 @@
 import { ConsoleShell } from "@/components/layout/console-shell";
 import { consoleNav } from "@/components/layout/nav-config";
+import { getTheme } from "@/lib/theme";
 import { requireRole } from "@/services/auth";
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
@@ -9,7 +10,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     .filter((g) => g.items.length);
 
   return (
-    <ConsoleShell user={user} groups={groups}>
+    <ConsoleShell user={user} groups={groups} theme={await getTheme()}>
       {children}
     </ConsoleShell>
   );

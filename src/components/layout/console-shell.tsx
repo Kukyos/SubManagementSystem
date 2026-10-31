@@ -2,14 +2,16 @@ import { Logo } from "@/components/brand/logo";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { NavLink } from "@/components/layout/nav-link";
 import type { NavGroup } from "@/components/layout/nav-config";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
+import type { Theme } from "@/lib/theme";
 import { gutter } from "@/components/layout/shell";
 import { cn } from "@/lib/format";
 import type { CurrentUser } from "@/services/auth";
 
-export function ConsoleShell({ user, groups, children }: { user: CurrentUser; groups: NavGroup[]; children: React.ReactNode }) {
+export function ConsoleShell({ user, groups, children, theme }: { user: CurrentUser; theme: Theme; groups: NavGroup[]; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <div data-shell data-theme={theme} className="bg-bg text-fg flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen print:!hidden w-60 shrink-0 flex-col border-r border-line bg-surface md:flex">
         <div className="px-5 py-5">
           <Logo href="/dashboard" />
@@ -37,7 +39,10 @@ export function ConsoleShell({ user, groups, children }: { user: CurrentUser; gr
             <div className="hidden flex-1 md:block">
               <CommandPalette pages={groups.flatMap((g) => g.items)} />
             </div>
+            <div className="flex items-center gap-2">
+            <ThemeToggle initial={theme} />
             <UserMenu user={user} />
+          </div>
           </div>
         </header>
 

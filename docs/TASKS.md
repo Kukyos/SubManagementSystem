@@ -66,7 +66,7 @@ add a row to Requests instead of editing it.
 | T3.3 | Revenue forecast | B | ✅ on the dashboard, next 6 months |
 | T3.4 | Global search (⌘K) | B | ✅ pages, customers, subscriptions, invoices |
 | T3.5 | CSV export on lists | B | ✅ customers, subscriptions, invoices, payments; current filters, every page |
-| T3.6 | Light theme (the app is dark-first) | B | ⬜ |
+| T3.6 | Light theme (the app is dark-first) | B | ✅ console and portal; toggle in the header |
 | T3.7 | Showcase README with screenshots | B | ⬜ |
 
 ## Polish

@@ -23,7 +23,7 @@ export function StatusTabs({
 
   return (
     <nav aria-label="Filter by status" className="mb-4 flex gap-1 overflow-x-auto border-b border-line">
-      {[{ value: "", label: "All", count: all, dot: "bg-white/40" }, ...tabs].map((t) => {
+      {[{ value: "", label: "All", count: all, dot: "bg-ink/40" }, ...tabs].map((t) => {
         const active = (current ?? "") === t.value;
         return (
           <Link

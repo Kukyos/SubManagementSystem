@@ -16,7 +16,7 @@ function Pill({ label, text, dot }: { label: string; text: string; dot: string }
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.03] px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-full border border-line bg-ink/[0.03] px-2.5 py-0.5 text-xs font-medium",
         text,
       )}
     >

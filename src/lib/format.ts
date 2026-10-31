@@ -8,6 +8,8 @@ const inrCompact = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
   notation: "compact",
+  // Explicit, because Node's ICU otherwise pads to "₹25.0L" while browsers print "₹25L" (a hydration mismatch).
+  minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
 

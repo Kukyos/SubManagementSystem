@@ -88,7 +88,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((s) => (
-                <tr key={s.id} className="hover:bg-white/[0.02]">
+                <tr key={s.id} className="hover:bg-ink/[0.02]">
                   <td className="px-5 py-3">
                     <Link href={`/subscriptions/${s.id}`} className="tabular font-medium hover:text-accent-hover">
                       {s.number}

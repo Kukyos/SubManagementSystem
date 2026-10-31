@@ -94,7 +94,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
               {rows.map((i) => {
                 const due = Number(i.total) - Number(i.amount_paid);
                 return (
-                  <tr key={i.id} className="hover:bg-white/[0.02]">
+                  <tr key={i.id} className="hover:bg-ink/[0.02]">
                     <td className="px-5 py-3">
                       <Link href={`/invoices/${i.id}`} className="tabular font-medium hover:text-accent-hover">
                         {i.number}

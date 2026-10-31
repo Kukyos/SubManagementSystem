@@ -122,7 +122,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                       <span className="text-muted group-hover:text-fg">{subscriptionStatus[st].label}</span>
                       <span className="tabular">{n.toLocaleString("en-IN")}</span>
                     </span>
-                    <span className="mt-1.5 block h-1.5 rounded-full bg-white/[0.06]">
+                    <span className="mt-1.5 block h-1.5 rounded-full bg-ink/[0.06]">
                       <span className="block h-full rounded-full" style={{ width: `${(n / statusTotal) * 100}%`, background: subscriptionStatus[st].hex }} />
                     </span>
                   </Link>
@@ -213,7 +213,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                     </span>
                     <span className="tabular">{money(p.mrr)}</span>
                   </span>
-                  <span className="mt-1.5 block h-1.5 rounded-full bg-white/[0.06]">
+                  <span className="mt-1.5 block h-1.5 rounded-full bg-ink/[0.06]">
                     <span className="block h-full rounded-full bg-accent" style={{ width: `${(p.mrr / topMrr) * 100}%` }} />
                   </span>
                 </li>

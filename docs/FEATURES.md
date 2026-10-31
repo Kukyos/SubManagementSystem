@@ -75,4 +75,4 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 | Revenue forecast from active subscriptions | next months' expected billing | ✅ |
 | Global search (customers, subscriptions, invoices) | thousands of rows need a way in | ✅ |
 | CSV export of any list | finance always wants a spreadsheet | ✅ |
-| Dark mode | | ⬜ |
+| Light theme (dark is the default) | people who work in daylight | ✅ |
