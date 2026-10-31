@@ -73,7 +73,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listInvoices(query)` (status incl. overdue, customer, search), `invoiceCounts()` | ✅ |
 | `getInvoice(id)` (lines, payments, timeline) | ✅ |
 | `setInvoiceStatus(state, formData)`, `confirmDrafts(ids)` (`services/invoice-actions.ts`) | ✅ |
-| `sendInvoice(id)` (email with PDF) | ⬜ |
+| `sendInvoice(state, formData)` (`id`; email with the PDF attached, stamps `sent_at`; `services/invoice-actions.ts`) | ✅ |
+| `invoicePdfResponse(id, as)` (`services/invoice-files.ts`): the PDF for `GET /invoices/[id]/pdf` (staff) and `GET /portal/invoices/[id]/pdf` (own invoices, no drafts) | ✅ |
 | `runBilling(state, formData)` (`asOf`; `services/invoice-actions.ts`) | ✅ |
 | `listBillingRuns(limit?)`, `billingDue()` (due subscriptions, draft invoices) | ✅ |
 

@@ -2,10 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { date, money } from "@/lib/format";
 import { dbMessage, isDate, text } from "@/lib/forms";
+import { invoicePdf, pdfName } from "@/lib/invoice-pdf";
+import { emailLayout, mailConfigured, sendMail, siteUrl } from "@/lib/mailer";
+import { invoiceDisplayStatus } from "@/lib/status";
 import { getCurrentUser } from "@/services/auth";
 import { uuid } from "@/services/catalogue";
 import type { FormState } from "@/services/catalogue-actions";
+import { getInvoice } from "@/services/invoices";
 import type { InvoiceStatus, PaymentMethod } from "@/types/models";
 
 async function staffOnly() {
@@ -97,4 +102,48 @@ export async function runBilling(_: RunState, formData: FormData): Promise<RunSt
   revalidatePath("/subscriptions");
   revalidatePath("/dashboard");
   return { ok: true, result: data as RunResult };
+}
+
+// Emails the invoice as a PDF to the customer and stamps sent_at.
+export async function sendInvoice(_: FormState, formData: FormData): Promise<FormState> {
+  const id = text(formData, "id");
+  if (!(await staffOnly())) return { ok: false, error: "Only staff can send invoices." };
+  if (!uuid.test(id)) return { ok: false, error: "That invoice no longer exists." };
+  if (!mailConfigured()) return { ok: false, error: "Email isn't set up on this server yet. Download the PDF and send it yourself for now." };
+
+  const inv = await getInvoice(id);
+  if (!inv) return { ok: false, error: "That invoice no longer exists." };
+  if (inv.status === "draft") return { ok: false, error: "Confirm the invoice before sending it." };
+  if (inv.status === "cancelled") return { ok: false, error: "Cancelled invoices aren't sent." };
+
+  const balance = Number(inv.total) - Number(inv.amount_paid);
+  const overdue = invoiceDisplayStatus(inv.status, inv.due_date) === "overdue";
+  const { html, text: plain } = emailLayout({
+    heading: inv.status === "paid" ? `Invoice ${inv.number}, paid` : `Invoice ${inv.number} for ${money(inv.total)}`,
+    lines: [
+      `Hi ${inv.customer.name.split(" ")[0]},`,
+      inv.status === "paid"
+        ? `Here's your invoice for your records. It was paid in full on ${date(inv.paid_at)}.`
+        : `Your invoice${inv.subscription ? ` for ${inv.subscription.plan}` : ""} is attached. ${money(balance)} is ${overdue ? "overdue since" : "due by"} ${date(inv.due_date)}.`,
+      "You can view it and pay online from your account.",
+    ],
+    button: { label: inv.status === "paid" ? "View invoice" : "View and pay", href: `${siteUrl()}/portal/invoices/${inv.id}` },
+  });
+
+  try {
+    await sendMail({
+      to: inv.customer.email,
+      subject: inv.status === "paid" ? `Invoice ${inv.number} (paid)` : `Invoice ${inv.number} from Brightloop`,
+      html,
+      text: plain,
+      attachments: [{ filename: pdfName(inv.number), content: Buffer.from(await invoicePdf(inv)), contentType: "application/pdf" }],
+    });
+  } catch {
+    return { ok: false, error: "The email didn't go out. Check the address and try again in a moment." };
+  }
+
+  const supabase = await createClient();
+  await supabase.from("invoices").update({ sent_at: new Date().toISOString() }).eq("id", id);
+  refresh(id);
+  return { ok: true, data: undefined, values: { message: `Sent to ${inv.customer.email}.` } };
 }

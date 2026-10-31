@@ -4,6 +4,17 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Invoice PDF and email. Console invoices have "Email to customer" (confirmed
+  or paid; "Send again" once `sent_at` is set) and a PDF link; the portal has
+  "Download PDF". The email is one short message with a "View and pay" button
+  to the portal and the PDF attached.
+- **Decision: `pdf-lib` for PDF, `nodemailer` for email.** pdf-lib is pure
+  JS and runs in a serverless function with no browser; the PDF is drawn by
+  hand to match the on-screen invoice. Its built-in Helvetica has no ₹, so
+  the PDF prints `Rs.`. nodemailer sends through the Gmail account in
+  `SMTP_*`. Without those env vars the send button says email isn't set up
+  instead of failing. Shared pieces are `lib/invoice-pdf.ts` and
+  `lib/mailer.ts` (one email layout for everything we send).
 - Revenue forecast on the dashboard: expected billing for this month and the
   next five. It walks each active subscription's periods the way
   `bill_subscription` does (from `next_invoice_date`, one cycle at a time,
