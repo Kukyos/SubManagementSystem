@@ -94,6 +94,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P17 | Stronger text shadow over the shard field | Landing, auth headings | B | ✅ |
 | P18 | Pay button on each unpaid row of the portal invoices list | Portal invoices | B | ✅ |
 | P19 | Landing's floating shards (no loop) behind the signed-in console and portal, both themes | Console, portal | P | ✅ |
+| P20 | Form validation popup restyled: red shard instead of the browser's "!", site-wide | All forms | P | ✅ |
 | P20 | Top navigation progress bar with a turning shard at its head | All pages | B | ✅ |
 
 ## Requests

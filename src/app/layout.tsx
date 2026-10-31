@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavProgress } from "@/components/layout/nav-progress";
+import { ValidationBubble } from "@/components/ui/validation-bubble";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <NavProgress />
         {children}
+        <ValidationBubble />
       </body>
     </html>
   );

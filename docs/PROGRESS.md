@@ -138,6 +138,10 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- The browser's "please fill in / match the format" popup is replaced on every
+  form by our own (`ValidationBubble`, mounted once in the root layout): a red
+  shard instead of the "!", the same message and the field's hint. Native
+  checks still decide what's valid; the popup only changes how it looks.
 - Console and portal now sit over the landing's floating shards. The loop
   was tried on the right and taken out: it crowded the data. Cards stay opaque
   so tables read cleanly. In the light theme distant shards fade out instead of
