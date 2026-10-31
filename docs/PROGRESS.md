@@ -4,6 +4,14 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Signed-in shells line up: the portal header and page share one 1440px
+  container (the landing's width) instead of a narrower 1152px one that left
+  wide black margins, with the nav beside the logo. Console header and page
+  share the same gutters. Settings puts Team and Taxes side by side on wide
+  screens; portal profile puts billing details beside the password card.
+  Layout markup moved from `(app)/layout.tsx` and `portal/layout.tsx` into
+  `components/layout/console-shell.tsx` and `portal-shell.tsx`; the layouts
+  keep the role check.
 - Customer portal: overview with balance and pause / resume / cancel (cancel
   asks twice), invoices with the same printable document as the console
   (moved to `components/sales/invoice-document.tsx`), plans with one-step
