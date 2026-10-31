@@ -46,6 +46,8 @@ const FOG: [number, number] = [7, 17];
 // resolution steps the canvas drops through when frames run long
 const PIXEL_STEPS = [1.5, 1.25, 1, 0.85, 0.7];
 const SLOW_FRAME_MS = 24;
+// behind the console and portal the shards just drift: slower, no pointer parallax
+const CALM_SPEED = 0.35;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
@@ -492,8 +494,9 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
         u.uPresence.value = presence;
         u.uReach.value = HOVER_RADIUS + HOVER_WIDEN * Math.max(Math.abs(flick.x), Math.abs(flick.y));
         u.uSwing.value.set(flick.x * DRAG, flick.y * DRAG);
-        bgUniforms.uTime.value = clock;
-        bgUniforms.uDrift.value.set(reduceMotion ? 0 : drift.x, reduceMotion ? 0 : drift.y);
+        const still = reduceMotion || !showRing;
+        bgUniforms.uTime.value = showRing ? clock : clock * CALM_SPEED;
+        bgUniforms.uDrift.value.set(still ? 0 : drift.x, still ? 0 : drift.y);
 
         renderer.render(scene, camera);
       };
