@@ -55,7 +55,7 @@ add a row to Requests instead of editing it.
 | T2.6 | Customer portal: overview, subscriptions, invoices | B | ⬜ |
 | T2.7 | Portal: subscribe to a plan | B | ⬜ |
 | T2.8 | Portal: pay invoice online (Razorpay test) | B | ⬜ |
-| T2.9 | Overdue view + payments list | B | ⬜ |
+| T2.9 | Overdue view + payments list | B | ✅ (aging on Payments; list filter on Invoices) |
 
 ## Tier 3: what makes it memorable
 

@@ -52,3 +52,8 @@ _Add them as they happen, in the same push as the fix._
 - Kill test servers by port, not by command line. A stale `next start` kept
   answering on the test port with an old build manifest, so a fresh build
   looked broken (500 on its CSS).
+
+- Payments list has no filtered total: PostgREST aggregates are off and a
+  client-side sum would stop at the 1,000-row cap. A `payments_summary(...)`
+  SQL function would add it. Overdue aging is bucketed in the app for the same
+  reason it's fine today (a few hundred rows); move it to SQL if it grows.

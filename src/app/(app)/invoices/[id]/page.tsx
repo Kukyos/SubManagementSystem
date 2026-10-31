@@ -9,7 +9,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { date, money } from "@/lib/format";
 import { today } from "@/lib/forms";
-import { invoiceDisplayStatus } from "@/lib/status";
+import { invoiceDisplayStatus, methodLabel } from "@/lib/status";
 import { requireRole } from "@/services/auth";
 import { uuid } from "@/services/catalogue";
 import { setInvoiceStatus } from "@/services/invoice-actions";
@@ -20,15 +20,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const invoice = uuid.test(id) ? await getInvoice(id) : null;
   return { title: invoice?.number ?? "Invoice" };
 }
-
-const methodLabel: Record<string, string> = {
-  bank_transfer: "Bank transfer",
-  upi: "UPI",
-  card: "Card",
-  cheque: "Cheque",
-  cash: "Cash",
-  online: "Online",
-};
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   await requireRole("admin", "staff");
@@ -210,7 +201,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 {inv.payments.map((p) => (
                   <li key={p.id} className="flex items-start justify-between gap-4 px-5 py-3 text-sm">
                     <span>
-                      {methodLabel[p.method] ?? p.method}
+                      {methodLabel[p.method]}
                       <span className="block text-xs text-faint">
                         {date(p.paid_on)}
                         {p.reference && ` · ${p.reference}`}

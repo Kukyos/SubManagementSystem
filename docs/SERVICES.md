@@ -80,7 +80,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 ## payments (`services/payments.ts`)
 | function | state |
 |---|---|
-| `listPayments(query)` | ⬜ |
+| `listPayments(query)` (method, date range, customer or invoice search) | ✅ |
+| `overdueAging()`: overdue balance in 30-day buckets, oldest invoices | ✅ |
 | `recordPayment(state, formData)` (`services/invoice-actions.ts`) | ✅ |
 | `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` | ⬜ |
 
