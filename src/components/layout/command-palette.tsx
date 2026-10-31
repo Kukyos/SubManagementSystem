@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { startNavProgress } from "@/components/layout/nav-progress";
 import type { NavItem } from "@/components/layout/nav-config";
 import { cn } from "@/lib/format";
 import type { SearchHit } from "@/services/reports";
@@ -80,6 +81,7 @@ export function CommandPalette({ pages }: { pages: NavItem[] }) {
     if (!item) return;
     close();
     setTerm("");
+    startNavProgress();
     router.push(item.href);
   }
 

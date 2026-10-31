@@ -4,6 +4,14 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Skeleton screens on every console and portal route (lists, detail pages,
+  dashboard, billing, payments, settings), built from `ui/skeleton.tsx` and
+  shaped like the page they stand in for. Without a `loading.tsx` a dynamic
+  route isn't prefetched, so a sidebar click sat on the old page until the
+  server finished; now the skeleton shows at once.
+- A thin progress bar across the top on every navigation, led by the turning
+  logo shard. It starts on internal link clicks (and ⌘K jumps) and finishes
+  when the URL changes.
 - **Decision: back to Razorpay** for online payment (reverses the Stripe
   call below; Razorpay is the preferred gateway). "Pay now" on a portal
   invoice creates a Razorpay order for the balance due, opens Checkout, then

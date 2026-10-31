@@ -236,3 +236,13 @@ a:focus-visible .roll-char {
     color-scheme: light;
   }
 }
+
+/* The shard at the head of the navigation progress bar. */
+@keyframes prism-turn {
+  from {
+    transform: rotateY(0deg) rotateZ(-8deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateZ(-8deg);
+  }
+}

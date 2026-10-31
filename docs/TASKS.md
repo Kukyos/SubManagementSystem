@@ -78,7 +78,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | P | ⬜ |
 | P2 | Show / hide password toggle (a shard: solid while hidden, wireframe when shown) | Sign in, sign up, reset | P | ✅ |
 | P3 | Friendly empty states with a next action | All lists | P | ⬜ |
-| P4 | Skeleton loaders matching each list's layout | All lists | P | ⬜ |
+| P4 | Skeleton loaders matching each list's layout | All lists | B | ✅ every console and portal route, detail pages too |
 | P5 | Inline field errors with focus on first invalid field | All forms | P | ⬜ |
 | P6 | Mobile pass: tables become cards under 640px | All lists | P | ⬜ |
 | P7 | Mobile pass: hero type size, nav collapses to a menu button under 1024px, check the loop sits well behind text | Landing | P | ⬜ |
@@ -93,7 +93,11 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P16 | Nav links: letters roll up on hover, grey to white | Landing | P | ✅ |
 | P17 | Stronger text shadow over the shard field | Landing, auth headings | B | ✅ |
 | P18 | Pay button on each unpaid row of the portal invoices list | Portal invoices | B | ✅ |
+<<<<<<< Updated upstream
 | P19 | Landing shard field behind the signed-in console and portal (dark theme) | Console, portal | P | ✅ |
+=======
+| P19 | Top navigation progress bar with a turning shard at its head | All pages | B | ✅ |
+>>>>>>> Stashed changes
 
 ## Requests
 
