@@ -51,7 +51,7 @@ add a row to Requests instead of editing it.
 | T2.2 | Taxes settings | B | ✅ (in Settings) |
 | T2.3 | Discounts list + editor, attach to subscriptions | B | ✅ |
 | T2.4 | Billing run page: run now, result report, history | B | ✅ |
-| T2.5 | Finance dashboard: KPIs, charts, date range | B | ⬜ |
+| T2.5 | Finance dashboard: KPIs, charts, date range | B | ✅ |
 | T2.6 | Customer portal: overview, subscriptions, invoices | B | ⬜ |
 | T2.7 | Portal: subscribe to a plan | B | ⬜ |
 | T2.8 | Portal: pay invoice online (Razorpay test) | B | ⬜ |

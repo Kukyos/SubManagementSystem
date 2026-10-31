@@ -88,7 +88,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 ## reports (`services/reports.ts`)
 | function | state |
 |---|---|
-| `getFinanceSummary(from?, to?)` | ⬜ |
+| `getFinanceSummary(from?, to?)` (numbers normalised from jsonb) | ✅ |
 | `search(term)` (customers, subscriptions, invoices) | ⬜ |
 
 ## portal (`services/portal.ts`)

@@ -4,6 +4,12 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- **Decision: no chart library.** The dashboard's charts are hand-drawn SVG
+  (`components/reports/bar-chart.tsx`): grouped monthly bars with a hover
+  tooltip and a table view. Invoiced is the accent violet, collected a darker
+  teal (`#1fa982`); the brighter brand teal fails the lightness band for chart
+  fills on the dark surface.
+- Billing run page, payments list with overdue aging, finance dashboard.
 - **Decision: `billing_runs` table.** `run_billing` logs every run (console
   or nightly) so the billing page can show history; migration
   `20261031063429_billing_runs.sql`.
