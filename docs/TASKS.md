@@ -22,9 +22,10 @@ add a row to Requests instead of editing it.
 | S4 | Docs set (`docs/`) | B | ✅ |
 | S5 | Vercel project linked, env vars, first deploy | B | ✅ |
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ✅ |
-| S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ⬜ |
+| S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | 🔨 admin + staff accounts and GST rates in; catalogue and volume next |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
+| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | ⬜ |
 
 ## Tier 1: the demo dies without these
 
@@ -33,7 +34,7 @@ add a row to Requests instead of editing it.
 | T1.1 | Landing page (shard loop scene) | B | ✅ |
 | T1.2 | Sign up, sign in, forgot / reset password | B | ✅ |
 | T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ✅ (every route stubbed) |
-| T1.4 | Products list + editor with variants | B | ⬜ |
+| T1.4 | Products list + editor with variants | B | 🔨 |
 | T1.5 | Plans list + editor | B | ⬜ |
 | T1.6 | Customers list + detail | B | ⬜ |
 | T1.7 | Subscriptions list (filters, status pipeline) | B | ⬜ |

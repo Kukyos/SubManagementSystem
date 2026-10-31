@@ -35,3 +35,9 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
 ## Lessons
 
 _Add them as they happen, in the same push as the fix._
+
+- `auth.admin.createUser({ app_metadata: { role } })` makes the profile as a
+  customer: the sign-up trigger runs before the role is written. Demo admin and
+  staff were fixed by hand. `inviteStaff` has to set `profiles.role` itself
+  after creating the user (and drop the stray customer row), or the trigger
+  should also run on update of `raw_app_meta_data`.
