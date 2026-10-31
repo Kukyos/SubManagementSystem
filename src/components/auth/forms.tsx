@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState, useState, type ReactNode } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { passwordHint, passwordPattern } from "@/lib/password";
+import { passwordHint, passwordPattern, passwordRules } from "@/lib/password";
 import { requestPasswordReset, signIn, signUp, updatePassword } from "@/services/auth-actions";
 
 export function AuthHeading({ eyebrow, title, lead }: { eyebrow: string; title: string; lead: ReactNode }) {
@@ -63,6 +63,7 @@ function PasswordToggleInput({
   defaultValue,
   label,
   hint,
+  meter,
 }: {
   id: string;
   name: string;
@@ -75,11 +76,13 @@ function PasswordToggleInput({
   defaultValue?: string;
   label: string;
   hint?: ReactNode;
+  meter?: boolean;
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [value, setValue] = useState(defaultValue ?? "");
 
   return (
-    <Field label={label} htmlFor={id} hint={hint}>
+    <Field label={label} htmlFor={id} hint={meter ? <StrengthMeter password={value} /> : hint}>
       <div className="relative">
         <Input
           id={id}
@@ -92,6 +95,7 @@ function PasswordToggleInput({
           pattern={pattern}
           title={title}
           defaultValue={defaultValue}
+          onInput={meter ? (e) => setValue(e.currentTarget.value) : undefined}
           className="pr-10 [&::-ms-reveal]:hidden"
         />
         <button
@@ -116,6 +120,31 @@ function PasswordToggleInput({
   );
 }
 
+const meterColours = ["bg-pink", "bg-pink", "bg-amber", "bg-blue", "bg-teal"];
+
+function StrengthMeter({ password }: { password: string }) {
+  const passed = passwordRules.map((r) => r.test(password));
+  const score = passed.filter(Boolean).length;
+  return (
+    <span className="block space-y-2.5 pt-1">
+      <span className="flex gap-1" aria-hidden>
+        {passwordRules.map((r, i) => (
+          <span key={r.label} className={`h-1 flex-1 rounded-full transition-colors duration-200 ${i < score ? meterColours[score] : "bg-ink/10"}`} />
+        ))}
+      </span>
+      <span className="grid grid-cols-2 gap-x-4 gap-y-1" aria-live="polite">
+        {passwordRules.map((r, i) => (
+          <span key={r.label} className={`flex items-center gap-1.5 transition-colors ${passed[i] ? "text-teal" : "text-faint"}`}>
+            <span aria-hidden className={`size-2 [clip-path:polygon(50%_0,100%_100%,0_100%)] ${passed[i] ? "bg-teal" : "bg-ink/20"}`} />
+            {r.label}
+            <span className="sr-only">{passed[i] ? ", done" : ", missing"}</span>
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
 function NewPassword({ label = "Password", autoFocus }: { label?: string; autoFocus?: boolean }) {
   return (
     <PasswordToggleInput
@@ -128,7 +157,7 @@ function NewPassword({ label = "Password", autoFocus }: { label?: string; autoFo
       minLength={9}
       pattern={passwordPattern}
       title={passwordHint}
-      hint={passwordHint}
+      meter
     />
   );
 }

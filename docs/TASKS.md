@@ -75,7 +75,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 
 | # | Task | Page | Owner | Status |
 |---|---|---|---|---|
-| P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | B | 🔨 |
+| P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | B | ✅ |
 | P2 | Show / hide password toggle (a shard: solid while hidden, wireframe when shown) | Sign in, sign up, reset | P | ✅ |
 | P3 | Friendly empty states with a next action | All lists | B | 🔨 |
 | P4 | Skeleton loaders matching each list's layout | All lists | B | ✅ every console and portal route, detail pages too |
