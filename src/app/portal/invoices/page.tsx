@@ -23,7 +23,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
       <PageHeader eyebrow="Your account" title="Invoices" description="Every invoice we've sent you, and what's left to pay." />
 
       {rows.length === 0 ? (
-        <EmptyState title="No invoices yet" body="Your first one arrives when a subscription starts billing." />
+        <EmptyState
+          title="No invoices yet"
+          body="Your first one arrives when a subscription starts billing."
+          action={<ButtonLink href="/portal/plans" size="sm">Browse plans</ButtonLink>}
+        />
       ) : (
         <Card className="overflow-x-auto">
           <table className="w-full text-sm">

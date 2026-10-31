@@ -77,7 +77,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 |---|---|---|---|---|
 | P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | B | ✅ |
 | P2 | Show / hide password toggle (a shard: solid while hidden, wireframe when shown) | Sign in, sign up, reset | P | ✅ |
-| P3 | Friendly empty states with a next action | All lists | B | 🔨 |
+| P3 | Friendly empty states with a next action | All lists | B | ✅ |
 | P4 | Skeleton loaders matching each list's layout | All lists | B | ✅ every console and portal route, detail pages too |
 | P5 | Inline field errors with focus on first invalid field | All forms | B | ✅ red edge and hint on invalid fields after a submit or edit; focus and message come from P21 |
 | P6 | Mobile pass: tables become cards under 640px | All lists | B | 🔨 |

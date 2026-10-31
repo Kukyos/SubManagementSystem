@@ -139,6 +139,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         <EmptyState
           title={filtered ? "No payments match" : "No payments yet"}
           body={filtered ? "Try a wider date range or another method." : "Record one from a confirmed invoice, or let customers pay from the portal."}
+          action={
+            filtered ? (
+              <ButtonLink href="/payments" size="sm" variant="secondary">Clear filters</ButtonLink>
+            ) : (
+              <ButtonLink href="/invoices?status=confirmed" size="sm">Unpaid invoices</ButtonLink>
+            )
+          }
         />
       ) : (
         <Card className="overflow-x-auto">

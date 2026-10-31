@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { StatusTabs } from "@/components/sales/status-tabs";
 import { InvoiceBadge } from "@/components/ui/badge";
-import { Button, buttonClass } from "@/components/ui/button";
+import { Button, ButtonLink, buttonClass } from "@/components/ui/button";
 import { ExportLink } from "@/components/ui/export-link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
@@ -75,6 +75,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         <EmptyState
           title={search ? `No invoices match “${search}”` : status ? `No ${invoiceStatus[status].label.toLowerCase()} invoices` : "No invoices yet"}
           body={search ? "Try the number's last digits, or part of the customer's name." : "Active subscriptions are billed every night, or from their page with Bill now."}
+          action={
+            search || status ? (
+              <ButtonLink href="/invoices" size="sm" variant="secondary">Show all invoices</ButtonLink>
+            ) : (
+              <ButtonLink href="/subscriptions?status=active" size="sm">Active subscriptions</ButtonLink>
+            )
+          }
         />
       ) : (
         <Card className="overflow-x-auto">

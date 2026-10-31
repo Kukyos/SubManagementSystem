@@ -1,4 +1,5 @@
 import { SubscribeForm } from "@/components/portal/portal-forms";
+import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { cycle, money } from "@/lib/format";
@@ -22,7 +23,11 @@ export default async function Page() {
       />
 
       {plans.length === 0 ? (
-        <EmptyState title="No plans open right now" body="Check back soon, or ask our team for a quotation." />
+        <EmptyState
+          title="No plans open right now"
+          body="Check back soon, or ask our team for a quotation."
+          action={<ButtonLink href="/portal" size="sm" variant="secondary">Back to overview</ButtonLink>}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((p) => {
