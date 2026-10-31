@@ -1,19 +1,21 @@
 import { StaffForm } from "@/components/sales/staff-form";
+import { TaxRow } from "@/components/settings/tax-form";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { date } from "@/lib/format";
 import { listTeam, requireRole } from "@/services/auth";
+import { listTaxes } from "@/services/catalogue";
 
 export const metadata = { title: "Settings" };
 
 export default async function Page() {
   const user = await requireRole("admin", "staff");
-  const team = await listTeam();
+  const [team, taxes] = await Promise.all([listTeam(), listTaxes()]);
   const isAdmin = user.role === "admin";
 
   return (
     <>
-      <PageHeader eyebrow="Admin" title="Settings" description="Who works in the console. Taxes move here next." />
+      <PageHeader eyebrow="Admin" title="Settings" description="Who works in the console, and the taxes invoices charge." />
 
       <Card className="max-w-3xl">
         <CardHeader title="Team" action={<span className="text-xs text-faint">{team.length} people</span>} />
@@ -37,6 +39,21 @@ export default async function Page() {
         ) : (
           <p className="border-t border-line px-5 py-4 text-sm text-muted">Only an admin can add staff.</p>
         )}
+      </Card>
+
+      <Card className="mt-6 max-w-3xl">
+        <CardHeader title="Taxes" action={<span className="text-xs text-faint">The default applies to new products</span>} />
+        <div className="divide-y divide-line">
+          {taxes.map((t) => (
+            // Re-keyed on the flags so a default moved by another row shows here too.
+            <TaxRow key={`${t.id}-${t.is_default}-${t.is_active}`} tax={t} readOnly={!isAdmin} />
+          ))}
+          {isAdmin ? (
+            <TaxRow readOnly={false} />
+          ) : (
+            <p className="px-5 py-4 text-sm text-muted">Only an admin can change taxes.</p>
+          )}
+        </div>
       </Card>
     </>
   );

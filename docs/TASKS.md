@@ -48,7 +48,7 @@ add a row to Requests instead of editing it.
 | # | Task | Owner | Status |
 |---|---|---|---|
 | T2.1 | Quotation templates + "new from template" | B | ⬜ |
-| T2.2 | Taxes settings | B | ⬜ |
+| T2.2 | Taxes settings | B | ✅ (in Settings) |
 | T2.3 | Discounts list + editor, attach to subscriptions | B | ⬜ |
 | T2.4 | Billing run page: run now, result report, history | B | ⬜ |
 | T2.5 | Finance dashboard: KPIs, charts, date range | B | ⬜ |

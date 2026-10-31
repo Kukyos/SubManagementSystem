@@ -166,3 +166,33 @@ export async function savePlan(_: FormState, formData: FormData): Promise<FormSt
   revalidatePath("/plans");
   redirect(`/plans/${data.id}`);
 }
+
+export async function saveTax(_: FormState, formData: FormData): Promise<FormState> {
+  const values = Object.fromEntries(["id", "name", "rate"].map((k) => [k, text(formData, k)]));
+  for (const f of ["isDefault", "isActive"]) values[f] = formData.get(f) ? "on" : "";
+  const fail = (error: string): FormState => ({ ok: false, error, values });
+
+  const denied = await adminOnly();
+  if (denied) return fail(denied);
+  if (!values.name) return fail("Give the tax a name, like GST 18%.");
+  const rate = Number(values.rate);
+  if (values.rate === "" || !Number.isFinite(rate) || rate < 0 || rate > 100) return fail("Rate is a percentage from 0 to 100.");
+  if (values.isDefault && !values.isActive) return fail("The default tax has to be active.");
+
+  const supabase = await createClient();
+  // Only one default is allowed (unique index), so clear the old one first.
+  if (values.isDefault) {
+    let clear = supabase.from("taxes").update({ is_default: false }).eq("is_default", true);
+    if (values.id) clear = clear.neq("id", values.id);
+    await clear;
+  }
+  const row = { name: values.name, rate: Math.round(rate * 100) / 100, is_default: !!values.isDefault, is_active: !!values.isActive };
+  const { error } = values.id
+    ? await supabase.from("taxes").update(row).eq("id", values.id)
+    : await supabase.from("taxes").insert(row);
+  if (error) return fail("We couldn't save the tax. Try again in a moment.");
+
+  revalidatePath("/settings");
+  revalidatePath("/products");
+  return { ok: true, data: undefined, values: values.id ? values : undefined };
+}

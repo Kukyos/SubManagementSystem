@@ -43,7 +43,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listProductOptions(keepId?)`: active products for pickers, plus the one already chosen | ✅ |
 | `listTaxes()` | ✅ |
 | `listVariantOptions()`: every variant, for line pickers | ✅ |
-| `saveTax(formData)` | ⬜ |
+| `saveTax(state, formData)` (admin; one default at a time) | ✅ |
 | `listTemplates()`, `getTemplate(id)`, `saveTemplate(formData)` | ⬜ |
 | `listDiscounts(query)`, `getDiscount(id)`, `saveDiscount(formData)` | ⬜ |
 
