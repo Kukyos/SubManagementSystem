@@ -30,7 +30,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `requestPasswordReset(state, formData)`, `updatePassword(state, formData)` | ✅ |
 | `safeNext(next)`: same-site `?next=` paths only | ✅ |
 | `completeAuthLink(searchParams)`: finishes a confirmation or reset link | ✅ |
-| `inviteStaff(formData)` (admin) | ⬜ |
+| `inviteStaff(state, formData)` (admin; `services/auth-actions.ts`) | ✅ |
+| `listTeam()`: admin and staff profiles | ✅ |
 
 ## catalogue (`services/catalogue.ts`)
 | function | state |
@@ -41,6 +42,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listPlans(query)` (with active subscription count), `getPlan(id)`, `savePlan(state, formData)` | ✅ |
 | `listProductOptions(keepId?)`: active products for pickers, plus the one already chosen | ✅ |
 | `listTaxes()` | ✅ |
+| `listVariantOptions()`: every variant, for line pickers | ✅ |
 | `saveTax(formData)` | ⬜ |
 | `listTemplates()`, `getTemplate(id)`, `saveTemplate(formData)` | ⬜ |
 | `listDiscounts(query)`, `getDiscount(id)`, `saveDiscount(formData)` | ⬜ |
@@ -48,26 +50,27 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 ## customers (`services/customers.ts`)
 | function | state |
 |---|---|
-| `listCustomers(query)`, `getCustomer(id)` (with subs, invoices, balance) | ⬜ |
-| `saveCustomer(formData)` | ⬜ |
+| `listCustomers(query)` (active subs, outstanding, overdue), `getCustomer(id)` (with subs, invoices, balance) | ✅ |
+| `listCustomerOptions()`: names for pickers | ✅ |
+| `saveCustomer(state, formData)` (`services/customer-actions.ts`) | ✅ |
 
 ## subscriptions (`services/subscriptions.ts`)
 | function | state |
 |---|---|
-| `listSubscriptions(query)` (status, plan, customer, date filters) | ⬜ |
-| `getSubscription(id)` (lines, discounts, invoices, timeline) | ⬜ |
-| `createSubscription(formData)` (blank or from template) | ⬜ |
-| `saveLines(id, lines)` | ⬜ |
-| `setStatus(id, status, reason?)` | ⬜ |
-| `renewSubscription(id)`, `billNow(id)` | ⬜ |
+| `listSubscriptions(query)` (status, plan, customer filters), `subscriptionCounts()` | ✅ |
+| `getSubscription(id)` (lines, invoices, timeline), `getTimeline(entityId)` | ✅ |
+| `createSubscription(state, formData)` (blank; from template is T2.1) | ✅ |
+| `addLine(state, formData)`, `setLineQuantity(lineId, subId, formData)`, `removeLine(lineId, subId)`: unit price is computed on the server | ✅ |
+| `setStatus(state, formData)` (`id`, `status`, `reason`) | ✅ |
+| `renewSubscription(state, formData)`, `billNow(state, formData)` | ✅ |
 | `attachDiscount(id, discountId)`, `detachDiscount(id, discountId)` | ⬜ |
 
 ## invoices (`services/invoices.ts`)
 | function | state |
 |---|---|
-| `listInvoices(query)` (status, overdue, customer, date filters) | ⬜ |
-| `getInvoice(id)` (lines, payments, timeline) | ⬜ |
-| `setInvoiceStatus(id, status)`, `confirmDrafts(ids)` | ⬜ |
+| `listInvoices(query)` (status incl. overdue, customer, search), `invoiceCounts()` | ✅ |
+| `getInvoice(id)` (lines, payments, timeline) | ✅ |
+| `setInvoiceStatus(state, formData)`, `confirmDrafts(ids)` (`services/invoice-actions.ts`) | ✅ |
 | `sendInvoice(id)` (email with PDF) | ⬜ |
 | `runBilling(asOf?)` | ⬜ |
 
@@ -75,7 +78,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | function | state |
 |---|---|
 | `listPayments(query)` | ⬜ |
-| `recordPayment(formData)` | ⬜ |
+| `recordPayment(state, formData)` (`services/invoice-actions.ts`) | ✅ |
 | `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` | ⬜ |
 
 ## reports (`services/reports.ts`)

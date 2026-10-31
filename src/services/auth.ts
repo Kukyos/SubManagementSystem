@@ -76,3 +76,15 @@ export async function completeAuthLink(params: URLSearchParams) {
   if (tokenHash && type) return !(await supabase.auth.verifyOtp({ token_hash: tokenHash, type })).error;
   return false;
 }
+
+export async function listTeam() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, created_at")
+    .in("role", ["admin", "staff"])
+    .order("role")
+    .order("full_name");
+  if (error) throw new Error(error.message);
+  return data;
+}

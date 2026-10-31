@@ -1,10 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { passwordProblem } from "@/lib/password";
-import { createClient } from "@/lib/supabase/server";
-import { homeFor, safeNext } from "@/services/auth";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getCurrentUser, homeFor, safeNext } from "@/services/auth";
 
 export type AuthFormState = {
   error?: string;
@@ -123,4 +124,34 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/");
+}
+
+export type StaffFormState = { ok?: boolean; error?: string; values?: Record<string, string> } | null;
+
+// Admin only. The role goes in app_metadata at creation, so the sign-up trigger
+// makes a staff profile (and no customer record) from the start.
+export async function inviteStaff(_: StaffFormState, formData: FormData): Promise<StaffFormState> {
+  const values = { fullName: text(formData, "fullName"), email: text(formData, "email").toLowerCase() };
+  const password = String(formData.get("password") ?? "");
+  const fail = (error: string) => ({ error, values });
+
+  const user = await getCurrentUser();
+  if (user?.role !== "admin") return fail("Only an admin can add staff.");
+  if (!values.fullName) return fail("Give their full name.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) return fail("That email doesn't look right.");
+  const problem = passwordProblem(password);
+  if (problem) return fail(problem);
+
+  const { error } = await createServiceClient().auth.admin.createUser({
+    email: values.email,
+    password,
+    email_confirm: true,
+    app_metadata: { role: "staff" },
+    user_metadata: { full_name: values.fullName },
+  });
+  if (error?.code === "email_exists") return fail(`${values.email} already has an account.`);
+  if (error) return fail("We couldn't add them. Try again in a moment.");
+
+  revalidatePath("/settings");
+  return { ok: true, values: { email: values.email } };
 }

@@ -41,7 +41,7 @@ add a row to Requests instead of editing it.
 | T1.8 | Subscription editor + detail: lines, status actions, timeline | B | ✅ |
 | T1.9 | Invoices list + detail: confirm, cancel, print | B | ✅ |
 | T1.10 | Record payment | B | ✅ |
-| T1.11 | Team page: admin adds staff | B | ⬜ |
+| T1.11 | Team page: admin adds staff | B | ✅ (in Settings) |
 
 ## Tier 2: what makes it a product
 

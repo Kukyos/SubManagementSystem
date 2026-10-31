@@ -4,6 +4,29 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Seed (`supabase/seed.sql`): nine more products with variants, ten more
+  plans (monthly, yearly, quarterly, a weekly trial that closes itself), 688
+  customers across ten cities, ~2,100 subscriptions over 18 months. Invoices
+  come from `bill_subscription` itself, so they follow the real rules; then
+  ~96% of past-due invoices are paid, a few part paid, the rest overdue.
+  Timeline entries are moved back to when each event happened. Emails use the
+  reserved `.example` domain so reminder mail can never reach a real inbox.
+- Customers, subscriptions, invoices and payments screens, and the team list
+  with "add staff" in Settings. Walked the whole flow in the browser: new
+  subscription, minimum-quantity refusal shown from the trigger, variant line,
+  confirm, activate, bill now, confirm invoice, part payment, balance, invoice
+  flips to Paid on its own.
+- **Decision: database messages reach the screen.** Lifecycle and payment
+  triggers raise `check_violation` with a sentence for people; actions pass
+  those through and hide every other database error.
+- **Decision: admin sets a first password for new staff** instead of an email
+  invite (see `AUTH.md`).
+- **Decision: line prices are computed on the server** (plan price for the
+  plan's own product, list price otherwise, plus the variant's extra). The form
+  never sends a price.
+- Input and Select carry `w-full`; a width passed in needs `!` to win
+  (`!w-40`). Fixed the filter selects on products and plans.
+
 ### Where things stand (read this first in a new session)
 
 - **Live:** the landing page at https://managesubs.vercel.app, plus sign in,
