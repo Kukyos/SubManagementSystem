@@ -89,6 +89,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | P | ⬜ |
 | P13 | Shard loop: shards under the pointer orbit their spot and swell, flicks swing them wider; parallax background shards; amber edges, denser field | Landing | P | ✅ |
 | P14 | Intro loader: turning mark, two-line statement, LOADING and percentage, once per session | Landing | P | ✅ |
+| P15 | Hero headline and eyebrow wipe up from a mask with a slight tilt | Landing | P | ✅ |
 
 ## Requests
 

@@ -78,16 +78,26 @@ export default function LandingPage() {
         <section data-shards="loop-right" className="mx-auto flex min-h-screen max-w-[1440px] items-center px-6 pt-24 md:px-10">
           <div className="max-w-2xl">
             <h1 className="text-display font-normal">
-              <span className="rise block">Revenue</span>
-              <span className="rise block [animation-delay:120ms]">that runs</span>
-              <span className="rise block [animation-delay:240ms]">itself.</span>
+              <span className="block overflow-hidden pb-[0.04em]">
+                <span className="wipe [animation-duration:1s]">Revenue</span>
+              </span>
+              <span className="block overflow-hidden pb-[0.04em]">
+                <span className="wipe [animation-delay:120ms] [animation-duration:1s]">that runs</span>
+              </span>
+              <span className="block overflow-hidden pb-[0.04em]">
+                <span className="wipe [animation-delay:240ms] [animation-duration:1s]">itself.</span>
+              </span>
             </h1>
-            <p className="eyebrow rise mt-10 [animation-delay:420ms]">Stop chasing renewals. Start billing them.</p>
-            <p className="rise mt-4 max-w-xl text-lead font-extralight [animation-delay:500ms]">
+            <p className="eyebrow mt-10 overflow-hidden">
+              <span className="wipe [animation-delay:700ms] [animation-duration:1s]">
+                Stop chasing renewals. Start billing them.
+              </span>
+            </p>
+            <p className="rise mt-4 max-w-xl text-lead font-extralight [animation-delay:850ms]">
               Plans, subscriptions, invoices and payments in one place. Brightloop bills every customer on time,
               applies the right taxes and discounts, and tells you exactly how much recurring revenue you have.
             </p>
-            <div className="rise mt-8 flex flex-wrap gap-3 [animation-delay:600ms]">
+            <div className="rise mt-8 flex flex-wrap gap-3 [animation-delay:1000ms]">
               <ButtonLink href="/signup" size="lg">
                 Get started
               </ButtonLink>

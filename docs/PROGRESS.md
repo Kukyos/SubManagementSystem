@@ -34,6 +34,9 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Hero entrance follows the reference: each headline line and the eyebrow
+  rise from behind a mask with a 4° tilt (`wipe` utility), staggered; the
+  lead and buttons fade up after them.
 - Landing intro loader, after the reference's: black screen, turning logo
   mark, "Your recurring revenue has a rhythm. Brightloop keeps it." wiping up,
   LOADING bottom left and a percentage bottom right, then Completed and a
