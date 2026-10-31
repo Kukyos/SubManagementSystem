@@ -200,3 +200,13 @@ a:focus-visible .roll-char {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Printing an invoice: paper, not the dark canvas. */
+@media print {
+  html,
+  body {
+    background: #fff;
+    color: #000;
+    color-scheme: light;
+  }
+}
