@@ -256,3 +256,28 @@ export async function billNow(_: FormState, formData: FormData): Promise<FormSta
     values: { message: data ? `${data} draft invoice${data === 1 ? "" : "s"} created.` : "Nothing due yet: the next period hasn't started." },
   };
 }
+
+export async function attachDiscount(_: FormState, formData: FormData): Promise<FormState> {
+  const id = text(formData, "id");
+  const discountId = text(formData, "discountId");
+  if (!(await staffOnly())) return { ok: false, error: "Only staff can attach discounts." };
+  if (!uuid.test(discountId)) return { ok: false, error: "Pick a discount." };
+  const supabase = await createClient();
+  const { data: discount } = await supabase.from("discounts").select("scope, is_active").eq("id", discountId).maybeSingle();
+  if (!discount?.is_active || discount.scope !== "subscription")
+    return { ok: false, error: "That discount can't be attached to a subscription." };
+  const { error } = await supabase.from("subscription_discounts").insert({ subscription_id: id, discount_id: discountId });
+  if (error?.code === "23505") return { ok: false, error: "That discount is already attached." };
+  if (error) return { ok: false, error: "We couldn't attach the discount. Try again in a moment." };
+  refresh(id);
+  revalidatePath("/discounts");
+  return { ok: true, data: undefined, values: { message: "Attached. It applies from the next invoice." } };
+}
+
+export async function detachDiscount(id: string, discountId: string) {
+  if (!(await staffOnly())) return;
+  const supabase = await createClient();
+  await supabase.from("subscription_discounts").delete().eq("subscription_id", id).eq("discount_id", discountId);
+  refresh(id);
+  revalidatePath("/discounts");
+}

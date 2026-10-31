@@ -5,6 +5,7 @@ import { likeTerm } from "@/services/catalogue";
 import type {
   ActivityEntry,
   Customer,
+  Discount,
   Invoice,
   ListQuery,
   ListResult,
@@ -84,6 +85,7 @@ export type SubscriptionDetail = Subscription & {
   plan: Plan;
   salesperson: string | null;
   lines: SubscriptionLineRow[];
+  discounts: Pick<Discount, "id" | "name" | "code" | "type" | "value" | "ends_on" | "usage_limit" | "times_used" | "is_active">[];
   invoices: Pick<Invoice, "id" | "number" | "status" | "invoice_date" | "due_date" | "period_start" | "period_end" | "total" | "amount_paid">[];
   timeline: TimelineEntry[];
 };
@@ -106,7 +108,7 @@ export async function getTimeline(entityId: string): Promise<TimelineEntry[]> {
 
 export async function getSubscription(id: string): Promise<SubscriptionDetail | null> {
   const supabase = await createClient();
-  const [sub, lines, invoices, timeline] = await Promise.all([
+  const [sub, lines, invoices, timeline, discounts] = await Promise.all([
     supabase
       .from("subscriptions")
       .select("*, customers(id, name, email, company), plans(*), profiles(full_name)")
@@ -124,8 +126,12 @@ export async function getSubscription(id: string): Promise<SubscriptionDetail | 
       .order("invoice_date", { ascending: false })
       .limit(24),
     getTimeline(id),
+    supabase
+      .from("subscription_discounts")
+      .select("discounts(id, name, code, type, value, ends_on, usage_limit, times_used, is_active)")
+      .eq("subscription_id", id),
   ]);
-  for (const r of [sub, lines, invoices]) if (r.error) throw new Error(r.error.message);
+  for (const r of [sub, lines, invoices, discounts]) if (r.error) throw new Error(r.error.message);
   if (!sub.data || !sub.data.customers || !sub.data.plans) return null;
 
   const { customers, plans, profiles, ...s } = sub.data;
@@ -140,6 +146,7 @@ export async function getSubscription(id: string): Promise<SubscriptionDetail | 
       variant: product_variants ? `${product_variants.attribute}: ${product_variants.value}` : null,
       taxRate: Number(taxes?.rate ?? products?.taxes?.rate ?? 0),
     })),
+    discounts: (discounts.data ?? []).flatMap((d) => (d.discounts ? [d.discounts] : [])),
     invoices: invoices.data ?? [],
     timeline,
   };

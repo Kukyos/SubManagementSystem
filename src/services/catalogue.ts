@@ -1,6 +1,8 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { orSafe } from "@/lib/forms";
 import type {
+  Discount,
   ListQuery,
   ListResult,
   Plan,
@@ -203,4 +205,48 @@ export async function getTemplate(id: string): Promise<TemplateDetail | null> {
       extra: Number(product_variants?.extra_price ?? 0),
     })),
   };
+}
+
+export type DiscountRow = Discount & { productCount: number; subscriptionCount: number };
+
+export async function listDiscounts({ page = 1, pageSize = 20, search, show = "active" }: ProductQuery = {}): Promise<ListResult<DiscountRow>> {
+  const supabase = await createClient();
+  let query = supabase
+    .from("discounts")
+    .select("*, discount_products(count), subscription_discounts(count)", { count: "exact" })
+    .order("is_active", { ascending: false })
+    .order("name")
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  if (show !== "all") query = query.eq("is_active", show === "active");
+  if (search) query = query.or(`name.ilike.${likeTerm(orSafe(search))},code.ilike.${likeTerm(orSafe(search))}`);
+
+  const { data, count, error } = await query;
+  if (error) throw new Error(error.message);
+  return {
+    total: count ?? 0,
+    rows: (data ?? []).map(({ discount_products, subscription_discounts, ...d }) => ({
+      ...d,
+      productCount: discount_products[0]?.count ?? 0,
+      subscriptionCount: subscription_discounts[0]?.count ?? 0,
+    })),
+  };
+}
+
+export type DiscountDetail = Discount & { productIds: string[] };
+
+export async function getDiscount(id: string): Promise<DiscountDetail | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("discounts").select("*, discount_products(product_id)").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  const { discount_products, ...d } = data;
+  return { ...d, productIds: discount_products.map((p) => p.product_id) };
+}
+
+// Subscription-level discounts staff can attach.
+export async function listDiscountOptions(): Promise<Discount[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("discounts").select("*").eq("scope", "subscription").eq("is_active", true).order("name");
+  if (error) throw new Error(error.message);
+  return data;
 }

@@ -266,3 +266,29 @@ from (values
 ) as v(template, product, qty, price, pos)
 join public.quotation_templates t on t.name = v.template
 join public.products p on p.name = v.product;
+
+-- ---------------------------------------------------------------------------
+-- Discounts
+-- ---------------------------------------------------------------------------
+insert into public.discounts (name, code, type, value, scope, min_purchase, min_quantity, starts_on, ends_on, usage_limit, is_active)
+values
+  ('CRM seats, 10% off five or more', 'CRM5PLUS', 'percent', 10, 'products', 0, 5, null, null, null, true),
+  ('Helpdesk launch offer', 'DESK500', 'fixed', 500, 'products', 0, 0, '2026-09-01', '2026-12-31', 300, true),
+  ('Diwali 2025, 20% off Books', 'DIWALI25', 'percent', 20, 'products', 0, 0, '2025-10-15', '2025-11-15', null, true),
+  ('Nonprofit pricing', 'NGO15', 'percent', 15, 'subscription', 0, 0, null, null, null, true),
+  ('Loyalty credit, ₹1,000 off', 'LOYAL1000', 'fixed', 1000, 'subscription', 5000, 0, null, null, 500, true),
+  ('Startup India, first quarter free of support', null, 'percent', 100, 'products', 0, 0, '2026-01-01', '2026-03-31', 50, false);
+
+insert into public.discount_products (discount_id, product_id)
+select d.id, p.id
+from (values
+  ('CRM5PLUS', 'Brightloop CRM seat'),
+  ('DESK500', 'Helpdesk agent seat'),
+  ('DIWALI25', 'Brightloop Books')
+) as v(code, product)
+join public.discounts d on d.code = v.code
+join public.products p on p.name = v.product;
+
+insert into public.discount_products (discount_id, product_id)
+select d.id, p.id from public.discounts d, public.products p
+where d.name like 'Startup India%' and p.name = 'Priority support';

@@ -5,9 +5,9 @@ import { Notice } from "@/components/auth/forms";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { cycle, money } from "@/lib/format";
-import { addLine, createSubscription } from "@/services/subscription-actions";
+import { addLine, attachDiscount, createSubscription } from "@/services/subscription-actions";
 import type { FormState } from "@/services/catalogue-actions";
-import type { Customer, Plan, Product, ProductVariant, QuotationTemplate } from "@/types/models";
+import type { Customer, Discount, Plan, Product, ProductVariant, QuotationTemplate } from "@/types/models";
 
 const termLabels = {
   immediate: "Due on receipt",
@@ -187,6 +187,35 @@ export function AddLineForm({
           {pending ? "Adding…" : "Add line"}
         </Button>
       </div>
+    </form>
+  );
+}
+
+export function AttachDiscountForm({ subscriptionId, discounts }: { subscriptionId: string; discounts: Pick<Discount, "id" | "name" | "type" | "value">[] }) {
+  const [state, action, pending] = useActionState(attachDiscount, null);
+  return (
+    <form action={action} className="space-y-2 border-t border-line p-5">
+      <input type="hidden" name="id" value={subscriptionId} />
+      <div className="flex gap-2">
+        <Select name="discountId" required defaultValue="" aria-label="Discount to attach" className="h-9">
+          <option value="" disabled>
+            Attach a discount
+          </option>
+          {discounts.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name} ({d.type === "percent" ? `${Number(d.value)}%` : money(d.value)})
+            </option>
+          ))}
+        </Select>
+        <Button size="sm" variant="secondary" disabled={pending} className="h-9">
+          {pending ? "Attaching…" : "Attach"}
+        </Button>
+      </div>
+      {state && (
+        <p role={state.ok ? "status" : "alert"} className={`text-xs ${state.ok ? "text-teal" : "text-pink"}`}>
+          {state.ok ? state.values?.message : state.error}
+        </p>
+      )}
     </form>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/sales/action-button";
-import { AddLineForm, NewSubscriptionForm } from "@/components/sales/subscription-forms";
+import { AddLineForm, AttachDiscountForm, NewSubscriptionForm } from "@/components/sales/subscription-forms";
 import { Timeline } from "@/components/sales/timeline";
 import { InvoiceBadge, SubscriptionBadge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -11,9 +11,9 @@ import { cycle, date, money } from "@/lib/format";
 import { today } from "@/lib/forms";
 import { invoiceDisplayStatus, subscriptionStatus } from "@/lib/status";
 import { requireRole } from "@/services/auth";
-import { listPlans, listProductOptions, listTemplates, listVariantOptions, uuid } from "@/services/catalogue";
+import { listDiscountOptions, listPlans, listProductOptions, listTemplates, listVariantOptions, uuid } from "@/services/catalogue";
 import { listCustomerOptions } from "@/services/customers";
-import { billNow, removeLine, renewSubscription, setLineQuantity, setStatus } from "@/services/subscription-actions";
+import { billNow, detachDiscount, removeLine, renewSubscription, setLineQuantity, setStatus } from "@/services/subscription-actions";
 import { getSubscription, type SubscriptionDetail } from "@/services/subscriptions";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -68,7 +68,10 @@ export default async function Page({
   if (!sub) notFound();
 
   const editable = sub.status !== "closed";
-  const [products, variants] = editable ? await Promise.all([listProductOptions(), listVariantOptions()]) : [[], []];
+  const [products, variants, discountOptions] = editable
+    ? await Promise.all([listProductOptions(), listVariantOptions(), listDiscountOptions()])
+    : [[], [], []];
+  const attachable = discountOptions.filter((d) => !sub.discounts.some((a) => a.id === d.id));
   const subtotal = sub.lines.reduce((n, l) => n + Number(l.amount), 0);
   const tax = sub.lines.reduce((n, l) => n + (Number(l.amount) * l.taxRate) / 100, 0);
   const qty = sub.lines.reduce((n, l) => n + Number(l.quantity), 0);
@@ -243,6 +246,39 @@ export default async function Page({
               </Term>
             </dl>
             {sub.notes && <p className="border-t border-line px-5 py-4 text-sm text-muted">{sub.notes}</p>}
+          </Card>
+
+          <Card>
+            <CardHeader title="Discounts" action={<span className="text-xs text-faint">Best live one applies</span>} />
+            {sub.discounts.length === 0 ? (
+              <p className="px-5 py-4 text-sm text-muted">None attached. Product discounts still apply by themselves.</p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {sub.discounts.map((d) => (
+                  <li key={d.id} className="flex items-center gap-3 px-5 py-3 text-sm">
+                    <span className="min-w-0 flex-1">
+                      <Link href={`/discounts/${d.id}`} className="hover:text-accent-hover">
+                        {d.name}
+                      </Link>
+                      <span className="block text-xs text-faint">
+                        {[d.code, d.ends_on && `until ${date(d.ends_on)}`, d.usage_limit && `${d.times_used} of ${d.usage_limit} used`, !d.is_active && "switched off"]
+                          .filter(Boolean)
+                          .join(" · ") || "No end date"}
+                      </span>
+                    </span>
+                    <span className="tabular text-muted">{d.type === "percent" ? `${Number(d.value)}%` : money(d.value)}</span>
+                    {editable && (
+                      <form action={detachDiscount.bind(null, sub.id, d.id)}>
+                        <button className="text-xs text-faint hover:text-pink" aria-label={`Detach ${d.name}`}>
+                          Detach
+                        </button>
+                      </form>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {editable && attachable.length > 0 && <AttachDiscountForm subscriptionId={sub.id} discounts={attachable} />}
           </Card>
 
           <Card>

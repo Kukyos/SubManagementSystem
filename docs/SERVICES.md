@@ -46,7 +46,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `saveTax(state, formData)` (admin; one default at a time) | ✅ |
 | `listTemplates()` (with line and use counts), `getTemplate(id)` (with lines) | ✅ |
 | `saveTemplate(state, formData)`, `addTemplateLine(state, formData)`, `removeTemplateLine(id, templateId)` (admin; `services/catalogue-actions.ts`) | ✅ |
-| `listDiscounts(query)`, `getDiscount(id)`, `saveDiscount(formData)` | ⬜ |
+| `listDiscounts(query)` (product and subscription counts), `getDiscount(id)` (with covered products), `listDiscountOptions()` (live subscription-scope) | ✅ |
+| `saveDiscount(state, formData)` (admin; replaces covered products) | ✅ |
 
 ## customers (`services/customers.ts`)
 | function | state |
@@ -64,7 +65,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `addLine(state, formData)`, `setLineQuantity(lineId, subId, formData)`, `removeLine(lineId, subId)`: unit price is computed on the server | ✅ |
 | `setStatus(state, formData)` (`id`, `status`, `reason`) | ✅ |
 | `renewSubscription(state, formData)`, `billNow(state, formData)` | ✅ |
-| `attachDiscount(id, discountId)`, `detachDiscount(id, discountId)` | ⬜ |
+| `attachDiscount(state, formData)`, `detachDiscount(id, discountId)` | ✅ |
 
 ## invoices (`services/invoices.ts`)
 | function | state |

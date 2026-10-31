@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/services/auth";
 import { uuid } from "@/services/catalogue";
-import type { ActionResult, BillingPeriod, PaymentTerms, ProductType } from "@/types/models";
+import type { ActionResult, BillingPeriod, DiscountScope, DiscountType, PaymentTerms, ProductType } from "@/types/models";
 
 export type FormState = (ActionResult & { values?: Record<string, string> }) | null;
 
@@ -285,4 +285,69 @@ export async function removeTemplateLine(id: string, templateId: string) {
   await supabase.from("quotation_template_lines").delete().eq("id", id);
   revalidatePath(`/templates/${templateId}`);
   revalidatePath("/templates");
+}
+
+export async function saveDiscount(_: FormState, formData: FormData): Promise<FormState> {
+  const values = Object.fromEntries(
+    ["id", "name", "code", "type", "value", "scope", "minPurchase", "minQuantity", "startsOn", "endsOn", "usageLimit"].map((k) => [k, text(formData, k)]),
+  );
+  values.isActive = formData.get("isActive") ? "on" : "";
+  const productIds = formData.getAll("productIds").map(String).filter((id) => uuid.test(id));
+  values.productIds = productIds.join(",");
+  const fail = (error: string): FormState => ({ ok: false, error, values });
+
+  const denied = await adminOnly();
+  if (denied) return fail(denied);
+  if (!values.name) return fail("Give the discount a name.");
+  if (!["percent", "fixed"].includes(values.type)) return fail("Pick percent or a fixed amount.");
+  if (!["products", "subscription"].includes(values.scope)) return fail("Pick what the discount applies to.");
+  const amount = Number(values.value);
+  if (!Number.isFinite(amount) || amount <= 0) return fail("The discount has to be more than 0.");
+  if (values.type === "percent" && amount > 100) return fail("A percentage discount can't be more than 100%.");
+  const minPurchase = price(values.minPurchase, "Minimum purchase");
+  if (minPurchase.error) return fail(minPurchase.error);
+  const minQty = Number(values.minQuantity || 0);
+  if (!Number.isFinite(minQty) || minQty < 0) return fail("Minimum quantity is 0 or more.");
+  for (const k of ["startsOn", "endsOn"]) if (values[k] && !isDate(values[k])) return fail("Dates look wrong. Pick them from the calendar.");
+  if (values.startsOn && values.endsOn && values.endsOn < values.startsOn) return fail("The discount can't end before it starts.");
+  const limit = values.usageLimit ? Number(values.usageLimit) : null;
+  if (limit !== null && (!Number.isInteger(limit) || limit < 1)) return fail("Usage limit is a whole number, or blank for no limit.");
+  if (values.scope === "products" && productIds.length === 0) return fail("Pick at least one product the discount covers.");
+
+  const row = {
+    name: values.name,
+    code: values.code ? values.code.toUpperCase() : null,
+    type: values.type as DiscountType,
+    value: Math.round(amount * 100) / 100,
+    scope: values.scope as DiscountScope,
+    min_purchase: minPurchase.value!,
+    min_quantity: minQty,
+    starts_on: values.startsOn || null,
+    ends_on: values.endsOn || null,
+    usage_limit: limit,
+    is_active: !!values.isActive,
+  };
+
+  const supabase = await createClient();
+  let id = values.id;
+  if (id) {
+    const { error } = await supabase.from("discounts").update(row).eq("id", id);
+    if (error?.code === "23505") return fail(`Another discount already uses the code ${row.code}.`);
+    if (error) return fail("We couldn't save the discount. Try again in a moment.");
+  } else {
+    const { data, error } = await supabase.from("discounts").insert(row).select("id").single();
+    if (error?.code === "23505") return fail(`Another discount already uses the code ${row.code}.`);
+    if (error) return fail("We couldn't create the discount. Try again in a moment.");
+    id = data.id;
+  }
+
+  // Product coverage is replaced wholesale; a subscription-scope discount covers none.
+  await supabase.from("discount_products").delete().eq("discount_id", id);
+  if (row.scope === "products")
+    await supabase.from("discount_products").insert(productIds.map((product_id) => ({ discount_id: id, product_id })));
+
+  revalidatePath("/discounts");
+  revalidatePath(`/discounts/${id}`);
+  if (!values.id) redirect(`/discounts/${id}`);
+  return { ok: true, data: undefined, values };
 }
