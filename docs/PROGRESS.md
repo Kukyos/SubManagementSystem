@@ -31,6 +31,9 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Shard hover: hot shards now circle their own spot on small orbits (each on
+  its own tilted plane, speed and direction) instead of jittering, and the
+  hover radius is wider (2.5 scene units, most of the loop's width).
 - Auth pages: sign in, sign up, forgot password, choose a new password. They
   share the landing scene, with the loop on the right and the form where the
   headline was. Password rules (more than 8 characters, upper, lower, special)
