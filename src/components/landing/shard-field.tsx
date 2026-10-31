@@ -153,12 +153,14 @@ const BG_VERTEX = /* glsl */ `
 const FRAGMENT = /* glsl */ `
   uniform float uOpacity;
   uniform vec2 uFog;
+  uniform float uLight;
   varying vec3 vColor;
   varying float vDepth;
 
   void main() {
     float fog = smoothstep(uFog.x, uFog.y, vDepth);
-    gl_FragColor = vec4(vColor * (1.0 - fog), uOpacity);
+    // on black, distance darkens a shard; on a light page it fades it out instead
+    gl_FragColor = vec4(vColor * (1.0 - fog * (1.0 - uLight)), uOpacity * (1.0 - fog * uLight));
     #include <colorspace_fragment>
   }
 `;
@@ -257,6 +259,16 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
       ringGeometry.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phase, 1));
       ringGeometry.instanceCount = COUNT;
 
+      // follows the console's theme toggle; the landing has no data-theme and stays dark
+      const themed = canvas.closest<HTMLElement>("[data-theme]");
+      const light = { value: 0 };
+      const readTheme = () => {
+        light.value = themed?.dataset.theme === "light" ? 1 : 0;
+      };
+      readTheme();
+      const themeWatch = new MutationObserver(readTheme);
+      if (themed) themeWatch.observe(themed, { attributes: true, attributeFilter: ["data-theme"] });
+
       const ringUniforms = {
         uTime: { value: 0 },
         uScatter: { value: 0 },
@@ -272,6 +284,7 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
         uRim: { value: new THREE.Vector3(amber.r, amber.g, amber.b) },
         uOpacity: { value: 0.9 },
         uFog: { value: new THREE.Vector2(...FOG) },
+        uLight: light,
       };
       const ringMaterial = new THREE.ShaderMaterial({
         vertexShader: RING_VERTEX,
@@ -321,6 +334,7 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
         uDrift: { value: new THREE.Vector2() },
         uOpacity: { value: 0.7 },
         uFog: { value: new THREE.Vector2(...FOG) },
+        uLight: light,
       };
       const bgMaterial = new THREE.ShaderMaterial({
         vertexShader: BG_VERTEX,
@@ -486,6 +500,7 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
 
       cleanup = () => {
         window.clearTimeout(remeasure);
+        themeWatch.disconnect();
         window.removeEventListener("resize", onResize);
         window.removeEventListener("pointermove", onMove);
         document.documentElement.removeEventListener("pointerleave", onLeave);

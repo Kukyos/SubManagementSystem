@@ -13,8 +13,8 @@ import type { CurrentUser } from "@/services/auth";
 export function ConsoleShell({ user, groups, children, theme }: { user: CurrentUser; theme: Theme; groups: NavGroup[]; children: React.ReactNode }) {
   return (
     <div data-shell data-theme={theme} className="bg-bg text-fg flex min-h-screen">
-      {/* the landing's floating shards, without the loop; the light theme keeps a plain background */}
-      <div className="print:hidden [[data-theme=light]_&]:hidden">
+      {/* the landing's floating shards, without the loop */}
+      <div className="print:hidden">
         <ShardField ring={false} />
       </div>
       <aside className="sticky top-0 z-10 hidden h-screen print:!hidden w-60 shrink-0 flex-col border-r border-line bg-surface md:flex">
