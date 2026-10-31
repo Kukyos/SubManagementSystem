@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signOut } from "@/services/auth-actions";
 import type { CurrentUser } from "@/services/auth";
 
@@ -17,9 +18,15 @@ export function UserMenu({ user }: { user: CurrentUser }) {
         <p className="text-sm leading-tight">{user.fullName}</p>
         <p className="text-xs text-faint">{roleLabel[user.role]}</p>
       </div>
-      <span className="grid size-8 place-items-center rounded-full border border-line-strong bg-surface-2 text-xs font-semibold">
+      {/* Customers have a profile page; staff details live with the team in Settings. */}
+      <Link
+        href={user.role === "customer" ? "/portal/profile" : "/settings"}
+        aria-label={user.role === "customer" ? "Your profile" : "Settings"}
+        title={user.role === "customer" ? "Your profile" : "Settings"}
+        className="grid size-8 place-items-center rounded-full border border-line-strong bg-surface-2 text-xs font-semibold transition-colors hover:border-accent hover:text-accent-hover"
+      >
         {initials || "?"}
-      </span>
+      </Link>
       <form action={signOut}>
         <button type="submit" className="text-xs font-semibold uppercase tracking-[0.025em] text-muted hover:text-fg">
           Sign out

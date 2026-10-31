@@ -4,6 +4,8 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- The initials circle in the header is a link: customers go to their
+  profile, staff and admins to Settings (where the team list is).
 - Light theme for the console and portal: a sun / moon button in the header,
   remembered in a `theme` cookie and read on the server. Tokens switch on the
   shell's `data-theme`; hard-coded `white/…` overlays became an `ink` token,
