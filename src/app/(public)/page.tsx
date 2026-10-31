@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { INTRO_SCRIPT } from "@/components/landing/intro";
 import { ShardField } from "@/components/landing/shard-field";
 import { SiteFooter, SiteHeader } from "@/components/landing/site-header";
+import { SiteLoader } from "@/components/landing/site-loader";
 import { ButtonLink } from "@/components/ui/button";
 import { subscriptionStatus } from "@/lib/status";
 import type { SubscriptionStatus } from "@/types/models";
@@ -66,6 +68,8 @@ const roles = [
 export default function LandingPage() {
   return (
     <>
+      <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
+      <SiteLoader />
       <ShardField />
       <SiteHeader />
 

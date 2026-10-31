@@ -34,6 +34,13 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Landing intro loader, after the reference's: black screen, turning logo
+  mark, "Your recurring revenue has a rhythm. Brightloop keeps it." wiping up,
+  LOADING bottom left and a percentage bottom right, then Completed and a
+  fade. It waits for fonts (at least 1.7s), shows once per browser session,
+  never under reduced motion, and the hero's entrance is paused beneath it.
+  An inline script in the page sets `data-intro` on `<html>` before paint so
+  repeat visits don't flash it.
 - Shard field follows the reference's own mechanics (read from its shipped
   shader): shards near the pointer orbit their spot and swell up to 1.75×,
   mouse speed swings the orbit wider along the flick and widens the reach,

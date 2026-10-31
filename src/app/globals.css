@@ -126,6 +126,46 @@ body {
   }
 }
 
+/* Masked line entrance from the reference: the line rises from behind its
+   parent's overflow edge with a slight tilt. Parent needs overflow-hidden. */
+@keyframes wipe-in {
+  from {
+    transform: translateY(110%) rotate(4deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@utility wipe {
+  display: block;
+  transform-origin: left bottom;
+  animation: wipe-in 1.2s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Intro loader states, set on <html> by the inline script and the loader.
+   The hero's entrance waits underneath until the loader finishes. */
+[data-intro="playing"] .site-loader,
+[data-intro="done"] .site-loader {
+  display: flex;
+}
+[data-intro="done"] .site-loader {
+  opacity: 0;
+  pointer-events: none;
+}
+[data-intro="playing"] body {
+  overflow: hidden;
+}
+[data-intro="playing"] main :is(.rise, .wipe) {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
