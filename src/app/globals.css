@@ -197,6 +197,41 @@ a:focus-visible .roll-char {
   transform: translateY(-100%);
 }
 
+/* Underline that grows from the left on hover. */
+.grow-line {
+  position: relative;
+}
+.grow-line::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -4px 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.grow-line:hover::after,
+.grow-line:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Landing lifecycle chips light up one after another as they scroll in;
+   each chip sets --i. Without scroll timelines they are simply lit. */
+@keyframes chip-light {
+  from {
+    opacity: 0.25;
+    filter: grayscale(1);
+  }
+}
+@supports (animation-timeline: view()) {
+  .chip-light {
+    animation: chip-light linear both;
+    animation-timeline: view();
+    animation-range: entry calc(40% + var(--i) * 12%) cover calc(25% + var(--i) * 6%);
+  }
+}
+
 @keyframes loader-spin {
   to {
     transform: rotate(360deg);

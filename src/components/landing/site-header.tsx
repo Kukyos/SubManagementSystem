@@ -34,14 +34,32 @@ export function SiteHeader() {
         <Logo />
         <nav className="flex items-center gap-2 md:gap-7" aria-label="Site">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className={`hidden lg:block ${navLink}`}>
+            <Link key={l.href} href={l.href} className={`grow-line hidden lg:block ${navLink}`}>
               <RollText text={l.label} />
             </Link>
           ))}
-          <Link href="/login" className={`px-2 ${navLink}`}>
+          <Link href="/login" className={`grow-line mx-2 hidden sm:block ${navLink}`}>
             <RollText text="Sign in" />
           </Link>
           <ButtonLink href="/signup">Get started</ButtonLink>
+          <details className="group relative lg:hidden">
+            <summary
+              aria-label="Menu"
+              className="grid size-10 cursor-pointer list-none place-items-center rounded-full border border-line-strong [&::-webkit-details-marker]:hidden"
+            >
+              <span aria-hidden className="flex w-4 flex-col gap-1">
+                <span className="h-px bg-white transition-transform group-open:translate-y-[2.5px] group-open:rotate-45" />
+                <span className="h-px bg-white transition-transform group-open:-translate-y-[2.5px] group-open:-rotate-45" />
+              </span>
+            </summary>
+            <div className="absolute right-0 mt-3 flex w-56 flex-col gap-1 rounded-card border border-line bg-black/95 p-3">
+              {[...links, { href: "/login", label: "Sign in" }].map((l) => (
+                <Link key={l.href} href={l.href} className={`rounded-lg px-3 py-2.5 ${navLink}`}>
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+          </details>
         </nav>
       </div>
     </header>

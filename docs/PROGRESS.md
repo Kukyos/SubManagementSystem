@@ -268,3 +268,6 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
   staff read it through `product_costs()`.
 - Wrote the core schema and the access / billing migrations.
 - Rewrote `HACKATHON_PLAN.md` for this build; added the docs set.
+
+- **Evaluator accounts:** `cleochariaofficial+evaladmin@` / `+evalstaff@` / `+evalcustomer@gmail.com`, listed in the README. The customer one is linked to seeded Naveen Iyer (Iyer Foods).
+- **Fix: staff added in Settings came out as customers.** Auth attaches `app_metadata` after the insert, so `handle_new_user` never sees the role. `addStaff` now sets the profile role and drops the customer row itself.

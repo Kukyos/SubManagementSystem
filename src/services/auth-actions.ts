@@ -142,7 +142,8 @@ export async function inviteStaff(_: StaffFormState, formData: FormData): Promis
   const problem = passwordProblem(password);
   if (problem) return fail(problem);
 
-  const { error } = await createServiceClient().auth.admin.createUser({
+  const svc = createServiceClient();
+  const { data, error } = await svc.auth.admin.createUser({
     email: values.email,
     password,
     email_confirm: true,
@@ -151,6 +152,12 @@ export async function inviteStaff(_: StaffFormState, formData: FormData): Promis
   });
   if (error?.code === "email_exists") return fail(`${values.email} already has an account.`);
   if (error) return fail("We couldn't add them. Try again in a moment.");
+
+  // Auth attaches app_metadata after the insert, so the sign-up trigger files them as a customer.
+  const id = data.user.id;
+  const promoted = await svc.from("profiles").update({ role: "staff" }).eq("id", id);
+  const unlinked = await svc.from("customers").delete().eq("user_id", id);
+  if (promoted.error || unlinked.error) return fail("They were added but not as staff. Try again in a moment.");
 
   revalidatePath("/settings");
   return { ok: true, values: { email: values.email } };

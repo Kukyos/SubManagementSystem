@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { INTRO_SCRIPT } from "@/components/landing/intro";
 import { ShardField } from "@/components/landing/shard-field";
 import { SiteFooter, SiteHeader } from "@/components/landing/site-header";
@@ -50,16 +51,19 @@ const features = [
 const roles = [
   {
     who: "Admins",
+    hex: "#FFB829",
     line: "set the rules",
     body: "Products, variants, plans, taxes and discounts, plus who on the team gets access.",
   },
   {
     who: "Staff",
+    hex: "#2FD3A7",
     line: "run the day",
     body: "Customers, quotations, subscriptions, invoices and payments, without touching the rules.",
   },
   {
     who: "Customers",
+    hex: "#8052FF",
     line: "serve themselves",
     body: "Their own subscriptions and invoices in a portal: pay online, pause or cancel, no emails needed.",
   },
@@ -98,8 +102,11 @@ export default function LandingPage() {
               applies the right taxes and discounts, and tells you exactly how much recurring revenue you have.
             </p>
             <div className="rise mt-8 flex flex-wrap gap-3 [animation-delay:620ms]">
-              <ButtonLink href="/signup" size="lg">
+              <ButtonLink href="/signup" size="lg" className="group">
                 Get started
+                <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
               </ButtonLink>
               <ButtonLink href="/login" size="lg" variant="secondary">
                 Sign in
@@ -162,7 +169,10 @@ export default function LandingPage() {
                   <ol className="mt-6 flex flex-wrap items-center gap-2" aria-label="Subscription lifecycle">
                     {lifecycle.map((s, n) => (
                       <li key={s} className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-line-strong px-3 py-1 text-xs font-medium">
+                        <span
+                          className="chip-light inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
+                          style={{ "--i": n, borderColor: subscriptionStatus[s].hex } as CSSProperties}
+                        >
                           <span
                             aria-hidden
                             className="size-2 [clip-path:polygon(50%_0,100%_100%,0_100%)]"
@@ -186,11 +196,18 @@ export default function LandingPage() {
           </h2>
           <div className="mt-16 grid gap-4 md:grid-cols-3">
             {roles.map((r) => (
-              <div key={r.who} className="reveal rounded-card border border-line bg-black/80 p-8">
-                <p className="text-2xl font-normal tracking-[-0.01em]">
-                  {r.who} <span className="text-muted">{r.line}.</span>
-                </p>
-                <p className="mt-4 font-extralight leading-relaxed text-white/80">{r.body}</p>
+              <div key={r.who} className="reveal group">
+                <div className="h-full rounded-card border border-line bg-black/80 p-8 transition duration-300 group-hover:-translate-y-1.5 group-hover:border-line-strong">
+                  <span
+                    aria-hidden
+                    className="mb-6 block size-3 transition-transform duration-500 [clip-path:polygon(50%_0,100%_100%,0_100%)] group-hover:rotate-180"
+                    style={{ background: r.hex }}
+                  />
+                  <p className="text-2xl font-normal tracking-[-0.01em]">
+                    {r.who} <span className="text-muted">{r.line}.</span>
+                  </p>
+                  <p className="mt-4 font-extralight leading-relaxed text-white/80">{r.body}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -202,8 +219,11 @@ export default function LandingPage() {
             Set up your first plan today. Your first invoice can go out tonight.
           </p>
           <div className="reveal mt-10 flex flex-wrap justify-center gap-3">
-            <ButtonLink href="/signup" size="lg">
+            <ButtonLink href="/signup" size="lg" className="group">
               Get started
+              <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+                →
+              </span>
             </ButtonLink>
             <ButtonLink href="/login" size="lg" variant="secondary">
               Sign in

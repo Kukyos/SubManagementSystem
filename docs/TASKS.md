@@ -23,9 +23,9 @@ add a row to Requests instead of editing it.
 | S5 | Vercel project linked, env vars, first deploy | B | ✅ |
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ✅ |
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ✅ `supabase/seed.sql`: 688 customers, ~2,100 subscriptions, ~6,800 invoices, ~6,000 payments |
-| S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
+| S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | ✅ per-role checks pass: customer sees only own rows, staff can't write discounts/taxes/roles |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
-| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | 🔨 templates in `supabase/templates/`; paste into Auth → Email Templates |
+| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | ✅ |
 
 ## Tier 1: the demo dies without these
 
@@ -81,12 +81,12 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P4 | Skeleton loaders matching each list's layout | All lists | B | ✅ every console and portal route, detail pages too |
 | P5 | Inline field errors with focus on first invalid field | All forms | B | ✅ red edge and hint on invalid fields after a submit or edit; focus and message come from P21 |
 | P6 | Mobile pass: tables become cards under 640px | All lists | B | ✅ `.table-cards` + `data-label` on every list table |
-| P7 | Mobile pass: hero type size, nav collapses to a menu button under 1024px, check the loop sits well behind text | Landing | P | ⬜ |
-| P8 | Hover states: CTA arrow nudge, nav link underline that grows from the left | Landing | P | ⬜ |
-| P9 | Lifecycle chips light up one after another when they scroll into view | Landing | P | ⬜ |
-| P10 | "Who it's for" cards: hover lift and a small coloured shard per role | Landing | P | ⬜ |
+| P7 | Mobile pass: hero type size, nav collapses to a menu button under 1024px, check the loop sits well behind text | Landing | B | ✅ menu button under 1024px (native details), sign-in folds into it on phones |
+| P8 | Hover states: CTA arrow nudge, nav link underline that grows from the left | Landing | B | ✅ |
+| P9 | Lifecycle chips light up one after another when they scroll into view | Landing | B | ✅ scroll-driven, staggered per chip |
+| P10 | "Who it's for" cards: hover lift and a small coloured shard per role | Landing | B | ✅ |
 | P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | B | ✅ plus `apple-icon.png` |
-| P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | P | ⬜ |
+| P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | B | ✅ landing 96/100/100/91, LCP 1.0s; login 98/100/100/91 |
 | P13 | Shard loop: shards under the pointer orbit their spot and swell, flicks swing them wider; parallax background shards; amber edges, denser field | Landing | P | ✅ |
 | P14 | Intro loader: turning mark, two-line statement, LOADING and percentage, once per session | Landing | P | ✅ |
 | P15 | Hero headline and eyebrow wipe up from a mask with a slight tilt | Landing | P | ✅ |
