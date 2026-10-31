@@ -86,6 +86,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P10 | "Who it's for" cards: hover lift and a small coloured shard per role | Landing | P | ⬜ |
 | P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | P | ⬜ |
 | P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | P | ⬜ |
+| P13 | Shard loop: pointer pushes shards out and lights them white, amber edges, denser field | Landing | P | ✅ |
 
 ## Requests
 

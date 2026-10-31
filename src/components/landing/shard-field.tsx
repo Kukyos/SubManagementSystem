@@ -7,6 +7,8 @@ import { useEffect, useRef } from "react";
   Sections on the page carry data-shards="loop-right | loop-left | loop | scatter";
   as the page scrolls the field eases between those states, so the loop breaks
   apart over the "how it runs today" section and pulls back together after.
+  Shards edge-on to the camera turn amber so the outline reads at any angle,
+  and the pointer pushes nearby shards out and lights them white for a moment.
 */
 
 type Pose = { scatter: number; x: number; scale: number };
@@ -28,6 +30,9 @@ const PALETTE: [string, number][] = [
   ["#5b8cff", 0.06],
 ];
 
+const HOVER_RADIUS = 0.7;
+const HOVER_PUSH = 0.32;
+
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
@@ -46,7 +51,7 @@ export function ShardField() {
 
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const small = window.innerWidth < 768;
-      const COUNT = small ? 1100 : 2600;
+      const COUNT = small ? 1600 : 5200;
 
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -84,9 +89,15 @@ export function ShardField() {
       const floater = new Uint8Array(COUNT);
       const rot = new Float32Array(COUNT * 3);
       const rotSpeed = new Float32Array(COUNT * 3);
+      const normal = new Float32Array(COUNT * 3);
+      const base = new Float32Array(COUNT * 3);
+      const heat = new Float32Array(COUNT);
+      const push = new Float32Array(COUNT * 3);
 
       const R = 2.35;
       const color = new THREE.Color();
+      const amber = new THREE.Color("#ffb829");
+      const RIM = [amber.r, amber.g, amber.b];
       for (let i = 0; i < COUNT; i++) {
         // torus shell, slightly thick so it reads as a volume
         const u = Math.random() * Math.PI * 2;
@@ -95,13 +106,16 @@ export function ShardField() {
         loop[i * 3] = (R + r * Math.cos(v)) * Math.cos(u);
         loop[i * 3 + 1] = r * Math.sin(v);
         loop[i * 3 + 2] = (R + r * Math.cos(v)) * Math.sin(u);
+        normal[i * 3] = Math.cos(v) * Math.cos(u);
+        normal[i * 3 + 1] = Math.sin(v);
+        normal[i * 3 + 2] = Math.cos(v) * Math.sin(u);
 
         scatter[i * 3] = (Math.random() - 0.5) * 20;
         scatter[i * 3 + 1] = (Math.random() - 0.5) * 12;
         scatter[i * 3 + 2] = (Math.random() - 0.5) * 12 - 1;
 
         floater[i] = Math.random() < 0.012 ? 1 : 0;
-        size[i] = floater[i] ? 0.1 + Math.random() * 0.16 : 0.026 + Math.random() * 0.045;
+        size[i] = floater[i] ? 0.1 + Math.random() * 0.16 : 0.022 + Math.random() * 0.036;
         delay[i] = Math.random();
 
         for (let k = 0; k < 3; k++) {
@@ -120,8 +134,13 @@ export function ShardField() {
         color.set(hex);
         if (floater[i]) color.multiplyScalar(0.4);
         mesh.setColorAt(i, color);
+        base[i * 3] = color.r;
+        base[i * 3 + 1] = color.g;
+        base[i * 3 + 2] = color.b;
       }
-      mesh.instanceColor!.needsUpdate = true;
+      const colors = mesh.instanceColor!;
+      colors.setUsage(THREE.DynamicDrawUsage);
+      colors.needsUpdate = true;
 
       // Section anchors: document Y of each section's middle and its pose.
       let anchors: { y: number; pose: Pose }[] = [];
@@ -159,10 +178,14 @@ export function ShardField() {
       };
 
       const current: Pose = { ...target() };
-      const mouse = { x: 0, y: 0 };
+      const mouse = { x: 0, y: 0, inside: false };
       const onMove = (e: PointerEvent) => {
         mouse.x = e.clientX / window.innerWidth - 0.5;
         mouse.y = e.clientY / window.innerHeight - 0.5;
+        mouse.inside = true;
+      };
+      const onLeave = () => {
+        mouse.inside = false;
       };
       const onResize = () => {
         renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -172,6 +195,10 @@ export function ShardField() {
       };
 
       const dummy = new THREE.Object3D();
+      const raycaster = new THREE.Raycaster();
+      const ndc = new THREE.Vector2();
+      const toLocal = new THREE.Matrix4();
+      const eye = new THREE.Vector3();
       let last = performance.now();
 
       const frame = () => {
@@ -193,26 +220,82 @@ export function ShardField() {
           camera.lookAt(0, 0, 0);
         }
 
+        // Pointer ray and camera position in the shards' own space, so distances and facing are cheap per shard.
+        camera.updateMatrixWorld();
+        mesh.updateWorldMatrix(true, false);
+        toLocal.copy(mesh.matrixWorld).invert();
+        eye.copy(camera.position).applyMatrix4(toLocal);
+        const hovering = mouse.inside && !reduceMotion;
+        if (hovering) {
+          ndc.set(mouse.x * 2, -mouse.y * 2);
+          raycaster.setFromCamera(ndc, camera);
+          raycaster.ray.applyMatrix4(toLocal);
+        }
+        const { origin: ro, direction: rd } = raycaster.ray;
+        const cool = Math.pow(0.18, dt);
+        const settle = 1 - Math.pow(0.08, dt);
+        const col = colors.array as Float32Array;
+
         for (let i = 0; i < COUNT; i++) {
           // each shard leaves and returns at its own moment, so the shape tears rather than fades
           const s = floater[i] ? 1 : smooth(clamp01(current.scatter * 1.6 - delay[i] * 0.6));
           const j = i * 3;
-          dummy.position.set(
-            loop[j] + (scatter[j] - loop[j]) * s,
-            loop[j + 1] + (scatter[j + 1] - loop[j + 1]) * s,
-            loop[j + 2] + (scatter[j + 2] - loop[j + 2]) * s,
-          );
+          const px = loop[j] + (scatter[j] - loop[j]) * s;
+          const py = loop[j + 1] + (scatter[j + 1] - loop[j + 1]) * s;
+          const pz = loop[j + 2] + (scatter[j + 2] - loop[j + 2]) * s;
+
+          // Heat jumps up under the pointer and cools over about a second, leaving a short trail.
+          let h = heat[i] * cool;
+          if (hovering && !floater[i]) {
+            const ox = px - ro.x;
+            const oy = py - ro.y;
+            const oz = pz - ro.z;
+            const along = ox * rd.x + oy * rd.y + oz * rd.z;
+            const qx = ox - rd.x * along;
+            const qy = oy - rd.y * along;
+            const qz = oz - rd.z * along;
+            const d = Math.sqrt(qx * qx + qy * qy + qz * qz);
+            if (d < HOVER_RADIUS) {
+              const k = 1 - d / HOVER_RADIUS;
+              const pull = k * k;
+              if (pull > h) h = pull;
+              const inv = (HOVER_PUSH * pull) / (d || 1);
+              push[j] += (qx * inv - push[j]) * 0.25;
+              push[j + 1] += (qy * inv - push[j + 1]) * 0.25;
+              push[j + 2] += (qz * inv - push[j + 2]) * 0.25;
+            }
+          }
+          heat[i] = h;
+          push[j] -= push[j] * settle;
+          push[j + 1] -= push[j + 1] * settle;
+          push[j + 2] -= push[j + 2] * settle;
+          dummy.position.set(px + push[j], py + push[j + 1], pz + push[j + 2]);
+
+          // Edge-on shards go amber; the band fades as the loop breaks up.
+          let rim = 0;
+          if (!floater[i]) {
+            const vx = eye.x - px;
+            const vy = eye.y - py;
+            const vz = eye.z - pz;
+            const facing = Math.abs(normal[j] * vx + normal[j + 1] * vy + normal[j + 2] * vz) / Math.sqrt(vx * vx + vy * vy + vz * vz);
+            rim = smooth(clamp01((0.5 - facing) / 0.35)) * 0.85 * (1 - s);
+          }
+          for (let c = 0; c < 3; c++) {
+            const tinted = base[j + c] + (RIM[c] - base[j + c]) * rim;
+            col[j + c] = tinted + (1 - tinted) * h;
+          }
           if (!reduceMotion) {
             rot[j] += rotSpeed[j] * dt;
             rot[j + 1] += rotSpeed[j + 1] * dt;
             rot[j + 2] += rotSpeed[j + 2] * dt;
           }
           dummy.rotation.set(rot[j], rot[j + 1], rot[j + 2]);
-          dummy.scale.setScalar(size[i] * (1 + s * 0.35));
+          dummy.scale.setScalar(size[i] * (1 + s * 0.35 + heat[i] * 0.4));
           dummy.updateMatrix();
           mesh.setMatrixAt(i, dummy.matrix);
         }
         mesh.instanceMatrix.needsUpdate = true;
+        colors.needsUpdate = true;
         renderer.render(scene, camera);
       };
 
@@ -224,6 +307,7 @@ export function ShardField() {
       const remeasure = window.setTimeout(measure, 800);
       window.addEventListener("resize", onResize);
       window.addEventListener("pointermove", onMove, { passive: true });
+      document.documentElement.addEventListener("pointerleave", onLeave);
       document.addEventListener("visibilitychange", onVisibility);
       renderer.setAnimationLoop(frame);
       canvas.style.opacity = "1";
@@ -232,6 +316,7 @@ export function ShardField() {
         window.clearTimeout(remeasure);
         window.removeEventListener("resize", onResize);
         window.removeEventListener("pointermove", onMove);
+        document.documentElement.removeEventListener("pointerleave", onLeave);
         document.removeEventListener("visibilitychange", onVisibility);
         renderer.setAnimationLoop(null);
         geometry.dispose();

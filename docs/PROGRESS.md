@@ -31,6 +31,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Shard loop follows the reference's hover more closely: shards under the
+  pointer push outward and turn white, then cool back over about a second;
+  shards edge-on to the camera turn amber so the outline holds at any angle.
+  Count raised to ~5,200 (1,600 on small screens) with smaller shards. Hover
+  is off under reduced motion. Done in the Builder's file with their OK.
 - Landing page: a three.js field of ~2,600 wireframe tetrahedra (1,100 on
   small screens). They hold a loop in the hero, scatter over the "billing
   month today" lines, and re-form for the features. Section poses come from
