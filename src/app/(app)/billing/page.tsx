@@ -38,7 +38,7 @@ export default async function Page() {
         <EmptyState title="No runs yet" body="Runs from this page and the nightly job show up here." />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Ran</th>
@@ -56,14 +56,14 @@ export default async function Page() {
                 const failed = Array.isArray(r.failed) ? r.failed.length : 0;
                 return (
                   <tr key={r.id} className="hover:bg-ink/[0.02]">
-                    <td className="px-5 py-3">{when.format(new Date(r.created_at))}</td>
-                    <td className="px-5 py-3 text-muted">{date(r.as_of)}</td>
-                    <td className="px-5 py-3 text-muted">{r.ranBy ?? "Nightly job"}</td>
-                    <td className="tabular px-5 py-3 text-right">{r.subscriptions_billed}</td>
-                    <td className="tabular px-5 py-3 text-right">{r.invoices_created}</td>
-                    <td className="tabular px-5 py-3 text-right text-muted">{r.subscriptions_closed}</td>
-                    <td className={`tabular px-5 py-3 text-right ${failed ? "text-pink" : "text-faint"}`}>{failed}</td>
-                    <td className="tabular px-5 py-3 text-right text-faint">{(r.duration_ms / 1000).toFixed(1)}s</td>
+                    <td data-label="Ran" className="px-5 py-3">{when.format(new Date(r.created_at))}</td>
+                    <td data-label="Billed up to" className="px-5 py-3 text-muted">{date(r.as_of)}</td>
+                    <td data-label="By" className="px-5 py-3 text-muted">{r.ranBy ?? "Nightly job"}</td>
+                    <td data-label="Subscriptions" className="tabular px-5 py-3 text-right">{r.subscriptions_billed}</td>
+                    <td data-label="Invoices" className="tabular px-5 py-3 text-right">{r.invoices_created}</td>
+                    <td data-label="Closed" className="tabular px-5 py-3 text-right text-muted">{r.subscriptions_closed}</td>
+                    <td data-label="Failed" className={`tabular px-5 py-3 text-right ${failed ? "text-pink" : "text-faint"}`}>{failed}</td>
+                    <td data-label="Took" className="tabular px-5 py-3 text-right text-faint">{(r.duration_ms / 1000).toFixed(1)}s</td>
                   </tr>
                 );
               })}

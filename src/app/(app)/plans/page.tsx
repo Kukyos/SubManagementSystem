@@ -48,7 +48,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Name</th>
@@ -62,21 +62,21 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
                 <tr key={p.id} className="hover:bg-ink/[0.02]">
-                  <td className="px-5 py-3">
+                  <td data-label="Name" className="px-5 py-3">
                     <Link href={`/plans/${p.id}`} className="font-medium hover:text-accent-hover">
                       {p.name}
                     </Link>
                     {!p.is_active && <span className="ml-2 text-xs text-faint">Archived</span>}
                   </td>
-                  <td className="px-5 py-3 text-muted">{p.product?.name ?? "—"}</td>
-                  <td className="px-5 py-3 text-muted">{cycle(p.billing_period, p.billing_interval)}</td>
-                  <td className="px-5 py-3 text-muted">
+                  <td data-label="Product" className="px-5 py-3 text-muted">{p.product?.name ?? "—"}</td>
+                  <td data-label="Billing" className="px-5 py-3 text-muted">{cycle(p.billing_period, p.billing_interval)}</td>
+                  <td data-label="Available" className="px-5 py-3 text-muted">
                     {p.available_from || p.available_until
                       ? `${p.available_from ? date(p.available_from) : "Now"} – ${p.available_until ? date(p.available_until) : "open"}`
                       : "Always"}
                   </td>
-                  <td className="tabular px-5 py-3 text-right text-muted">{p.activeCount}</td>
-                  <td className="tabular px-5 py-3 text-right">{money(p.price)}</td>
+                  <td data-label="Active subs" className="tabular px-5 py-3 text-right text-muted">{p.activeCount}</td>
+                  <td data-label="Price" className="tabular px-5 py-3 text-right">{money(p.price)}</td>
                 </tr>
               ))}
             </tbody>

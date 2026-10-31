@@ -47,7 +47,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Name</th>
@@ -60,16 +60,16 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             <tbody className="divide-y divide-line">
               {rows.map((c) => (
                 <tr key={c.id} className="hover:bg-ink/[0.02]">
-                  <td className="px-5 py-3">
+                  <td data-label="Name" className="px-5 py-3">
                     <Link href={`/customers/${c.id}`} className="font-medium hover:text-accent-hover">
                       {c.name}
                     </Link>
                     <span className="block text-xs text-faint">{c.email}</span>
                   </td>
-                  <td className="px-5 py-3 text-muted">{c.company ?? "—"}</td>
-                  <td className="px-5 py-3 text-muted">{c.city ?? "—"}</td>
-                  <td className="tabular px-5 py-3 text-right text-muted">{c.activeCount}</td>
-                  <td className="tabular px-5 py-3 text-right">
+                  <td data-label="Company" className="px-5 py-3 text-muted">{c.company ?? "—"}</td>
+                  <td data-label="City" className="px-5 py-3 text-muted">{c.city ?? "—"}</td>
+                  <td data-label="Active subs" className="tabular px-5 py-3 text-right text-muted">{c.activeCount}</td>
+                  <td data-label="Outstanding" className="tabular px-5 py-3 text-right">
                     {c.outstanding > 0 ? money(c.outstanding) : <span className="text-faint">—</span>}
                     {c.overdue > 0 && <span className="block text-xs text-pink">{money(c.overdue)} overdue</span>}
                   </td>

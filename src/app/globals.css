@@ -246,3 +246,17 @@ a:focus-visible .roll-char {
     transform: rotateY(360deg) rotateZ(-8deg);
   }
 }
+
+/* Lists under 640px: each row becomes a card, each cell a "label  value" line.
+   Labels come from data-label on the td. Unlayered, so it beats the px-5/py-3 utilities. */
+@media (max-width: 639px) {
+  .table-cards thead { display: none; }
+  .table-cards, .table-cards tbody, .table-cards tr { display: block; width: 100%; }
+  .table-cards tr { padding: 14px 16px; }
+  .table-cards td { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 3px 0; text-align: right; }
+  .table-cards td::before { content: attr(data-label); flex-shrink: 0; font-size: 12px; color: var(--color-muted); text-align: left; }
+  .table-cards td:first-child { display: block; padding-bottom: 8px; text-align: left; }
+  .table-cards td:first-child::before, .table-cards td[data-label=""]::before { content: none; }
+  .table-cards td[data-label=""] { justify-content: flex-end; padding-top: 8px; }
+  .table-cards td:empty { display: none; }
+}

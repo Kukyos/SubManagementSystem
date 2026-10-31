@@ -85,7 +85,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Number</th>
@@ -102,12 +102,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                 const due = Number(i.total) - Number(i.amount_paid);
                 return (
                   <tr key={i.id} className="hover:bg-ink/[0.02]">
-                    <td className="px-5 py-3">
+                    <td data-label="Number" className="px-5 py-3">
                       <Link href={`/invoices/${i.id}`} className="tabular font-medium hover:text-accent-hover">
                         {i.number}
                       </Link>
                     </td>
-                    <td className="px-5 py-3">
+                    <td data-label="Customer" className="px-5 py-3">
                       {i.customer ? (
                         <Link href={`/customers/${i.customer.id}`} className="hover:text-accent-hover">
                           {i.customer.name}
@@ -116,13 +116,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                         "—"
                       )}
                     </td>
-                    <td className="px-5 py-3 text-muted">{date(i.invoice_date)}</td>
-                    <td className="px-5 py-3 text-muted">{date(i.due_date)}</td>
-                    <td className="px-5 py-3">
+                    <td data-label="Date" className="px-5 py-3 text-muted">{date(i.invoice_date)}</td>
+                    <td data-label="Due" className="px-5 py-3 text-muted">{date(i.due_date)}</td>
+                    <td data-label="Status" className="px-5 py-3">
                       <InvoiceBadge status={invoiceDisplayStatus(i.status, i.due_date)} />
                     </td>
-                    <td className="tabular px-5 py-3 text-right">{money(i.total)}</td>
-                    <td className="tabular px-5 py-3 text-right text-muted">
+                    <td data-label="Total" className="tabular px-5 py-3 text-right">{money(i.total)}</td>
+                    <td data-label="Still due" className="tabular px-5 py-3 text-right text-muted">
                       {i.status === "confirmed" && due > 0 ? money(due) : <span className="text-faint">—</span>}
                     </td>
                   </tr>

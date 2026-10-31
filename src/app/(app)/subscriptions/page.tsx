@@ -75,7 +75,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Number</th>
@@ -89,12 +89,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             <tbody className="divide-y divide-line">
               {rows.map((s) => (
                 <tr key={s.id} className="hover:bg-ink/[0.02]">
-                  <td className="px-5 py-3">
+                  <td data-label="Number" className="px-5 py-3">
                     <Link href={`/subscriptions/${s.id}`} className="tabular font-medium hover:text-accent-hover">
                       {s.number}
                     </Link>
                   </td>
-                  <td className="px-5 py-3">
+                  <td data-label="Customer" className="px-5 py-3">
                     {s.customer ? (
                       <Link href={`/customers/${s.customer.id}`} className="hover:text-accent-hover">
                         {s.customer.name}
@@ -104,11 +104,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                     )}
                     {s.customer?.company && <span className="block text-xs text-faint">{s.customer.company}</span>}
                   </td>
-                  <td className="px-5 py-3 text-muted">{s.plan}</td>
-                  <td className="px-5 py-3">
+                  <td data-label="Plan" className="px-5 py-3 text-muted">{s.plan}</td>
+                  <td data-label="Status" className="px-5 py-3">
                     <SubscriptionBadge status={s.status} />
                   </td>
-                  <td className="px-5 py-3 text-muted">
+                  <td data-label="Next" className="px-5 py-3 text-muted">
                     {s.status === "active"
                       ? `Bills ${date(s.next_invoice_date)}`
                       : s.status === "quotation"
@@ -117,7 +117,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                           ? `Ended ${date(s.expiry_date)}`
                           : `Starts ${date(s.start_date)}`}
                   </td>
-                  <td className="tabular px-5 py-3 text-right">{money(s.amount)}</td>
+                  <td data-label="Per cycle" className="tabular px-5 py-3 text-right">{money(s.amount)}</td>
                 </tr>
               ))}
             </tbody>

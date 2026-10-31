@@ -80,7 +80,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P3 | Friendly empty states with a next action | All lists | B | ✅ |
 | P4 | Skeleton loaders matching each list's layout | All lists | B | ✅ every console and portal route, detail pages too |
 | P5 | Inline field errors with focus on first invalid field | All forms | B | ✅ red edge and hint on invalid fields after a submit or edit; focus and message come from P21 |
-| P6 | Mobile pass: tables become cards under 640px | All lists | B | 🔨 |
+| P6 | Mobile pass: tables become cards under 640px | All lists | B | ✅ `.table-cards` + `data-label` on every list table |
 | P7 | Mobile pass: hero type size, nav collapses to a menu button under 1024px, check the loop sits well behind text | Landing | P | ⬜ |
 | P8 | Hover states: CTA arrow nudge, nav link underline that grows from the left | Landing | P | ⬜ |
 | P9 | Lifecycle chips light up one after another when they scroll into view | Landing | P | ⬜ |

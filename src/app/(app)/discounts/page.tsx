@@ -59,7 +59,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Name</th>
@@ -75,26 +75,26 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                 const live = liveness(d, now);
                 return (
                   <tr key={d.id} className="hover:bg-ink/[0.02]">
-                    <td className="px-5 py-3">
+                    <td data-label="Name" className="px-5 py-3">
                       <Link href={`/discounts/${d.id}`} className="font-medium hover:text-accent-hover">
                         {d.name}
                       </Link>
                       {d.code && <span className="block font-mono text-xs text-faint">{d.code}</span>}
                     </td>
-                    <td className="px-5 py-3 text-muted">
+                    <td data-label="Applies to" className="px-5 py-3 text-muted">
                       {d.scope === "products"
                         ? `${d.productCount} product${d.productCount === 1 ? "" : "s"}`
                         : `${d.subscriptionCount} subscription${d.subscriptionCount === 1 ? "" : "s"}`}
                     </td>
-                    <td className="px-5 py-3 text-muted">
+                    <td data-label="Window" className="px-5 py-3 text-muted">
                       {d.starts_on || d.ends_on ? `${d.starts_on ? date(d.starts_on) : "Now"} – ${d.ends_on ? date(d.ends_on) : "open"}` : "Always"}
                     </td>
-                    <td className="tabular px-5 py-3 text-right text-muted">
+                    <td data-label="Used" className="tabular px-5 py-3 text-right text-muted">
                       {d.times_used}
                       {d.usage_limit ? ` / ${d.usage_limit}` : ""}
                     </td>
-                    <td className={`px-5 py-3 text-xs font-medium ${live.tone}`}>{live.label}</td>
-                    <td className="tabular px-5 py-3 text-right">{d.type === "percent" ? `${Number(d.value)}%` : money(d.value)}</td>
+                    <td data-label="Status" className={`px-5 py-3 text-xs font-medium ${live.tone}`}>{live.label}</td>
+                    <td data-label="Value" className="tabular px-5 py-3 text-right">{d.type === "percent" ? `${Number(d.value)}%` : money(d.value)}</td>
                   </tr>
                 );
               })}

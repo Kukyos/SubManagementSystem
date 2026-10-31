@@ -49,7 +49,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Name</th>
@@ -63,17 +63,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
                 <tr key={p.id} className="hover:bg-ink/[0.02]">
-                  <td className="px-5 py-3">
+                  <td data-label="Name" className="px-5 py-3">
                     <Link href={`/products/${p.id}`} className="font-medium hover:text-accent-hover">
                       {p.name}
                     </Link>
                     {!p.is_active && <span className="ml-2 text-xs text-faint">Archived</span>}
                   </td>
-                  <td className="px-5 py-3 text-muted">{typeLabel[p.type]}</td>
-                  <td className="px-5 py-3 text-muted">{p.tax?.name ?? "—"}</td>
-                  <td className="tabular px-5 py-3 text-right text-muted">{p.variantCount || "—"}</td>
-                  <td className="tabular px-5 py-3 text-right text-muted">{p.costPrice == null ? "—" : money(p.costPrice)}</td>
-                  <td className="tabular px-5 py-3 text-right">{money(p.sales_price)}</td>
+                  <td data-label="Type" className="px-5 py-3 text-muted">{typeLabel[p.type]}</td>
+                  <td data-label="Tax" className="px-5 py-3 text-muted">{p.tax?.name ?? "—"}</td>
+                  <td data-label="Variants" className="tabular px-5 py-3 text-right text-muted">{p.variantCount || "—"}</td>
+                  <td data-label="Cost" className="tabular px-5 py-3 text-right text-muted">{p.costPrice == null ? "—" : money(p.costPrice)}</td>
+                  <td data-label="Sales price" className="tabular px-5 py-3 text-right">{money(p.sales_price)}</td>
                 </tr>
               ))}
             </tbody>

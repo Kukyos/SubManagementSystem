@@ -32,7 +32,7 @@ export default async function Page() {
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Name</th>
@@ -49,21 +49,21 @@ export default async function Page() {
             <tbody className="divide-y divide-line">
               {templates.map((t) => (
                 <tr key={t.id} className="hover:bg-ink/[0.02]">
-                  <td className="px-5 py-3">
+                  <td data-label="Name" className="px-5 py-3">
                     <Link href={`/templates/${t.id}`} className="font-medium hover:text-accent-hover">
                       {t.name}
                     </Link>
                     <span className="block text-xs text-faint">Quote valid {t.validity_days} days</span>
                   </td>
-                  <td className="px-5 py-3 text-muted">
+                  <td data-label="Plan" className="px-5 py-3 text-muted">
                     {t.plan?.name ?? "—"}
                     {t.plan && <span className="block text-xs text-faint">{cycle(t.plan.billing_period, t.plan.billing_interval)}</span>}
                   </td>
-                  <td className="px-5 py-3 text-muted">{t.duration_periods ? `${t.duration_periods} cycles` : "Open-ended"}</td>
-                  <td className="px-5 py-3 text-muted">{termLabel[t.payment_terms]}</td>
-                  <td className="tabular px-5 py-3 text-right text-muted">{t.lineCount}</td>
-                  <td className="tabular px-5 py-3 text-right text-muted">{t.usedCount}</td>
-                  <td className="px-5 py-3 text-right">
+                  <td data-label="Contract" className="px-5 py-3 text-muted">{t.duration_periods ? `${t.duration_periods} cycles` : "Open-ended"}</td>
+                  <td data-label="Terms" className="px-5 py-3 text-muted">{termLabel[t.payment_terms]}</td>
+                  <td data-label="Lines" className="tabular px-5 py-3 text-right text-muted">{t.lineCount}</td>
+                  <td data-label="Used" className="tabular px-5 py-3 text-right text-muted">{t.usedCount}</td>
+                  <td data-label="" className="px-5 py-3 text-right">
                     <ButtonLink href={`/subscriptions/new?template=${t.id}`} size="sm" variant="secondary">
                       Use
                     </ButtonLink>

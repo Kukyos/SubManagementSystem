@@ -149,7 +149,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-cards w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Received</th>
@@ -164,8 +164,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
                 <tr key={p.id} className="hover:bg-ink/[0.02]">
-                  <td className="px-5 py-3 text-muted">{date(p.paid_on)}</td>
-                  <td className="px-5 py-3">
+                  <td data-label="Received" className="px-5 py-3 text-muted">{date(p.paid_on)}</td>
+                  <td data-label="Invoice" className="px-5 py-3">
                     {p.invoice ? (
                       <Link href={`/invoices/${p.invoice.id}`} className="tabular font-medium hover:text-accent-hover">
                         {p.invoice.number}
@@ -174,7 +174,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                       "—"
                     )}
                   </td>
-                  <td className="px-5 py-3">
+                  <td data-label="Customer" className="px-5 py-3">
                     {p.customer ? (
                       <Link href={`/customers/${p.customer.id}`} className="hover:text-accent-hover">
                         {p.customer.name}
@@ -183,10 +183,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                       "—"
                     )}
                   </td>
-                  <td className="px-5 py-3 text-muted">{methodLabel[p.method]}</td>
-                  <td className="px-5 py-3 font-mono text-xs text-faint">{p.reference ?? "—"}</td>
-                  <td className="px-5 py-3 text-muted">{p.recordedBy ?? (p.method === "online" ? "Customer, online" : "—")}</td>
-                  <td className="tabular px-5 py-3 text-right">{money(p.amount)}</td>
+                  <td data-label="Method" className="px-5 py-3 text-muted">{methodLabel[p.method]}</td>
+                  <td data-label="Reference" className="px-5 py-3 font-mono text-xs text-faint">{p.reference ?? "—"}</td>
+                  <td data-label="Recorded by" className="px-5 py-3 text-muted">{p.recordedBy ?? (p.method === "online" ? "Customer, online" : "—")}</td>
+                  <td data-label="Amount" className="tabular px-5 py-3 text-right">{money(p.amount)}</td>
                 </tr>
               ))}
             </tbody>
