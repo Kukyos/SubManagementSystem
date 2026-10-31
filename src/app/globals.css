@@ -143,6 +143,32 @@ body {
   animation: wipe-in 1.2s cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 
+/* Nav letter roll: each .roll-char carries a copy of itself below (::after)
+   and the pair slides up on hover of the enclosing link. */
+@utility roll {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.2;
+  vertical-align: top;
+}
+
+.roll-char {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.roll-char::after {
+  content: attr(data-ch);
+  position: absolute;
+  left: 0;
+  top: 100%;
+}
+a:hover .roll-char,
+a:focus-visible .roll-char {
+  transform: translateY(-100%);
+}
+
 @keyframes loader-spin {
   to {
     transform: rotate(360deg);

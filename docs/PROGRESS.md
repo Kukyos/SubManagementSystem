@@ -34,6 +34,9 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Landing nav links take the reference's hover: letters roll up one after
+  another (18ms stagger) with a copy rolling in from below, and the colour
+  eases from #9a9a9a to white over 0.5s. Screen readers get the plain label.
 - Hero entrance follows the reference: each headline line and the eyebrow
   rise from behind a mask with a 4° tilt (`wipe` utility), staggered; the
   lead and buttons fade up after them.

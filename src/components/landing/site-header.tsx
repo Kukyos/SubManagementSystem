@@ -2,6 +2,25 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { ButtonLink } from "@/components/ui/button";
 
+const navLink =
+  "text-[13px] font-semibold uppercase tracking-[0.025em] text-[#9a9a9a] transition-colors duration-500 ease-[cubic-bezier(0.5,1,0.89,1)] hover:text-white focus-visible:text-white";
+
+// Letters roll up one after another on hover and a copy rolls in from below, as in the reference's nav.
+function RollText({ text }: { text: string }) {
+  return (
+    <span className="roll">
+      <span className="sr-only">{text}</span>
+      <span aria-hidden className="flex">
+        {[...text].map((ch, i) => (
+          <span key={i} data-ch={ch} className="roll-char" style={{ transitionDelay: `${i * 18}ms` }}>
+            {ch}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
 const links = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#features", label: "Features" },
@@ -15,19 +34,12 @@ export function SiteHeader() {
         <Logo />
         <nav className="flex items-center gap-2 md:gap-7" aria-label="Site">
           {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="hidden text-[13px] font-semibold uppercase tracking-[0.025em] text-white/80 transition-colors hover:text-white lg:block"
-            >
-              {l.label}
+            <Link key={l.href} href={l.href} className={`hidden lg:block ${navLink}`}>
+              <RollText text={l.label} />
             </Link>
           ))}
-          <Link
-            href="/login"
-            className="px-2 text-[13px] font-semibold uppercase tracking-[0.025em] text-white/80 transition-colors hover:text-white"
-          >
-            Sign in
+          <Link href="/login" className={`px-2 ${navLink}`}>
+            <RollText text="Sign in" />
           </Link>
           <ButtonLink href="/signup">Get started</ButtonLink>
         </nav>
