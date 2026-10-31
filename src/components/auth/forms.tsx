@@ -92,27 +92,24 @@ function PasswordToggleInput({
           pattern={pattern}
           title={title}
           defaultValue={defaultValue}
-          className="pr-10"
+          className="pr-10 [&::-ms-reveal]:hidden"
         />
         <button
           type="button"
           aria-label={showPassword ? "Hide password" : "Show password"}
           onClick={() => setShowPassword((current) => !current)}
-          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted transition-colors hover:text-fg"
+          className="group absolute inset-y-0 right-0 flex w-10 items-center justify-center"
         >
-          {showPassword ? (
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
-              <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
-              <path d="M3 3l18 18" />
-              <path d="M10.6 10.6A2.7 2.7 0 0 0 13.4 13.4" />
-              <path d="M9.1 5.5A11.1 11.1 0 0 1 12 5c6.5 0 10 7 10 7a16.7 16.7 0 0 1-4.4 5.3" />
-              <path d="M6.2 6.2A16.7 16.7 0 0 0 2 12s3.5 7 10 7a10.8 10.8 0 0 0 5.8-1.8" />
-            </svg>
-          )}
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className={`size-[18px] stroke-[1.4] [stroke-linejoin:round] transition-[color,fill,transform] duration-300 group-hover:rotate-[-12deg] ${
+              showPassword ? "fill-transparent stroke-current text-muted group-hover:text-fg" : "fill-accent stroke-accent-hover text-accent"
+            }`}
+          >
+            <path d="M12.5 2.5 21 16.5 3 19.5Z" />
+            <path d="M12.5 2.5 11.5 13 3 19.5M11.5 13 21 16.5" fill="none" className={showPassword ? "" : "stroke-black/35"} />
+          </svg>
         </button>
       </div>
     </Field>
