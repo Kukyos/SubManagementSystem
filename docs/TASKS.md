@@ -76,7 +76,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | # | Task | Page | Owner | Status |
 |---|---|---|---|---|
 | P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | P | ⬜ |
-| P2 | Show / hide password toggle | Sign in, sign up, reset | P | ⬜ |
+| P2 | Show / hide password toggle | Sign in, sign up, reset | P | ✅ |
 | P3 | Friendly empty states with a next action | All lists | P | ⬜ |
 | P4 | Skeleton loaders matching each list's layout | All lists | P | ⬜ |
 | P5 | Inline field errors with focus on first invalid field | All forms | P | ⬜ |
@@ -91,6 +91,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P14 | Intro loader: turning mark, two-line statement, LOADING and percentage, once per session | Landing | P | ✅ |
 | P15 | Hero headline and eyebrow wipe up from a mask with a slight tilt | Landing | P | ✅ |
 | P16 | Nav links: letters roll up on hover, grey to white | Landing | P | ✅ |
+| P17 | Stronger text shadow over the shard field | Landing, auth headings | B | ✅ |
 
 ## Requests
 
