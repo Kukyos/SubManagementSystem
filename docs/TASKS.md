@@ -3,7 +3,14 @@
 Claim a row by putting your lane in **Owner** and pushing before you start.
 Tick it in the same push as the work. Tick only your own rows.
 
-Lanes: **B** = Builder, **P** = Polisher. Status: ⬜ todo · 🔨 in progress · ✅ done.
+Lanes: **B** = Builder, **P** = Polisher.
+
+Status: ⬜ todo · 🔨 in progress · 📦 incoming · ✅ done.
+
+**📦 incoming** means the work is finished on someone's machine but not
+pushed yet. It lands over the next pushes. Leave those files alone until the
+row turns ✅. Pull first, then start. If you need to touch an incoming page,
+add a row to Requests instead of editing it.
 
 ## Setup
 
@@ -17,7 +24,7 @@ Lanes: **B** = Builder, **P** = Polisher. Status: ⬜ todo · 🔨 in progress �
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ⬜ |
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ⬜ |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
-| S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ⬜ |
+| S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | 🔨 doc done, tokens next |
 
 ## Tier 1: the demo dies without these
 

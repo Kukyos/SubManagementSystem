@@ -115,15 +115,20 @@ after a server-side role check.
 - The Polisher works on `polish/<topic>` branches, pushes freely, and the
   branch is merged to `main` **with a merge commit, not a squash**, so the
   history shows who did the work. Merge small and often.
-- **Push at least once an hour, from everyone.** Small commits with clear
-  messages beat one large drop. Work in progress goes on a branch; it still
-  gets pushed.
+- **Push at least once an hour, from everyone.** Work in progress goes on a
+  branch; it still gets pushed.
+- **One thing per commit.** One page, one fix, one migration. If five pages
+  get finished in one sitting, they go out as five commits over the following
+  pushes, not one drop. Until they are pushed, their rows in `TASKS.md` say
+  📦 incoming so nobody starts on the same files.
+- Commit messages are short and plain, the way you'd say it to a teammate:
+  "products page with variant editor", "fix rounding on subscription
+  discounts". Code comments only where the why isn't obvious.
 - `git pull` before starting anything, and again after every merge to `main`.
 - Claim a row in `TASKS.md` and push the claim before starting it.
 - A merge that breaks production is **reverted first, debugged after**.
 - Deleting or moving a file gets a line in `PROGRESS.md`, not just a commit.
-- Commit messages describe the change in plain words. No tool-generated
-  trailers or footers of any kind in commits or PR bodies.
+- No tool-generated trailers or footers of any kind in commits or PR bodies.
 - Authorship is honest: no `--author` overrides, no backdated commits.
 
 ---
