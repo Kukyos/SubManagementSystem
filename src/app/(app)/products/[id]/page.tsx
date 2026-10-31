@@ -6,10 +6,8 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { money } from "@/lib/format";
 import { requireRole } from "@/services/auth";
-import { getProduct, listTaxes } from "@/services/catalogue";
+import { getProduct, listTaxes, uuid } from "@/services/catalogue";
 import { archiveProduct, deleteVariant } from "@/services/catalogue-actions";
-
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

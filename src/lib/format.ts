@@ -26,3 +26,11 @@ export function date(value: string | null | undefined) {
 export function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+const periodWord = { daily: "day", weekly: "week", monthly: "month", yearly: "year" } as const;
+
+// "Monthly", "Every 3 months", "Yearly"
+export function cycle(period: keyof typeof periodWord, interval = 1) {
+  if (interval === 1) return period[0].toUpperCase() + period.slice(1);
+  return `Every ${interval} ${periodWord[period]}s`;
+}

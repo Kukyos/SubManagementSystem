@@ -34,6 +34,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Plans page: list (product, billing cycle, availability window, active
+  subscriptions, price) and one-form editor with the plan rules as
+  checkboxes. Unticking "available" archives a plan. Paging is a shared
+  `Pager` in `components/ui/`. Product pickers keep a product that has been
+  archived since it was chosen, so saving doesn't clear it.
 - Products page: list with search, active / archived filter and paging;
   editor with variants (base + extra price shown per variant), archive and
   restore. Staff see it read-only, with cost. Catalogue writes check for admin

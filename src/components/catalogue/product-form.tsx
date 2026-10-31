@@ -23,7 +23,8 @@ export function ProductForm({ product, taxes, readOnly }: { product: ProductDeta
         </p>
       )}
 
-      <fieldset disabled={readOnly || pending} className="space-y-5">
+      {/* React resets the form after each action and selects ignore a new defaultValue; re-keying remounts them. */}
+      <fieldset key={JSON.stringify(v)} disabled={readOnly || pending} className="space-y-5">
         <Field label="Name" htmlFor="name">
           <Input id="name" name="name" required autoFocus={!product} defaultValue={v?.name ?? product?.name} placeholder="Odoo ERP licence" />
         </Field>

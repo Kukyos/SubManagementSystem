@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/services/auth";
-import type { ActionResult, ProductType } from "@/types/models";
+import type { ActionResult, BillingPeriod, ProductType } from "@/types/models";
 
 export type FormState = (ActionResult & { values?: Record<string, string> }) | null;
 
@@ -105,4 +105,64 @@ export async function deleteVariant(id: string, productId: string) {
   await supabase.from("product_variants").delete().eq("id", id);
   revalidatePath(`/products/${productId}`);
   revalidatePath("/products");
+}
+
+const periods: BillingPeriod[] = ["daily", "weekly", "monthly", "yearly"];
+const isDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+
+export async function savePlan(_: FormState, formData: FormData): Promise<FormState> {
+  const values = Object.fromEntries(
+    [
+      "id", "name", "productId", "price", "billingPeriod", "billingInterval",
+      "minQuantity", "availableFrom", "availableUntil", "description",
+    ].map((k) => [k, text(formData, k)]),
+  );
+  const flags = ["autoClose", "closable", "pausable", "renewable", "isActive"] as const;
+  for (const f of flags) values[f] = formData.get(f) ? "on" : "";
+  const fail = (error: string): FormState => ({ ok: false, error, values });
+
+  const denied = await adminOnly();
+  if (denied) return fail(denied);
+  if (!values.name) return fail("Give the plan a name.");
+  if (!periods.includes(values.billingPeriod as BillingPeriod)) return fail("Pick how often the plan bills.");
+  const amount = price(values.price, "Price");
+  if (amount.error) return fail(amount.error);
+  const interval = Number(values.billingInterval || 1);
+  if (!Number.isInteger(interval) || interval < 1 || interval > 36) return fail("Bill every 1 to 36 periods.");
+  const minQty = Number(values.minQuantity || 1);
+  if (!Number.isInteger(minQty) || minQty < 1) return fail("Minimum quantity is a whole number, 1 or more.");
+  for (const k of ["availableFrom", "availableUntil"]) if (values[k] && !isDate(values[k])) return fail("Dates look wrong. Pick them from the calendar.");
+  if (values.availableFrom && values.availableUntil && values.availableUntil < values.availableFrom)
+    return fail("The plan can't stop being available before it starts.");
+
+  const row = {
+    name: values.name,
+    product_id: values.productId || null,
+    price: amount.value!,
+    billing_period: values.billingPeriod as BillingPeriod,
+    billing_interval: interval,
+    min_quantity: minQty,
+    available_from: values.availableFrom || null,
+    available_until: values.availableUntil || null,
+    auto_close: !!values.autoClose,
+    closable: !!values.closable,
+    pausable: !!values.pausable,
+    renewable: !!values.renewable,
+    is_active: !!values.isActive,
+    description: values.description || null,
+  };
+
+  const supabase = await createClient();
+  if (values.id) {
+    const { error } = await supabase.from("plans").update(row).eq("id", values.id);
+    if (error) return fail("We couldn't save the plan. Try again in a moment.");
+    revalidatePath("/plans");
+    revalidatePath(`/plans/${values.id}`);
+    return { ok: true, data: undefined, values };
+  }
+
+  const { data, error } = await supabase.from("plans").insert(row).select("id").single();
+  if (error) return fail("We couldn't create the plan. Try again in a moment.");
+  revalidatePath("/plans");
+  redirect(`/plans/${data.id}`);
 }

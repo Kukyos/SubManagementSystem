@@ -38,7 +38,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listProducts(query)` (`show`: active / archived / all), `getProduct(id)` (with variants; cost for staff) | ✅ |
 | `saveProduct(state, formData)`, `archiveProduct(id, archived?)` (`services/catalogue-actions.ts`) | ✅ |
 | `saveVariant(state, formData)`, `deleteVariant(id, productId)` (`services/catalogue-actions.ts`) | ✅ |
-| `listPlans(query)`, `getPlan(id)`, `savePlan(formData)` | ⬜ |
+| `listPlans(query)` (with active subscription count), `getPlan(id)`, `savePlan(state, formData)` | ✅ |
+| `listProductOptions(keepId?)`: active products for pickers, plus the one already chosen | ✅ |
 | `listTaxes()` | ✅ |
 | `saveTax(formData)` | ⬜ |
 | `listTemplates()`, `getTemplate(id)`, `saveTemplate(formData)` | ⬜ |

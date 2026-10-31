@@ -3,7 +3,8 @@ import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
-import { cn, money } from "@/lib/format";
+import { Pager } from "@/components/ui/pager";
+import { money } from "@/lib/format";
 import { requireRole } from "@/services/auth";
 import { listProducts, type ProductQuery } from "@/services/catalogue";
 
@@ -19,10 +20,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
   const show = (["active", "archived", "all"].includes(params.show ?? "") ? params.show : "active") as ProductQuery["show"];
   const page = Math.max(1, Number(params.page) || 1);
   const { rows, total } = await listProducts({ page, pageSize, search, show });
-  const pages = Math.max(1, Math.ceil(total / pageSize));
   const isAdmin = user.role === "admin";
-
-  const href = (p: number) => `/products?${new URLSearchParams({ ...(search && { q: search }), show: show!, page: String(p) })}`;
 
   return (
     <>
@@ -83,21 +81,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         </Card>
       )}
 
-      {pages > 1 && (
-        <nav className="mt-4 flex items-center justify-between text-sm text-muted" aria-label="Pages">
-          <span>
-            {total} products · page {page} of {pages}
-          </span>
-          <div className="flex gap-2">
-            <Link href={href(page - 1)} className={cn(buttonClass({ variant: "secondary", size: "sm" }), page <= 1 && "pointer-events-none opacity-40")} aria-disabled={page <= 1}>
-              Previous
-            </Link>
-            <Link href={href(page + 1)} className={cn(buttonClass({ variant: "secondary", size: "sm" }), page >= pages && "pointer-events-none opacity-40")} aria-disabled={page >= pages}>
-              Next
-            </Link>
-          </div>
-        </nav>
-      )}
+      <Pager path="/products" params={{ q: search, show }} page={page} pageSize={pageSize} total={total} noun="products" />
     </>
   );
 }

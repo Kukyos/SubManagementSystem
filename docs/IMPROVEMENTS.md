@@ -34,6 +34,11 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
 
 ## Lessons
 
+- React 19 resets a form after its action runs, and a `<select>` doesn't take
+  a new `defaultValue`, so after a failed save the dropdowns snapped back to
+  their first value while text fields kept what was typed. Forms that echo
+  values back re-key their fieldset on the returned values.
+
 _Add them as they happen, in the same push as the fix._
 
 - `auth.admin.createUser({ app_metadata: { role } })` makes the profile as a
