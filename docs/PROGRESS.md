@@ -34,6 +34,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Shard ring now sways in 3D (a slow yaw and pitch swing on top of its own
+  spin, since a torus spinning on its axis alone looks static), shards drift
+  slightly, and depth fog is stronger. Hover is back to parting the shards,
+  now as a swirling ripple around the pointer; a damped spring per shard
+  lets them flow back with a slight wobble. Replaces the orbit-in-place hover.
 - Products page: list with search, active / archived filter and paging;
   editor with variants (base + extra price shown per variant), archive and
   restore. Staff see it read-only, with cost. Catalogue writes check for admin

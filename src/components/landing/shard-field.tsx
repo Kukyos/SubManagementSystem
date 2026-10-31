@@ -7,9 +7,10 @@ import { useEffect, useRef } from "react";
   Sections on the page carry data-shards="loop-right | loop-left | loop | scatter";
   as the page scrolls the field eases between those states, so the loop breaks
   apart over the "how it runs today" section and pulls back together after.
-  Shards edge-on to the camera turn amber so the outline reads at any angle,
-  and shards under the pointer spin up and orbit their own spot, lit white,
-  calming down over about a second.
+  Shards edge-on to the camera turn amber so the outline reads at any angle.
+  The ring sways in 3D (spinning a torus on its own axis alone looks static),
+  shards drift slightly, and the pointer parts nearby shards in a swirling
+  ripple; a spring per shard lets them flow back with a little wobble.
 */
 
 type Pose = { scatter: number; x: number; scale: number };
@@ -32,9 +33,13 @@ const PALETTE: [string, number][] = [
 ];
 
 const HOVER_RADIUS = 2;
-const ORBIT = 0.09;
-const ORBIT_SPEED = 7;
-const HYPER_SPIN = 14;
+const HOVER_PUSH = 0.38;
+const HOVER_SWIRL = 0.14;
+const RIPPLE = 0.07;
+const HOVER_SPIN = 4;
+const STIFFNESS = 90;
+const DAMPING = 13;
+const DRIFT = 0.035;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
@@ -61,16 +66,18 @@ export function ShardField() {
       renderer.setSize(window.innerWidth, window.innerHeight, false);
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(0x000000, 7, 17);
+      scene.fog = new THREE.Fog(0x000000, 6.5, 15);
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 60);
       camera.position.set(0, 0, 9);
 
-      // outer group moves/scales with the page, tilt shows the ring in perspective, spin turns it
+      // rig moves/scales with the page, sway swings it in 3D, tilt shows the ring in perspective, spin turns it
       const rig = new THREE.Group();
+      const sway = new THREE.Group();
       const tilt = new THREE.Group();
       tilt.rotation.set(1.05, 0, 0.35);
       const spin = new THREE.Group();
-      rig.add(tilt);
+      rig.add(sway);
+      sway.add(tilt);
       tilt.add(spin);
       scene.add(rig);
 
@@ -95,10 +102,9 @@ export function ShardField() {
       const normal = new Float32Array(COUNT * 3);
       const base = new Float32Array(COUNT * 3);
       const heat = new Float32Array(COUNT);
-      const phase = new Float32Array(COUNT);
-      const orbitRate = new Float32Array(COUNT);
-      const orbitA = new Float32Array(COUNT * 3);
-      const orbitB = new Float32Array(COUNT * 3);
+      const phase = new Float32Array(COUNT * 3);
+      const off = new Float32Array(COUNT * 3);
+      const vel = new Float32Array(COUNT * 3);
 
       const R = 2.35;
       const color = new THREE.Color();
@@ -127,30 +133,8 @@ export function ShardField() {
         for (let k = 0; k < 3; k++) {
           rot[i * 3 + k] = Math.random() * Math.PI * 2;
           rotSpeed[i * 3 + k] = (Math.random() - 0.5) * (floater[i] ? 0.5 : 1.4);
+          phase[i * 3 + k] = Math.random() * Math.PI * 2;
         }
-
-        // Orbit plane: two perpendicular unit vectors around a random axis.
-        const az = Math.random() * Math.PI * 2;
-        const nz = Math.random() * 2 - 1;
-        const nr = Math.sqrt(1 - nz * nz);
-        const nx = nr * Math.cos(az);
-        const ny = nr * Math.sin(az);
-        const flip = Math.abs(nx) < 0.9;
-        let ax = flip ? 0 : -nz;
-        let ay = flip ? nz : 0;
-        let azv = flip ? -ny : nx;
-        const al = Math.hypot(ax, ay, azv);
-        ax /= al;
-        ay /= al;
-        azv /= al;
-        orbitA[i * 3] = ax;
-        orbitA[i * 3 + 1] = ay;
-        orbitA[i * 3 + 2] = azv;
-        orbitB[i * 3] = ny * azv - nz * ay;
-        orbitB[i * 3 + 1] = nz * ax - nx * azv;
-        orbitB[i * 3 + 2] = nx * ay - ny * ax;
-        phase[i] = Math.random() * Math.PI * 2;
-        orbitRate[i] = ORBIT_SPEED * (0.7 + Math.random() * 0.6) * (Math.random() < 0.5 ? -1 : 1);
 
         let pick = Math.random();
         let hex = PALETTE[0][0];
@@ -234,6 +218,7 @@ export function ShardField() {
         const now = performance.now();
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
+        const t = now / 1000;
         const goal = reduceMotion ? { ...target(), scatter: 0 } : target();
         const ease = reduceMotion ? 1 : 1 - Math.pow(0.002, dt);
         current.scatter += (goal.scatter - current.scatter) * ease;
@@ -243,7 +228,9 @@ export function ShardField() {
         rig.position.x = current.x;
         rig.scale.setScalar(current.scale);
         if (!reduceMotion) {
-          spin.rotation.y += dt * 0.07;
+          spin.rotation.y += dt * 0.1;
+          sway.rotation.y = Math.sin(t * 0.21) * 0.42;
+          sway.rotation.x = Math.sin(t * 0.15 + 1.3) * 0.12;
           camera.position.x += (mouse.x * 0.6 - camera.position.x) * 0.04;
           camera.position.y += (-mouse.y * 0.4 - camera.position.y) * 0.04;
           camera.lookAt(0, 0, 0);
@@ -262,7 +249,7 @@ export function ShardField() {
         }
         const { origin: ro, direction: rd } = raycaster.ray;
         const cool = Math.pow(0.18, dt);
-        const t = now / 1000;
+        const drift = reduceMotion ? 0 : DRIFT;
         const col = colors.array as Float32Array;
 
         for (let i = 0; i < COUNT; i++) {
@@ -275,6 +262,9 @@ export function ShardField() {
 
           // Heat jumps up under the pointer and cools over about a second, leaving a short trail.
           let h = heat[i] * cool;
+          let tx = 0;
+          let ty = 0;
+          let tz = 0;
           if (hovering && !floater[i]) {
             const ox = px - ro.x;
             const oy = py - ro.y;
@@ -284,20 +274,32 @@ export function ShardField() {
             const qy = oy - rd.y * along;
             const qz = oz - rd.z * along;
             const d = Math.sqrt(qx * qx + qy * qy + qz * qz);
-            if (d < HOVER_RADIUS) {
+            if (d < HOVER_RADIUS && d > 1e-4) {
               const k = 1 - d / HOVER_RADIUS;
-              if (k * k > h) h = k * k;
+              const f = k * k;
+              if (f > h) h = f;
+              // Outward from the pointer ray with a travelling ripple, plus a swirl around it.
+              const out = (f * (HOVER_PUSH + RIPPLE * Math.sin(d * 10 - t * 9))) / d;
+              const sw = (f * HOVER_SWIRL) / d;
+              tx = qx * out + (rd.y * qz - rd.z * qy) * sw;
+              ty = qy * out + (rd.z * qx - rd.x * qz) * sw;
+              tz = qz * out + (rd.x * qy - rd.y * qx) * sw;
             }
           }
           heat[i] = h;
-          // Hot shards circle their own spot instead of moving out of the way.
-          const angle = t * orbitRate[i] + phase[i];
-          const oc = Math.cos(angle) * ORBIT * h;
-          const os = Math.sin(angle) * ORBIT * h;
+
+          // Damped spring toward the hover offset; slightly underdamped so shards settle back with a wobble.
+          vel[j] += ((tx - off[j]) * STIFFNESS - vel[j] * DAMPING) * dt;
+          vel[j + 1] += ((ty - off[j + 1]) * STIFFNESS - vel[j + 1] * DAMPING) * dt;
+          vel[j + 2] += ((tz - off[j + 2]) * STIFFNESS - vel[j + 2] * DAMPING) * dt;
+          off[j] += vel[j] * dt;
+          off[j + 1] += vel[j + 1] * dt;
+          off[j + 2] += vel[j + 2] * dt;
+
           dummy.position.set(
-            px + orbitA[j] * oc + orbitB[j] * os,
-            py + orbitA[j + 1] * oc + orbitB[j + 1] * os,
-            pz + orbitA[j + 2] * oc + orbitB[j + 2] * os,
+            px + off[j] + Math.sin(t * 0.7 + phase[j]) * drift,
+            py + off[j + 1] + Math.sin(t * 0.83 + phase[j + 1]) * drift,
+            pz + off[j + 2] + Math.sin(t * 0.61 + phase[j + 2]) * drift,
           );
 
           // Edge-on shards go amber; the band fades as the loop breaks up.
@@ -314,7 +316,7 @@ export function ShardField() {
             col[j + c] = tinted + (1 - tinted) * h;
           }
           if (!reduceMotion) {
-            const spinUp = 1 + h * HYPER_SPIN;
+            const spinUp = 1 + h * HOVER_SPIN;
             rot[j] += rotSpeed[j] * dt * spinUp;
             rot[j + 1] += rotSpeed[j + 1] * dt * spinUp;
             rot[j + 2] += rotSpeed[j + 2] * dt * spinUp;
