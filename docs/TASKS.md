@@ -92,6 +92,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P15 | Hero headline and eyebrow wipe up from a mask with a slight tilt | Landing | P | ✅ |
 | P16 | Nav links: letters roll up on hover, grey to white | Landing | P | ✅ |
 | P17 | Stronger text shadow over the shard field | Landing, auth headings | B | ✅ |
+| P18 | Pay button on each unpaid row of the portal invoices list | Portal invoices | B | ✅ |
 
 ## Requests
 

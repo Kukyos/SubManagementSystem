@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InvoiceBadge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { Pager } from "@/components/ui/pager";
@@ -34,6 +35,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                 <th className="px-5 py-3 font-medium">Status</th>
                 <th className="px-5 py-3 text-right font-medium">Total</th>
                 <th className="px-5 py-3 text-right font-medium">To pay</th>
+                <th className="px-5 py-3"><span className="sr-only">Pay</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -54,6 +56,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                     </td>
                     <td className="tabular px-5 py-3 text-right">{money(i.total)}</td>
                     <td className={`tabular px-5 py-3 text-right ${owed > 0 ? "" : "text-faint"}`}>{owed > 0 ? money(owed) : "—"}</td>
+                    <td className="px-5 py-3 text-right">
+                      {owed > 0 && (
+                        <ButtonLink href={`/portal/invoices/${i.id}`} size="sm">
+                          Pay
+                        </ButtonLink>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
