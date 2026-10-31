@@ -4,6 +4,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Deleted the scaffold's `src/app/favicon.ico`. The tab icon is now
+  `src/app/icon.svg` (the tetrahedron on a dark tile), with `apple-icon.png`
+  for home screens and a generated `opengraph-image.tsx` for link previews.
+  `/opengraph-image` is public in `proxy.ts` so crawlers aren't sent to
+  sign in. `metadataBase` comes from `NEXT_PUBLIC_SITE_URL`.
 - Every email now matches the site: black page, dark card, the tetrahedron
   logo, amber eyebrow, violet pill button, and the raw link under the button
   for clients that block it. Mail clients drop SVG, so the logo is a PNG at

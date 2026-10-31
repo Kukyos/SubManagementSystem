@@ -85,7 +85,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P8 | Hover states: CTA arrow nudge, nav link underline that grows from the left | Landing | P | ⬜ |
 | P9 | Lifecycle chips light up one after another when they scroll into view | Landing | P | ⬜ |
 | P10 | "Who it's for" cards: hover lift and a small coloured shard per role | Landing | P | ⬜ |
-| P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | B | 🔨 |
+| P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | B | ✅ plus `apple-icon.png` |
 | P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | P | ⬜ |
 | P13 | Shard loop: shards under the pointer orbit their spot and swell, flicks swing them wider; parallax background shards; amber edges, denser field | Landing | P | ✅ |
 | P14 | Intro loader: turning mark, two-line statement, LOADING and percentage, once per session | Landing | P | ✅ |

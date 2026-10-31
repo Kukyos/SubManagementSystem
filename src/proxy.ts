@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // Refreshes the Supabase session cookie on every request and sends signed-out
 // visitors away from the app. Role checks happen in the pages and in RLS;
 // this is only the optimistic first gate.
-const PUBLIC_PATHS = ["/", "/login", "/signup", "/forgot-password", "/auth"];
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/forgot-password", "/auth", "/opengraph-image"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || (p !== "/" && pathname.startsWith(p + "/")));
