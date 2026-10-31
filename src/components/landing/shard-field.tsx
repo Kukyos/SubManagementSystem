@@ -43,6 +43,9 @@ const ORBIT = 0.22;
 const DRAG = 0.35;
 const PARALLAX = 0.25;
 const FOG: [number, number] = [7, 17];
+// resolution steps the canvas drops through when frames run long
+const PIXEL_STEPS = [1.5, 1.25, 1, 0.85, 0.7];
+const SLOW_FRAME_MS = 24;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
@@ -184,7 +187,9 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
       const BG_COUNT = small ? 110 : 250;
 
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      let pixelStep = PIXEL_STEPS.findIndex((r) => r <= window.devicePixelRatio);
+      if (pixelStep < 0) pixelStep = PIXEL_STEPS.length - 1;
+      renderer.setPixelRatio(PIXEL_STEPS[pixelStep]);
       renderer.setSize(window.innerWidth, window.innerHeight, false);
 
       const scene = new THREE.Scene();
@@ -423,11 +428,24 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
       const toLocal = new THREE.Matrix4();
       let last = performance.now();
       let clock = 0;
+      // skip the first frames after start or a tab return, they're always slow
+      let sampled = -30;
+      let sampleMs = 0;
 
       const frame = () => {
         const now = performance.now();
-        const dt = Math.min((now - last) / 1000, 0.05);
+        const raw = now - last;
+        const dt = Math.min(raw / 1000, 0.05);
         last = now;
+
+        if (pixelStep < PIXEL_STEPS.length - 1 && ++sampled > 0) {
+          sampleMs += raw;
+          if (sampled === 60) {
+            if (sampleMs / 60 > SLOW_FRAME_MS) renderer.setPixelRatio(PIXEL_STEPS[++pixelStep]);
+            sampled = -10;
+            sampleMs = 0;
+          }
+        }
         if (!reduceMotion) clock += dt;
         // per-frame easing factors from the reference, made frame-rate independent
         const f60 = dt * 60;
@@ -483,6 +501,8 @@ export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
       // Background tabs get no frames anyway; stop the loop so we don't burn the battery on return.
       const onVisibility = () => {
         last = performance.now();
+        sampled = -30;
+        sampleMs = 0;
         renderer.setAnimationLoop(document.hidden ? null : frame);
       };
 

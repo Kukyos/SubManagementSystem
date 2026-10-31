@@ -96,6 +96,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P19 | Landing's floating shards (no loop) behind the signed-in console and portal, both themes | Console, portal | P | ✅ |
 | P21 | Form validation popup restyled: red shard instead of the browser's "!", site-wide | All forms | P | ✅ |
 | P20 | Top navigation progress bar with a turning shard at its head | All pages | B | ✅ |
+| P22 | Shard field drops its resolution step by step when frames run slow; grain on its own layer | Landing, console, portal | P | ✅ |
 
 ## Requests
 
