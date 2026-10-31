@@ -1,10 +1,10 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { money } from "@/lib/format";
-import { isDate, orSafe } from "@/lib/forms";
+import { isDate, orSafe, today } from "@/lib/forms";
 import { invoiceDisplayStatus, invoiceStatus, subscriptionStatus } from "@/lib/status";
 import { likeTerm } from "@/services/catalogue";
-import type { InvoiceStatus, SubscriptionStatus } from "@/types/models";
+import type { BillingPeriod, InvoiceStatus, SubscriptionStatus } from "@/types/models";
 
 export type MonthPoint = { month: string; invoiced: number; collected: number; new_subscriptions: number; closed_subscriptions: number };
 
@@ -125,4 +125,80 @@ export async function search(raw: string): Promise<SearchHit[]> {
       href: `/invoices/${i.id}`,
     })),
   ];
+}
+
+export type ForecastMonth = { month: string; active: number; confirmed: number; invoices: number };
+
+const addPeriod = (d: Date, period: BillingPeriod, n: number) => {
+  const x = new Date(d);
+  if (period === "daily") x.setUTCDate(x.getUTCDate() + n);
+  else if (period === "weekly") x.setUTCDate(x.getUTCDate() + 7 * n);
+  else {
+    // Same as Postgres date + interval: the day clamps to the end of a shorter month.
+    const months = period === "monthly" ? n : 12 * n;
+    const day = x.getUTCDate();
+    x.setUTCDate(1);
+    x.setUTCMonth(x.getUTCMonth() + months);
+    const last = new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + 1, 0)).getUTCDate();
+    x.setUTCDate(Math.min(day, last));
+  }
+  return x;
+};
+
+// Expected billing for this month and the next ones, walking each subscription's
+// periods the way bill_subscription does (start at next_invoice_date, step one
+// cycle, stop at expiry). Lines with tax, before discounts. Paused subscriptions
+// bill nothing; confirmed ones are counted from their start date, shown apart
+// because someone still has to activate them.
+export async function revenueForecast(months = 6): Promise<ForecastMonth[]> {
+  const supabase = await createClient();
+  const taxes = await supabase.from("taxes").select("id, rate");
+  if (taxes.error) throw new Error(taxes.error.message);
+  const rate = new Map(taxes.data.map((t) => [t.id, Number(t.rate)]));
+
+  const subs = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("status, start_date, expiry_date, next_invoice_date, plans(billing_period, billing_interval), subscription_lines(amount, tax_id, products(tax_id))")
+      .in("status", ["active", "confirmed"])
+      .order("id")
+      .range(from, from + 999);
+    if (error) throw new Error(error.message);
+    subs.push(...data);
+    if (data.length < 1000) break;
+  }
+
+  const now = new Date(today() + "T00:00:00Z");
+  const first = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, 1));
+  const out: ForecastMonth[] = Array.from({ length: months }, (_, i) => ({
+    month: new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + i, 1)).toISOString().slice(0, 7),
+    active: 0,
+    confirmed: 0,
+    invoices: 0,
+  }));
+
+  for (const s of subs) {
+    if (!s.plans) continue;
+    const perCycle = s.subscription_lines.reduce((sum, l) => {
+      const taxId = l.tax_id ?? l.products?.tax_id;
+      return sum + Number(l.amount) * (1 + (taxId ? (rate.get(taxId) ?? 0) : 0) / 100);
+    }, 0);
+    if (perCycle <= 0) continue;
+    const expiry = s.expiry_date ? new Date(s.expiry_date + "T00:00:00Z") : null;
+    let at = new Date((s.next_invoice_date ?? s.start_date) + "T00:00:00Z");
+    for (let guard = 0; at < end && (!expiry || at <= expiry) && guard < 1000; guard++) {
+      // Periods already due are billed by tonight's run, so they land in this month.
+      const when = at < first ? first : at;
+      const i = (when.getUTCFullYear() - first.getUTCFullYear()) * 12 + when.getUTCMonth() - first.getUTCMonth();
+      const m = out[i];
+      if (m) {
+        m[s.status === "active" ? "active" : "confirmed"] += perCycle;
+        m.invoices += 1;
+      }
+      at = addPeriod(at, s.plans.billing_period, s.plans.billing_interval);
+    }
+  }
+  return out.map((m) => ({ ...m, active: Math.round(m.active), confirmed: Math.round(m.confirmed) }));
 }

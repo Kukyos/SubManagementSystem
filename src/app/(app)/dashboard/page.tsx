@@ -8,7 +8,7 @@ import { cn, date, money, moneyCompact } from "@/lib/format";
 import { isDate, today } from "@/lib/forms";
 import { subscriptionStatus } from "@/lib/status";
 import { requireRole } from "@/services/auth";
-import { getFinanceSummary } from "@/services/reports";
+import { getFinanceSummary, revenueForecast } from "@/services/reports";
 import { subscriptionStatuses } from "@/services/subscriptions";
 
 export const metadata = { title: "Dashboard" };
@@ -38,7 +38,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
   const now = today();
   const from = params.from && isDate(params.from) ? params.from : undefined;
   const to = params.to && isDate(params.to) ? params.to : undefined;
-  const s = await getFinanceSummary(from, to);
+  const [s, forecast] = await Promise.all([getFinanceSummary(from, to), revenueForecast(6)]);
+  const forecastTotal = forecast.reduce((n, m) => n + m.active + m.confirmed, 0);
+  const forecastConfirmed = forecast.reduce((n, m) => n + m.confirmed, 0);
   const ranges = presets(now);
   const activeRange = ranges.find((r) => r.from === s.from && r.to === s.to);
   const statusTotal = Object.values(s.subscriptions_by_status).reduce((a, b) => a + (b ?? 0), 0) || 1;
@@ -135,6 +137,50 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
           )}
         </Card>
       </div>
+
+      <Card className="mt-6">
+        <CardHeader
+          title={
+            <>
+              Forecast <span className="ml-2 text-xs font-normal text-faint">next 6 months, with tax, before discounts</span>
+            </>
+          }
+          action={<span className="tabular text-sm">{moneyCompact(forecastTotal)}</span>}
+        />
+        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+          <MonthlyBars
+            title="Expected billing per month, next 6 months"
+            months={forecast.map((m) => m.month)}
+            series={[
+              { key: "active", label: "Active subscriptions", color: invoicedColor, values: forecast.map((m) => m.active) },
+              { key: "confirmed", label: "Confirmed, once activated", color: "#ffb829", values: forecast.map((m) => m.confirmed) },
+            ]}
+          />
+          <dl className="space-y-4 text-sm">
+            <div>
+              <dt className="text-xs text-muted">This month</dt>
+              <dd className="tabular mt-1 text-2xl font-light">{moneyCompact(forecast[0].active + forecast[0].confirmed)}</dd>
+              <dd className="text-xs text-faint">{forecast[0].invoices.toLocaleString("en-IN")} invoices, including anything due tonight</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted">Monthly average</dt>
+              <dd className="tabular mt-1 text-2xl font-light">{moneyCompact(forecastTotal / forecast.length)}</dd>
+              <dd className="text-xs text-faint">MRR today is {moneyCompact(s.mrr)} before tax</dd>
+            </div>
+            {forecastConfirmed > 0 && (
+              <div>
+                <dt className="text-xs text-muted">Waiting on activation</dt>
+                <dd className="tabular mt-1 text-2xl font-light text-amber">{moneyCompact(forecastConfirmed)}</dd>
+                <dd>
+                  <Link href="/subscriptions?status=confirmed" className="text-xs text-faint hover:text-muted">
+                    Confirmed subscriptions →
+                  </Link>
+                </dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      </Card>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card>

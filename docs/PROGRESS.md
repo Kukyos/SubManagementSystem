@@ -4,6 +4,14 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Revenue forecast on the dashboard: expected billing for this month and the
+  next five. It walks each active subscription's periods the way
+  `bill_subscription` does (from `next_invoice_date`, one cycle at a time,
+  month ends clamped like Postgres, stopping at expiry); periods already due
+  count in this month. Confirmed subscriptions show apart (amber) from their
+  start date. With tax, before discounts, so it reads against Invoiced.
+  **Decision: computed in the service, not SQL.** It is a projection, not a
+  billing rule, and ~2,000 subscriptions is one query.
 - Global search: ⌘K / Ctrl+K, or the search box in the console header, opens
   a palette that jumps to any console page and finds customers (name, email,
   company), subscriptions and invoices (number, or customer name). Arrow keys

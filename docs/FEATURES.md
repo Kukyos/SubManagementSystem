@@ -72,7 +72,7 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 | Status timeline on every subscription and invoice | "anyone on the team can see where it stands" | 🟡 |
 | Invoice PDF / print view and email delivery | send and print, done properly | ⬜ |
 | Overdue reminders (dunning) | chase before it becomes lost revenue | ⬜ |
-| Revenue forecast from active subscriptions | next months' expected billing | ⬜ |
+| Revenue forecast from active subscriptions | next months' expected billing | ✅ |
 | Global search (customers, subscriptions, invoices) | thousands of rows need a way in | ✅ |
 | CSV export of any list | finance always wants a spreadsheet | ✅ |
 | Dark mode | | ⬜ |

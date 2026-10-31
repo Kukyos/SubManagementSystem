@@ -89,6 +89,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | function | state |
 |---|---|
 | `getFinanceSummary(from?, to?)` (numbers normalised from jsonb) | ✅ |
+| `revenueForecast(months?)`: expected billing per month from active and confirmed subscriptions (with tax, before discounts) | ✅ |
 | `search(term)` (customers, subscriptions, invoices; five each, numbers by prefix) | ✅ |
 | `quickSearch(term)` (`services/search-actions.ts`; staff only, for the ⌘K palette) | ✅ |
 
