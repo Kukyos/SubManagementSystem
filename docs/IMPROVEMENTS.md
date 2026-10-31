@@ -14,8 +14,9 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
   no "preview next month's invoices" yet.
 
 - **Landing on mobile** hasn't been checked on a real phone yet (P7).
-- **Shard field cost.** ~2,600 instances updated on the CPU each frame. Fine on
-  a laptop; if a low-end phone stutters, move the morph into a vertex shader
+- **Shard field cost.** ~5,200 instances (1,600 on small screens), with
+  position, hover and edge colour all updated on the CPU each frame. Fine on a
+  laptop; if a low-end phone stutters, move the morph into a vertex shader
   or drop the count further.
 
 ## Ideas
