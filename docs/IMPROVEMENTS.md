@@ -13,7 +13,15 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
 - **Billing ahead of today.** `run_billing` refuses future dates, so there is
   no "preview next month's invoices" yet.
 
+- **Landing on mobile** hasn't been checked on a real phone yet (P7).
+- **Shard field cost.** ~2,600 instances updated on the CPU each frame. Fine on
+  a laptop; if a low-end phone stutters, move the morph into a vertex shader
+  or drop the count further.
+
 ## Ideas
+
+- Feed the dashboard's shard field from real subscriptions: colour by plan,
+  dim when paused, pulse amber when an invoice is overdue.
 
 - Upcoming-invoice preview on each subscription (what the next invoice will
   contain, with discounts applied).

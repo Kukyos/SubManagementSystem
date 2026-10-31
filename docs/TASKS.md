@@ -24,15 +24,15 @@ add a row to Requests instead of editing it.
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ⬜ |
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ⬜ |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
-| S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | 🔨 doc done, tokens next |
+| S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
 
 ## Tier 1: the demo dies without these
 
 | # | Task | Owner | Status |
 |---|---|---|---|
-| T1.1 | Landing page | B | ⬜ |
+| T1.1 | Landing page (shard loop scene) | B | ✅ |
 | T1.2 | Sign up, sign in, forgot / reset password | B | ⬜ |
-| T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ⬜ |
+| T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ✅ (every route stubbed) |
 | T1.4 | Products list + editor with variants | B | ⬜ |
 | T1.5 | Plans list + editor | B | ⬜ |
 | T1.6 | Customers list + detail | B | ⬜ |
@@ -65,7 +65,7 @@ add a row to Requests instead of editing it.
 | T3.3 | Revenue forecast | B | ⬜ |
 | T3.4 | Global search (⌘K) | B | ⬜ |
 | T3.5 | CSV export on lists | B | ⬜ |
-| T3.6 | Dark mode | B | ⬜ |
+| T3.6 | Light theme (the app is dark-first) | B | ⬜ |
 | T3.7 | Showcase README with screenshots | B | ⬜ |
 
 ## Polish
@@ -80,6 +80,12 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P4 | Skeleton loaders matching each list's layout | All lists | P | ⬜ |
 | P5 | Inline field errors with focus on first invalid field | All forms | P | ⬜ |
 | P6 | Mobile pass: tables become cards under 640px | All lists | P | ⬜ |
+| P7 | Mobile pass: hero type size, nav collapses to a menu button under 1024px, check the loop sits well behind text | Landing | P | ⬜ |
+| P8 | Hover states: CTA arrow nudge, nav link underline that grows from the left | Landing | P | ⬜ |
+| P9 | Lifecycle chips light up one after another when they scroll into view | Landing | P | ⬜ |
+| P10 | "Who it's for" cards: hover lift and a small coloured shard per role | Landing | P | ⬜ |
+| P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | P | ⬜ |
+| P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | P | ⬜ |
 
 ## Requests
 

@@ -23,9 +23,10 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 ## auth (`services/auth.ts`)
 | function | state |
 |---|---|
-| `getCurrentUser(): { id, email, role, fullName, customerId } \| null` | ⬜ |
-| `requireRole(...roles)`: redirects if the user lacks the role | ⬜ |
-| `signUp(formData)`, `signIn(formData)`, `signOut()` | ⬜ |
+| `getCurrentUser(): { id, email, role, fullName, customerId } \| null` | ✅ |
+| `requireRole(...roles)`: redirects if the user lacks the role | ✅ |
+| `signOut()` (`services/auth-actions.ts`) | ✅ |
+| `signUp(formData)`, `signIn(formData)` | ⬜ |
 | `requestPasswordReset(formData)`, `updatePassword(formData)` | ⬜ |
 | `inviteStaff(formData)` (admin) | ⬜ |
 
