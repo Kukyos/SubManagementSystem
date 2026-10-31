@@ -7,11 +7,15 @@ import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { Pager } from "@/components/ui/pager";
 import { date, money, moneyCompact } from "@/lib/format";
 import { methodLabel } from "@/lib/status";
+import { ActionButton } from "@/components/sales/action-button";
 import { requireRole } from "@/services/auth";
+import { sendOverdueReminders } from "@/services/invoice-actions";
 import { listPayments, overdueAging, paymentMethods } from "@/services/payments";
 import type { PaymentMethod } from "@/types/models";
 
 export const metadata = { title: "Payments" };
+// Sending reminders to every overdue customer can take a while.
+export const maxDuration = 120;
 
 const pageSize = 25;
 
@@ -54,6 +58,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             )
           }
         />
+        {aging.count > 0 && (
+          // A second click to confirm: this emails real customers.
+          <details className="group border-b border-line px-5 py-3">
+            <summary className="cursor-pointer list-none text-sm text-muted hover:text-fg group-open:text-fg">
+              Email reminders to {aging.customers} customer{aging.customers === 1 ? "" : "s"}…
+            </summary>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <p className="text-xs text-muted">
+                One email each, listing what they owe past due with a link to pay.
+              </p>
+              <ActionButton action={sendOverdueReminders} fields={{}} label="Send reminders" busy="Sending…" variant="primary" />
+            </div>
+          </details>
+        )}
         {aging.count === 0 ? (
           <p className="px-5 py-6 text-sm text-muted">Nothing overdue. Every confirmed invoice is inside its payment terms.</p>
         ) : (

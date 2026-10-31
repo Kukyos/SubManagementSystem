@@ -82,8 +82,10 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | function | state |
 |---|---|
 | `listPayments(query)` (method, date range, customer or invoice search) | ✅ |
-| `overdueAging()`: overdue balance in 30-day buckets, oldest invoices | ✅ |
+| `overdueAging()`: overdue balance in 30-day buckets, oldest invoices, customer count | ✅ |
 | `recordPayment(state, formData)` (`services/invoice-actions.ts`) | ✅ |
+| `overdueByCustomer()`: overdue invoices grouped per customer, longest owing first | ✅ |
+| `sendOverdueReminders(state, formData)` (`services/invoice-actions.ts`): one email per overdue customer | ✅ |
 | `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` | ⬜ |
 
 ## reports (`services/reports.ts`)

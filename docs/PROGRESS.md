@@ -4,6 +4,10 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Overdue reminders: "Email reminders to N customers…" on the Payments
+  overdue card (asks twice) sends each customer one email listing what's past
+  due, oldest first, with a link to their invoices. Five at a time over a
+  pooled connection; the page allows 120 seconds for the run.
 - Invoice PDF and email. Console invoices have "Email to customer" (confirmed
   or paid; "Send again" once `sent_at` is set) and a PDF link; the portal has
   "Download PDF". The email is one short message with a "View and pay" button

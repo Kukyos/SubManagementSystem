@@ -21,6 +21,8 @@ export async function sendMail(message: {
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port,
     secure: port === 465,
+    pool: true,
+    maxConnections: 3,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
   const from = process.env.EMAIL_FROM || `Brightloop <${process.env.SMTP_USER}>`;
