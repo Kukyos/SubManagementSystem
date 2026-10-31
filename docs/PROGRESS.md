@@ -4,6 +4,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- CSV export on customers, subscriptions, invoices and payments. The button
+  passes the list's filters to `/export/[list]`, which walks every page
+  (1,000 rows a request) through the same list services, so the file is
+  exactly what the screen shows. UTF-8 with a BOM for Excel; cells that look
+  like formulas are prefixed with `'`.
 - Signed-in shells line up: the portal header and page share one 1440px
   container (the landing's width) instead of a narrower 1152px one that left
   wide black margins, with the nav beside the logo. Console header and page

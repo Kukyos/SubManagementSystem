@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
@@ -25,7 +26,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         eyebrow="Sales"
         title="Customers"
         description="Billing contacts, their subscriptions and what they owe."
-        actions={<ButtonLink href="/customers/new">New customer</ButtonLink>}
+        actions={
+          <>
+            <ExportLink list="customers" params={{ q: search }} />
+            <ButtonLink href="/customers/new">New customer</ButtonLink>
+          </>
+        }
       />
 
       <form className="mb-4 flex flex-wrap gap-2" role="search">

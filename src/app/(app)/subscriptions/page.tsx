@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StatusTabs } from "@/components/sales/status-tabs";
 import { SubscriptionBadge } from "@/components/ui/badge";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
@@ -37,7 +38,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         eyebrow="Sales"
         title="Subscriptions"
         description="Every deal from first draft to closed. Click a status to see just those."
-        actions={<ButtonLink href="/subscriptions/new">New subscription</ButtonLink>}
+        actions={
+          <>
+            <ExportLink list="subscriptions" params={{ q: search, status, plan: planId }} />
+            <ButtonLink href="/subscriptions/new">New subscription</ButtonLink>
+          </>
+        }
       />
 
       <StatusTabs

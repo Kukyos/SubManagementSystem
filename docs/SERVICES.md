@@ -91,6 +91,11 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `getFinanceSummary(from?, to?)` (numbers normalised from jsonb) | ✅ |
 | `search(term)` (customers, subscriptions, invoices) | ⬜ |
 
+## exports (`services/exports.ts`)
+| function | state |
+|---|---|
+| `exportCsv(list, params)`: customers, subscriptions, invoices or payments as CSV, taking the list page's query string; served by `GET /export/[list]` (staff only) | ✅ |
+
 ## portal (`services/portal.ts`)
 | function | state |
 |---|---|

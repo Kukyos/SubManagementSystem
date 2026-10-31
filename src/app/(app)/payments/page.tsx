@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
@@ -28,7 +29,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
 
   return (
     <>
-      <PageHeader eyebrow="Billing" title="Payments" description="Every payment recorded against an invoice, and what is still overdue." />
+      <PageHeader
+        eyebrow="Billing"
+        title="Payments"
+        description="Every payment recorded against an invoice, and what is still overdue."
+        actions={<ExportLink list="payments" params={{ q: search, method, from, to }} />}
+      />
 
       <Card className="mb-8">
         <CardHeader

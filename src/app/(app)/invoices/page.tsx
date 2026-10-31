@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StatusTabs } from "@/components/sales/status-tabs";
 import { InvoiceBadge } from "@/components/ui/badge";
 import { Button, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
@@ -38,11 +39,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         title="Invoices"
         description="Created by the billing run as drafts. Confirm them to send, then record what comes in."
         actions={
-          drafts.length > 0 && (
-            <form action={confirmDrafts.bind(null, drafts)}>
-              <Button>Confirm {drafts.length} draft{drafts.length === 1 ? "" : "s"} below</Button>
-            </form>
-          )
+          <>
+            <ExportLink list="invoices" params={{ q: search, status, customer: customerId }} />
+            {drafts.length > 0 && (
+              <form action={confirmDrafts.bind(null, drafts)}>
+                <Button>Confirm {drafts.length} draft{drafts.length === 1 ? "" : "s"} below</Button>
+              </form>
+            )}
+          </>
         }
       />
 
