@@ -35,6 +35,10 @@ const HOVER_RADIUS = 2;
 const ORBIT = 0.09;
 const ORBIT_SPEED = 7;
 const HYPER_SPIN = 14;
+// How far the camera swings around the scene with the pointer, in radians at the screen edge.
+const LOOK_YAW = 0.18;
+const LOOK_PITCH = 0.05;
+const CAMERA_DISTANCE = 9;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
@@ -63,7 +67,8 @@ export function ShardField() {
       const scene = new THREE.Scene();
       scene.fog = new THREE.Fog(0x000000, 7, 17);
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 60);
-      camera.position.set(0, 0, 9);
+      camera.position.set(0, 0, CAMERA_DISTANCE);
+      const look = { yaw: 0, pitch: 0 };
 
       // outer group moves/scales with the page, tilt shows the ring in perspective, spin turns it
       const rig = new THREE.Group();
@@ -244,8 +249,19 @@ export function ShardField() {
         rig.scale.setScalar(current.scale);
         if (!reduceMotion) {
           spin.rotation.y += dt * 0.07;
-          camera.position.x += (mouse.x * 0.6 - camera.position.x) * 0.04;
-          camera.position.y += (-mouse.y * 0.4 - camera.position.y) * 0.04;
+          // Orbit the camera a little with the pointer; the squared term keeps the centre calm and gives the edges most of the turn.
+          const mx = mouse.inside ? mouse.x * 2 : 0;
+          const my = mouse.inside ? mouse.y * 2 : 0;
+          const yawGoal = (mx * 0.35 + Math.sign(mx) * mx * mx * 0.65) * LOOK_YAW;
+          const pitchGoal = -my * LOOK_PITCH;
+          const follow = 1 - Math.pow(0.08, dt);
+          look.yaw += (yawGoal - look.yaw) * follow;
+          look.pitch += (pitchGoal - look.pitch) * follow;
+          camera.position.set(
+            Math.sin(look.yaw) * Math.cos(look.pitch) * CAMERA_DISTANCE,
+            Math.sin(look.pitch) * CAMERA_DISTANCE,
+            Math.cos(look.yaw) * Math.cos(look.pitch) * CAMERA_DISTANCE,
+          );
           camera.lookAt(0, 0, 0);
         }
 
