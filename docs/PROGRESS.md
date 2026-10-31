@@ -34,9 +34,13 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
-- Shard background turns slightly with the pointer: the camera orbits the
-  scene up to ~10° at the left and right edges (barely at all near the
-  centre) and eases back when the pointer leaves the window.
+- Shard field follows the reference's own mechanics (read from its shipped
+  shader): shards near the pointer orbit their spot and swell up to 1.75×,
+  mouse speed swings the orbit wider along the flick and widens the reach,
+  and the pointer follows with easing. The ambient floaters are now their own
+  layer of ~250 larger, dimmer shards that slide against the pointer with
+  depth parallax. This replaces the camera turn and the white hover glow; the
+  reference has neither.
 - Plans page: list (product, billing cycle, availability window, active
   subscriptions, price) and one-form editor with the plan rules as
   checkboxes. Unticking "available" archives a plan. Paging is a shared

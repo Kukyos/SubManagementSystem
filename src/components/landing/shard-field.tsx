@@ -7,9 +7,11 @@ import { useEffect, useRef } from "react";
   Sections on the page carry data-shards="loop-right | loop-left | loop | scatter";
   as the page scrolls the field eases between those states, so the loop breaks
   apart over the "how it runs today" section and pulls back together after.
-  Shards edge-on to the camera turn amber so the outline reads at any angle,
-  and shards under the pointer spin up and orbit their own spot, lit white,
-  calming down over about a second.
+  Shards edge-on to the camera turn amber so the outline reads at any angle.
+  Shards near the pointer circle their own spot and swell; a fast flick of the
+  mouse swings them wider in that direction and widens the area it reaches.
+  A separate layer of larger, dimmer shards floats behind and slides against
+  the pointer with depth parallax.
 */
 
 type Pose = { scatter: number; x: number; scale: number };
@@ -32,16 +34,23 @@ const PALETTE: [string, number][] = [
 ];
 
 const HOVER_RADIUS = 2;
-const ORBIT = 0.09;
-const ORBIT_SPEED = 7;
-const HYPER_SPIN = 14;
-// How far the camera swings around the scene with the pointer, in radians at the screen edge.
-const LOOK_YAW = 0.18;
-const LOOK_PITCH = 0.05;
-const CAMERA_DISTANCE = 9;
+const HOVER_WIDEN = 0.6;
+const HOVER_GROW = 0.75;
+const ORBIT = 0.22;
+const DRAG = 0.35;
+const PARALLAX = 0.25;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+function pickColor(): string {
+  let pick = Math.random();
+  for (const [c, w] of PALETTE) {
+    if ((pick -= w) <= 0) return c;
+  }
+  return PALETTE[0][0];
+}
 
 export function ShardField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,6 +68,7 @@ export function ShardField() {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const small = window.innerWidth < 768;
       const COUNT = small ? 1600 : 5200;
+      const BG_COUNT = small ? 110 : 250;
 
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -67,8 +77,7 @@ export function ShardField() {
       const scene = new THREE.Scene();
       scene.fog = new THREE.Fog(0x000000, 7, 17);
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 60);
-      camera.position.set(0, 0, CAMERA_DISTANCE);
-      const look = { yaw: 0, pitch: 0 };
+      camera.position.set(0, 0, 9);
 
       // outer group moves/scales with the page, tilt shows the ring in perspective, spin turns it
       const rig = new THREE.Group();
@@ -94,16 +103,13 @@ export function ShardField() {
       const scatter = new Float32Array(COUNT * 3);
       const size = new Float32Array(COUNT);
       const delay = new Float32Array(COUNT);
-      const floater = new Uint8Array(COUNT);
       const rot = new Float32Array(COUNT * 3);
       const rotSpeed = new Float32Array(COUNT * 3);
       const normal = new Float32Array(COUNT * 3);
       const base = new Float32Array(COUNT * 3);
-      const heat = new Float32Array(COUNT);
-      const phase = new Float32Array(COUNT);
+      const orbitAmp = new Float32Array(COUNT);
       const orbitRate = new Float32Array(COUNT);
-      const orbitA = new Float32Array(COUNT * 3);
-      const orbitB = new Float32Array(COUNT * 3);
+      const phase = new Float32Array(COUNT);
 
       const R = 2.35;
       const color = new THREE.Color();
@@ -125,48 +131,18 @@ export function ShardField() {
         scatter[i * 3 + 1] = (Math.random() - 0.5) * 12;
         scatter[i * 3 + 2] = (Math.random() - 0.5) * 12 - 1;
 
-        floater[i] = Math.random() < 0.012 ? 1 : 0;
-        size[i] = floater[i] ? 0.1 + Math.random() * 0.16 : 0.022 + Math.random() * 0.036;
+        size[i] = 0.022 + Math.random() * 0.036;
         delay[i] = Math.random();
+        orbitAmp[i] = Math.random() * ORBIT;
+        orbitRate[i] = 1.5 + Math.random() * 3;
+        phase[i] = Math.random() * Math.PI * 2;
 
         for (let k = 0; k < 3; k++) {
           rot[i * 3 + k] = Math.random() * Math.PI * 2;
-          rotSpeed[i * 3 + k] = (Math.random() - 0.5) * (floater[i] ? 0.5 : 1.4);
+          rotSpeed[i * 3 + k] = (Math.random() - 0.5) * 1.4;
         }
 
-        // Orbit plane: two perpendicular unit vectors around a random axis.
-        const az = Math.random() * Math.PI * 2;
-        const nz = Math.random() * 2 - 1;
-        const nr = Math.sqrt(1 - nz * nz);
-        const nx = nr * Math.cos(az);
-        const ny = nr * Math.sin(az);
-        const flip = Math.abs(nx) < 0.9;
-        let ax = flip ? 0 : -nz;
-        let ay = flip ? nz : 0;
-        let azv = flip ? -ny : nx;
-        const al = Math.hypot(ax, ay, azv);
-        ax /= al;
-        ay /= al;
-        azv /= al;
-        orbitA[i * 3] = ax;
-        orbitA[i * 3 + 1] = ay;
-        orbitA[i * 3 + 2] = azv;
-        orbitB[i * 3] = ny * azv - nz * ay;
-        orbitB[i * 3 + 1] = nz * ax - nx * azv;
-        orbitB[i * 3 + 2] = nx * ay - ny * ax;
-        phase[i] = Math.random() * Math.PI * 2;
-        orbitRate[i] = ORBIT_SPEED * (0.7 + Math.random() * 0.6) * (Math.random() < 0.5 ? -1 : 1);
-
-        let pick = Math.random();
-        let hex = PALETTE[0][0];
-        for (const [c, w] of PALETTE) {
-          if ((pick -= w) <= 0) {
-            hex = c;
-            break;
-          }
-        }
-        color.set(hex);
-        if (floater[i]) color.multiplyScalar(0.4);
+        color.set(pickColor());
         mesh.setColorAt(i, color);
         base[i * 3] = color.r;
         base[i * 3 + 1] = color.g;
@@ -175,6 +151,33 @@ export function ShardField() {
       const colors = mesh.instanceColor!;
       colors.setUsage(THREE.DynamicDrawUsage);
       colors.needsUpdate = true;
+
+      // Background layer: larger, dimmer shards spread through the whole view, each with its own depth.
+      const bgMaterial = new THREE.MeshBasicMaterial({ wireframe: true, transparent: true, opacity: 0.7, depthWrite: false });
+      const bgMesh = new THREE.InstancedMesh(geometry, bgMaterial, BG_COUNT);
+      bgMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      scene.add(bgMesh);
+      const bgPos = new Float32Array(BG_COUNT * 3);
+      const bgDepth = new Float32Array(BG_COUNT);
+      const bgDrift = new Float32Array(BG_COUNT);
+      const bgRate = new Float32Array(BG_COUNT);
+      const bgAxis: InstanceType<typeof THREE.Vector3>[] = [];
+      const bgSize = new Float32Array(BG_COUNT);
+      for (let i = 0; i < BG_COUNT; i++) {
+        const z = -7 + Math.random() * 10;
+        bgPos[i * 3] = (Math.random() - 0.5) * 24;
+        bgPos[i * 3 + 1] = (Math.random() - 0.5) * 14;
+        bgPos[i * 3 + 2] = z;
+        // nearer shards slide further with the pointer
+        bgDepth[i] = 0.2 + ((z + 7) / 10) * 0.8;
+        bgDrift[i] = 0.05 + Math.random() * 0.25;
+        bgRate[i] = 1 + Math.random() * 3;
+        bgAxis.push(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize());
+        bgSize[i] = 0.06 + Math.random() * 0.16;
+        color.set(pickColor()).multiplyScalar(0.45);
+        bgMesh.setColorAt(i, color);
+      }
+      bgMesh.instanceColor!.needsUpdate = true;
 
       // Section anchors: document Y of each section's middle and its pose.
       let anchors: { y: number; pose: Pose }[] = [];
@@ -212,14 +215,32 @@ export function ShardField() {
       };
 
       const current: Pose = { ...target() };
-      const mouse = { x: 0, y: 0, inside: false };
+      // Pointer in normalised device coords (-1..1, y up), plus a flick vector from how fast it moved.
+      const mouse = { x: 0, y: 0, seen: false, inside: false };
+      const flickTarget = { x: 0, y: 0 };
+      const flick = { x: 0, y: 0 };
+      const eased = { x: 0, y: 0 };
+      const drift = { x: 0, y: 0 };
+      let presence = 0;
       const onMove = (e: PointerEvent) => {
-        mouse.x = e.clientX / window.innerWidth - 0.5;
-        mouse.y = e.clientY / window.innerHeight - 0.5;
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = 1 - (e.clientY / window.innerHeight) * 2;
+        if (mouse.seen) {
+          flickTarget.x = clamp(50 * (nx - mouse.x), -2, 2);
+          flickTarget.y = clamp(50 * (ny - mouse.y), -2, 2);
+        } else {
+          eased.x = nx;
+          eased.y = ny;
+        }
+        mouse.x = nx;
+        mouse.y = ny;
+        mouse.seen = true;
         mouse.inside = true;
       };
       const onLeave = () => {
         mouse.inside = false;
+        flickTarget.x = 0;
+        flickTarget.y = 0;
       };
       const onResize = () => {
         renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -233,12 +254,20 @@ export function ShardField() {
       const ndc = new THREE.Vector2();
       const toLocal = new THREE.Matrix4();
       const eye = new THREE.Vector3();
+      const right = new THREE.Vector3();
+      const up = new THREE.Vector3();
       let last = performance.now();
 
       const frame = () => {
         const now = performance.now();
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
+        const t = now / 1000;
+        // per-frame easing factors from the reference, made frame-rate independent
+        const f60 = dt * 60;
+        const follow = 1 - Math.pow(1 - 0.075, f60);
+        const settle = 1 - Math.pow(1 - 0.1, f60);
+
         const goal = reduceMotion ? { ...target(), scatter: 0 } : target();
         const ease = reduceMotion ? 1 : 1 - Math.pow(0.002, dt);
         current.scatter += (goal.scatter - current.scatter) * ease;
@@ -247,51 +276,47 @@ export function ShardField() {
 
         rig.position.x = current.x;
         rig.scale.setScalar(current.scale);
-        if (!reduceMotion) {
-          spin.rotation.y += dt * 0.07;
-          // Orbit the camera a little with the pointer; the squared term keeps the centre calm and gives the edges most of the turn.
-          const mx = mouse.inside ? mouse.x * 2 : 0;
-          const my = mouse.inside ? mouse.y * 2 : 0;
-          const yawGoal = (mx * 0.35 + Math.sign(mx) * mx * mx * 0.65) * LOOK_YAW;
-          const pitchGoal = -my * LOOK_PITCH;
-          const follow = 1 - Math.pow(0.08, dt);
-          look.yaw += (yawGoal - look.yaw) * follow;
-          look.pitch += (pitchGoal - look.pitch) * follow;
-          camera.position.set(
-            Math.sin(look.yaw) * Math.cos(look.pitch) * CAMERA_DISTANCE,
-            Math.sin(look.pitch) * CAMERA_DISTANCE,
-            Math.cos(look.yaw) * Math.cos(look.pitch) * CAMERA_DISTANCE,
-          );
-          camera.lookAt(0, 0, 0);
-        }
+        if (!reduceMotion) spin.rotation.y += dt * 0.07;
 
-        // Pointer ray and camera position in the shards' own space, so distances and facing are cheap per shard.
+        flickTarget.x -= flickTarget.x * settle;
+        flickTarget.y -= flickTarget.y * settle;
+        flick.x += (flickTarget.x - flick.x) * follow;
+        flick.y += (flickTarget.y - flick.y) * follow;
+        eased.x += (mouse.x - eased.x) * follow;
+        eased.y += (mouse.y - eased.y) * follow;
+        drift.x += (PARALLAX * mouse.x - drift.x) * settle;
+        drift.y += (PARALLAX * mouse.y - drift.y) * settle;
+        presence += ((mouse.inside && !reduceMotion ? 1 : 0) - presence) * settle;
+
+        // Pointer ray, camera position and screen axes in the shards' own space, so per-shard work stays cheap.
         camera.updateMatrixWorld();
         mesh.updateWorldMatrix(true, false);
         toLocal.copy(mesh.matrixWorld).invert();
         eye.copy(camera.position).applyMatrix4(toLocal);
-        const hovering = mouse.inside && !reduceMotion;
+        right.set(1, 0, 0).applyQuaternion(camera.quaternion).transformDirection(toLocal);
+        up.set(0, 1, 0).applyQuaternion(camera.quaternion).transformDirection(toLocal);
+        const hovering = presence > 0.001;
         if (hovering) {
-          ndc.set(mouse.x * 2, -mouse.y * 2);
+          ndc.set(eased.x, eased.y);
           raycaster.setFromCamera(ndc, camera);
           raycaster.ray.applyMatrix4(toLocal);
         }
         const { origin: ro, direction: rd } = raycaster.ray;
-        const cool = Math.pow(0.18, dt);
-        const t = now / 1000;
+        const reach = HOVER_RADIUS + HOVER_WIDEN * Math.max(Math.abs(flick.x), Math.abs(flick.y));
+        const swingX = flick.x * DRAG;
+        const swingY = flick.y * DRAG;
         const col = colors.array as Float32Array;
 
         for (let i = 0; i < COUNT; i++) {
           // each shard leaves and returns at its own moment, so the shape tears rather than fades
-          const s = floater[i] ? 1 : smooth(clamp01(current.scatter * 1.6 - delay[i] * 0.6));
+          const s = smooth(clamp01(current.scatter * 1.6 - delay[i] * 0.6));
           const j = i * 3;
-          const px = loop[j] + (scatter[j] - loop[j]) * s;
-          const py = loop[j + 1] + (scatter[j + 1] - loop[j + 1]) * s;
-          const pz = loop[j + 2] + (scatter[j + 2] - loop[j + 2]) * s;
+          let px = loop[j] + (scatter[j] - loop[j]) * s;
+          let py = loop[j + 1] + (scatter[j + 1] - loop[j + 1]) * s;
+          let pz = loop[j + 2] + (scatter[j + 2] - loop[j + 2]) * s;
 
-          // Heat jumps up under the pointer and cools over about a second, leaving a short trail.
-          let h = heat[i] * cool;
-          if (hovering && !floater[i]) {
+          let near = 0;
+          if (hovering && s < 1) {
             const ox = px - ro.x;
             const oy = py - ro.y;
             const oz = pz - ro.z;
@@ -300,48 +325,58 @@ export function ShardField() {
             const qy = oy - rd.y * along;
             const qz = oz - rd.z * along;
             const d = Math.sqrt(qx * qx + qy * qy + qz * qz);
-            if (d < HOVER_RADIUS) {
-              const k = 1 - d / HOVER_RADIUS;
-              if (k * k > h) h = k * k;
+            if (d < reach) {
+              near = smooth(1 - d / reach) * presence * (1 - s);
+              // circle in the screen plane; a flick stretches the circle along the flick
+              const a = t * orbitRate[i] + phase[i];
+              const cx = Math.sin(a) * (orbitAmp[i] + swingX) * near;
+              const cy = Math.cos(a) * (orbitAmp[i] + swingY) * near;
+              px += right.x * cx + up.x * cy;
+              py += right.y * cx + up.y * cy;
+              pz += right.z * cx + up.z * cy;
             }
           }
-          heat[i] = h;
-          // Hot shards circle their own spot instead of moving out of the way.
-          const angle = t * orbitRate[i] + phase[i];
-          const oc = Math.cos(angle) * ORBIT * h;
-          const os = Math.sin(angle) * ORBIT * h;
-          dummy.position.set(
-            px + orbitA[j] * oc + orbitB[j] * os,
-            py + orbitA[j + 1] * oc + orbitB[j + 1] * os,
-            pz + orbitA[j + 2] * oc + orbitB[j + 2] * os,
-          );
+          dummy.position.set(px, py, pz);
 
           // Edge-on shards go amber; the band fades as the loop breaks up.
-          let rim = 0;
-          if (!floater[i]) {
-            const vx = eye.x - px;
-            const vy = eye.y - py;
-            const vz = eye.z - pz;
-            const facing = Math.abs(normal[j] * vx + normal[j + 1] * vy + normal[j + 2] * vz) / Math.sqrt(vx * vx + vy * vy + vz * vz);
-            rim = smooth(clamp01((0.5 - facing) / 0.35)) * 0.85 * (1 - s);
-          }
+          const vx = eye.x - px;
+          const vy = eye.y - py;
+          const vz = eye.z - pz;
+          const facing = Math.abs(normal[j] * vx + normal[j + 1] * vy + normal[j + 2] * vz) / Math.sqrt(vx * vx + vy * vy + vz * vz);
+          const rim = smooth(clamp01((0.5 - facing) / 0.35)) * 0.85 * (1 - s);
           for (let c = 0; c < 3; c++) {
-            const tinted = base[j + c] + (RIM[c] - base[j + c]) * rim;
-            col[j + c] = tinted + (1 - tinted) * h;
+            col[j + c] = base[j + c] + (RIM[c] - base[j + c]) * rim;
           }
+
           if (!reduceMotion) {
-            const spinUp = 1 + h * HYPER_SPIN;
-            rot[j] += rotSpeed[j] * dt * spinUp;
-            rot[j + 1] += rotSpeed[j + 1] * dt * spinUp;
-            rot[j + 2] += rotSpeed[j + 2] * dt * spinUp;
+            rot[j] += rotSpeed[j] * dt;
+            rot[j + 1] += rotSpeed[j + 1] * dt;
+            rot[j + 2] += rotSpeed[j + 2] * dt;
           }
           dummy.rotation.set(rot[j], rot[j + 1], rot[j + 2]);
-          dummy.scale.setScalar(size[i] * (1 + s * 0.35 + heat[i] * 0.4));
+          dummy.scale.setScalar(size[i] * (1 + s * 0.35 + near * HOVER_GROW));
           dummy.updateMatrix();
           mesh.setMatrixAt(i, dummy.matrix);
         }
         mesh.instanceMatrix.needsUpdate = true;
         colors.needsUpdate = true;
+
+        const bt = reduceMotion ? 0 : t;
+        for (let i = 0; i < BG_COUNT; i++) {
+          const j = i * 3;
+          const w = bgRate[i] * 0.5;
+          dummy.position.set(
+            bgPos[j] - drift.x * bgDepth[i] * 4 + Math.sin(bt * w) * bgDrift[i],
+            bgPos[j + 1] - drift.y * bgDepth[i] * 4 + Math.cos(bt * w) * bgDrift[i],
+            bgPos[j + 2],
+          );
+          dummy.quaternion.setFromAxisAngle(bgAxis[i], (bt * bgRate[i] * 0.15) % (Math.PI * 2));
+          dummy.scale.setScalar(bgSize[i]);
+          dummy.updateMatrix();
+          bgMesh.setMatrixAt(i, dummy.matrix);
+        }
+        bgMesh.instanceMatrix.needsUpdate = true;
+
         renderer.render(scene, camera);
       };
 
@@ -367,7 +402,9 @@ export function ShardField() {
         renderer.setAnimationLoop(null);
         geometry.dispose();
         material.dispose();
+        bgMaterial.dispose();
         mesh.dispose();
+        bgMesh.dispose();
         renderer.dispose();
       };
     })();
