@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/format";
 
 export const inputClass =
-  "h-10 w-full rounded-field border border-line bg-surface-2 px-3 text-sm text-fg placeholder:text-faint transition-colors focus:border-accent focus:outline-none aria-[invalid=true]:border-pink";
+  "h-10 w-full rounded-field border border-line bg-surface-2 px-3 text-sm text-fg placeholder:text-faint transition-colors focus:border-accent focus:outline-none user-invalid:border-pink aria-[invalid=true]:border-pink";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cn(inputClass, className)} {...props} />;
@@ -31,7 +31,7 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="group space-y-1.5">
       <label htmlFor={htmlFor} className="block text-xs font-medium text-muted">
         {label}
       </label>
@@ -41,7 +41,7 @@ export function Field({
           {error}
         </p>
       ) : (
-        hint && <p className="text-xs text-faint">{hint}</p>
+        hint && <p className="text-xs text-faint transition-colors group-has-[:user-invalid]:text-pink">{hint}</p>
       )}
     </div>
   );
