@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { orSafe, today } from "@/lib/forms";
 import { likeTerm } from "@/services/catalogue";
 import { getTimeline, type TimelineEntry } from "@/services/subscriptions";
-import type { Customer, Invoice, InvoiceLine, ListQuery, ListResult, Payment } from "@/types/models";
+import type { BillingRun, Customer, Invoice, InvoiceLine, ListQuery, ListResult, Payment } from "@/types/models";
 import type { InvoiceDisplayStatus } from "@/lib/status";
 
 export const invoiceFilters: InvoiceDisplayStatus[] = ["draft", "confirmed", "overdue", "paid", "cancelled"];
@@ -106,4 +106,32 @@ export async function getInvoice(id: string): Promise<InvoiceDetail | null> {
     payments: (payments.data ?? []).map(({ profiles, ...p }) => ({ ...p, recordedBy: profiles?.full_name ?? null })),
     timeline,
   };
+}
+
+export type BillingRunRow = BillingRun & { ranBy: string | null };
+
+export async function listBillingRuns(limit = 30): Promise<BillingRunRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("billing_runs")
+    .select("*, profiles(full_name)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  return data.map(({ profiles, ...r }) => ({ ...r, ranBy: profiles?.full_name ?? null }));
+}
+
+// What tonight's run would pick up if it ran now.
+export async function billingDue(): Promise<{ due: number; draftInvoices: number }> {
+  const supabase = await createClient();
+  const now = today();
+  const [due, drafts] = await Promise.all([
+    supabase
+      .from("subscriptions")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active")
+      .or(`next_invoice_date.lte.${now},and(next_invoice_date.is.null,start_date.lte.${now})`),
+    supabase.from("invoices").select("id", { count: "exact", head: true }).eq("status", "draft"),
+  ]);
+  return { due: due.count ?? 0, draftInvoices: drafts.count ?? 0 };
 }

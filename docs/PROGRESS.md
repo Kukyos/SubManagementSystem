@@ -4,6 +4,11 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- **Decision: `billing_runs` table.** `run_billing` logs every run (console
+  or nightly) so the billing page can show history; migration
+  `20261031063429_billing_runs.sql`.
+- Quotation templates, taxes in Settings, discounts with attach / detach on
+  subscriptions. Seeded four templates and six discounts.
 - Seed (`supabase/seed.sql`): nine more products with variants, ten more
   plans (monthly, yearly, quarterly, a weekly trial that closes itself), 688
   customers across ten cities, ~2,100 subscriptions over 18 months. Invoices

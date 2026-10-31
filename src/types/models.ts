@@ -16,6 +16,7 @@ export type Invoice = Tables<"invoices">;
 export type InvoiceLine = Tables<"invoice_lines">;
 export type Payment = Tables<"payments">;
 export type ActivityEntry = Tables<"activity_log">;
+export type BillingRun = Tables<"billing_runs">;
 
 export type UserRole = Enums<"user_role">;
 export type SubscriptionStatus = Enums<"subscription_status">;

@@ -74,3 +74,27 @@ export async function recordPayment(_: FormState, formData: FormData): Promise<F
   revalidatePath("/payments");
   return { ok: true, data: undefined };
 }
+
+export type RunResult = {
+  run_id: string;
+  as_of: string;
+  subscriptions_billed: number;
+  invoices_created: number;
+  subscriptions_closed: number;
+  failed: { subscription: string; id: string; error: string }[];
+};
+export type RunState = { ok: true; result: RunResult } | { ok: false; error: string } | null;
+
+export async function runBilling(_: RunState, formData: FormData): Promise<RunState> {
+  const asOf = text(formData, "asOf");
+  if (!(await staffOnly())) return { ok: false, error: "Only staff can run billing." };
+  if (asOf && !isDate(asOf)) return { ok: false, error: "Pick a date from the calendar." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("run_billing", asOf ? { p_as_of: asOf } : {});
+  if (error) return { ok: false, error: dbMessage(error, "The billing run failed. Try again in a moment.") };
+  revalidatePath("/billing");
+  revalidatePath("/invoices");
+  revalidatePath("/subscriptions");
+  revalidatePath("/dashboard");
+  return { ok: true, result: data as RunResult };
+}

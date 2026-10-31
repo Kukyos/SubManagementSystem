@@ -74,7 +74,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `getInvoice(id)` (lines, payments, timeline) | ✅ |
 | `setInvoiceStatus(state, formData)`, `confirmDrafts(ids)` (`services/invoice-actions.ts`) | ✅ |
 | `sendInvoice(id)` (email with PDF) | ⬜ |
-| `runBilling(asOf?)` | ⬜ |
+| `runBilling(state, formData)` (`asOf`; `services/invoice-actions.ts`) | ✅ |
+| `listBillingRuns(limit?)`, `billingDue()` (due subscriptions, draft invoices) | ✅ |
 
 ## payments (`services/payments.ts`)
 | function | state |
