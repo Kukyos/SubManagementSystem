@@ -31,9 +31,6 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
-- Shard loop thinned to ~2,800 (900 on small screens) and made uneven: shards
-  are placed by a density pattern with random phases, so dense clumps and thin
-  patches land somewhere different on each visit.
 - Shard hover: hot shards now circle their own spot on small orbits (each on
   its own tilted plane, speed and direction) instead of jittering, and the
   hover radius is wider (2.5 scene units, most of the loop's width).
