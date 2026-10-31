@@ -3,8 +3,8 @@
 Plans, subscriptions and recurring billing in one place.
 
 Built for the Odoo hackathon problem statement *Subscription Management
-System*. This README becomes the project showcase once the screens land; for
-now it is the setup reference. How we work is in
+System*. This README is the project showcase once the screens land; for now
+it is the setup reference. How we work is in
 [`docs/HACKATHON_PLAN.md`](docs/HACKATHON_PLAN.md).
 
 ## Stack
