@@ -7,7 +7,7 @@ import { dbMessage, isDate, text, today } from "@/lib/forms";
 import { getCurrentUser } from "@/services/auth";
 import { uuid } from "@/services/catalogue";
 import type { FormState } from "@/services/catalogue-actions";
-import type { PaymentTerms, SubscriptionStatus } from "@/types/models";
+import type { BillingPeriod, PaymentTerms, SubscriptionStatus } from "@/types/models";
 
 const terms: PaymentTerms[] = ["immediate", "net_7", "net_15", "net_30", "net_45", "net_60"];
 
@@ -23,10 +23,9 @@ function refresh(id: string) {
 
 // A line's unit price: the plan's price when it's the plan's own product,
 // otherwise the product's list price, plus the variant's extra either way.
-async function unitPrice(subscriptionId: string, productId: string, variantId: string | null) {
+async function priceFor(plan: { product_id: string | null; price: number } | null, productId: string, variantId: string | null) {
   const supabase = await createClient();
-  const [{ data: sub }, { data: product }, { data: variant }] = await Promise.all([
-    supabase.from("subscriptions").select("plans(product_id, price)").eq("id", subscriptionId).single(),
+  const [{ data: product }, { data: variant }] = await Promise.all([
     supabase.from("products").select("sales_price, is_active").eq("id", productId).maybeSingle(),
     variantId
       ? supabase.from("product_variants").select("extra_price, product_id").eq("id", variantId).maybeSingle()
@@ -34,18 +33,53 @@ async function unitPrice(subscriptionId: string, productId: string, variantId: s
   ]);
   if (!product) return null;
   if (variant && variant.product_id !== productId) return null;
-  const base = sub?.plans?.product_id === productId ? Number(sub.plans.price) : Number(product.sales_price);
+  const base = plan?.product_id === productId ? Number(plan.price) : Number(product.sales_price);
   return Math.round((base + Number(variant?.extra_price ?? 0)) * 100) / 100;
+}
+
+async function unitPrice(subscriptionId: string, productId: string, variantId: string | null) {
+  const supabase = await createClient();
+  const { data: sub } = await supabase.from("subscriptions").select("plans(product_id, price)").eq("id", subscriptionId).single();
+  return priceFor(sub?.plans ?? null, productId, variantId);
+}
+
+// Start date plus n billing cycles, for a template's contract length.
+function addCycles(start: string, period: BillingPeriod, every: number, n: number) {
+  const d = new Date(start + "T00:00:00Z");
+  const steps = every * n;
+  if (period === "daily") d.setUTCDate(d.getUTCDate() + steps);
+  if (period === "weekly") d.setUTCDate(d.getUTCDate() + steps * 7);
+  if (period === "monthly") d.setUTCMonth(d.getUTCMonth() + steps);
+  if (period === "yearly") d.setUTCFullYear(d.getUTCFullYear() + steps);
+  return d.toISOString().slice(0, 10);
 }
 
 export async function createSubscription(_: FormState, formData: FormData): Promise<FormState> {
   const values = Object.fromEntries(
-    ["customerId", "planId", "startDate", "expiryDate", "paymentTerms", "notes"].map((k) => [k, text(formData, k)]),
+    ["templateId", "customerId", "planId", "startDate", "expiryDate", "paymentTerms", "notes"].map((k) => [k, text(formData, k)]),
   );
   const fail = (error: string): FormState => ({ ok: false, error, values });
 
   const user = await staffOnly();
   if (!user) return fail("Only staff can create subscriptions.");
+  const supabase = await createClient();
+
+  // A template fixes the plan and terms and brings its own lines.
+  const template = uuid.test(values.templateId)
+    ? (
+        await supabase
+          .from("quotation_templates")
+          .select("id, plan_id, payment_terms, duration_periods, notes, quotation_template_lines(product_id, variant_id, description, quantity, unit_price, position)")
+          .eq("id", values.templateId)
+          .maybeSingle()
+      ).data
+    : null;
+  if (values.templateId && !template) return fail("That template no longer exists.");
+  if (template) {
+    values.planId = template.plan_id;
+    values.paymentTerms = template.payment_terms;
+  }
+
   if (!uuid.test(values.customerId)) return fail("Pick a customer.");
   if (!uuid.test(values.planId)) return fail("Pick a plan.");
   if (!isDate(values.startDate)) return fail("Pick a start date.");
@@ -53,27 +87,50 @@ export async function createSubscription(_: FormState, formData: FormData): Prom
     return fail("The end date has to be after the start date.");
   if (!terms.includes(values.paymentTerms as PaymentTerms)) return fail("Pick payment terms.");
 
-  const supabase = await createClient();
-  const { data: plan } = await supabase.from("plans").select("id, product_id, price, min_quantity").eq("id", values.planId).single();
+  const { data: plan } = await supabase
+    .from("plans")
+    .select("id, product_id, price, min_quantity, billing_period, billing_interval")
+    .eq("id", values.planId)
+    .single();
   if (!plan) return fail("That plan no longer exists.");
+
+  const expiry =
+    values.expiryDate ||
+    (template?.duration_periods ? addCycles(values.startDate, plan.billing_period, plan.billing_interval, template.duration_periods) : null);
 
   const { data, error } = await supabase
     .from("subscriptions")
     .insert({
       customer_id: values.customerId,
       plan_id: values.planId,
+      template_id: template?.id ?? null,
       start_date: values.startDate,
-      expiry_date: values.expiryDate || null,
+      expiry_date: expiry,
       payment_terms: values.paymentTerms as PaymentTerms,
-      notes: values.notes || null,
+      notes: values.notes || template?.notes || null,
       salesperson_id: user.id,
     })
     .select("id")
     .single();
   if (error) return fail(dbMessage(error, "We couldn't create the subscription. Try again in a moment."));
 
-  // Start with the plan's own product at its minimum quantity; staff adjust from there.
-  if (plan.product_id) {
+  if (template?.quotation_template_lines.length) {
+    const lines = await Promise.all(
+      [...template.quotation_template_lines]
+        .sort((a, b) => a.position - b.position)
+        .map(async (l, i) => ({
+          subscription_id: data.id,
+          product_id: l.product_id,
+          variant_id: l.variant_id,
+          description: l.description,
+          quantity: l.quantity,
+          unit_price: l.unit_price ?? (await priceFor(plan, l.product_id, l.variant_id)) ?? 0,
+          position: i,
+        })),
+    );
+    await supabase.from("subscription_lines").insert(lines);
+  } else if (plan.product_id) {
+    // Start with the plan's own product at its minimum quantity; staff adjust from there.
     await supabase.from("subscription_lines").insert({
       subscription_id: data.id,
       product_id: plan.product_id,

@@ -11,7 +11,7 @@ import { cycle, date, money } from "@/lib/format";
 import { today } from "@/lib/forms";
 import { invoiceDisplayStatus, subscriptionStatus } from "@/lib/status";
 import { requireRole } from "@/services/auth";
-import { listPlans, listProductOptions, listVariantOptions, uuid } from "@/services/catalogue";
+import { listPlans, listProductOptions, listTemplates, listVariantOptions, uuid } from "@/services/catalogue";
 import { listCustomerOptions } from "@/services/customers";
 import { billNow, removeLine, renewSubscription, setLineQuantity, setStatus } from "@/services/subscription-actions";
 import { getSubscription, type SubscriptionDetail } from "@/services/subscriptions";
@@ -42,15 +42,22 @@ export default async function Page({
   const { id } = await params;
 
   if (id === "new") {
-    const { customer } = await searchParams;
-    const [customers, plans] = await Promise.all([listCustomerOptions(), listPlans({ pageSize: 200 })]);
+    const { customer, template } = await searchParams;
+    const [customers, plans, templates] = await Promise.all([listCustomerOptions(), listPlans({ pageSize: 200 }), listTemplates()]);
     return (
       <>
         {back}
         <PageHeader eyebrow="Sales" title="New subscription" description="Starts as a draft. Add lines, send it as a quotation, then confirm and activate." />
         <Card className="max-w-3xl">
           <CardHeader title="Subscription" />
-          <NewSubscriptionForm customers={customers} plans={plans.rows} customerId={customer} today={today()} />
+          <NewSubscriptionForm
+            customers={customers}
+            plans={plans.rows}
+            templates={templates}
+            customerId={customer}
+            templateId={template}
+            today={today()}
+          />
         </Card>
       </>
     );
@@ -178,7 +185,7 @@ export default async function Page({
                 </tfoot>
               </table>
             )}
-            {editable && <AddLineForm subscriptionId={sub.id} products={products} variants={variants} />}
+            {editable && <AddLineForm fields={{ subscriptionId: sub.id }} products={products} variants={variants} />}
           </Card>
 
           <Card className="overflow-x-auto">

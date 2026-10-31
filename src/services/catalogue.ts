@@ -1,6 +1,15 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { ListQuery, ListResult, Plan, Product, ProductVariant, Tax } from "@/types/models";
+import type {
+  ListQuery,
+  ListResult,
+  Plan,
+  Product,
+  ProductVariant,
+  QuotationTemplate,
+  QuotationTemplateLine,
+  Tax,
+} from "@/types/models";
 
 // Never "*": cost_price isn't selectable (see SCHEMA.md).
 const productColumns = "id, name, type, sales_price, tax_id, notes, is_active, created_at";
@@ -145,4 +154,53 @@ export async function listVariantOptions(): Promise<ProductVariant[]> {
     .order("value");
   if (error) throw new Error(error.message);
   return data;
+}
+
+export type TemplateRow = QuotationTemplate & {
+  plan: Pick<Plan, "id" | "name" | "billing_period" | "billing_interval"> | null;
+  lineCount: number;
+  usedCount: number;
+};
+
+export async function listTemplates(): Promise<TemplateRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("quotation_templates")
+    .select("*, plans(id, name, billing_period, billing_interval), quotation_template_lines(count), subscriptions(count)")
+    .order("name");
+  if (error) throw new Error(error.message);
+  return data.map(({ plans, quotation_template_lines, subscriptions, ...t }) => ({
+    ...t,
+    plan: plans,
+    lineCount: quotation_template_lines[0]?.count ?? 0,
+    usedCount: subscriptions[0]?.count ?? 0,
+  }));
+}
+
+export type TemplateLineRow = QuotationTemplateLine & { product: string; listPrice: number; variant: string | null; extra: number };
+export type TemplateDetail = QuotationTemplate & { lines: TemplateLineRow[] };
+
+export async function getTemplate(id: string): Promise<TemplateDetail | null> {
+  const supabase = await createClient();
+  const [{ data, error }, lines] = await Promise.all([
+    supabase.from("quotation_templates").select("*").eq("id", id).maybeSingle(),
+    supabase
+      .from("quotation_template_lines")
+      .select("*, products(name, sales_price), product_variants(attribute, value, extra_price)")
+      .eq("template_id", id)
+      .order("position"),
+  ]);
+  if (error) throw new Error(error.message);
+  if (lines.error) throw new Error(lines.error.message);
+  if (!data) return null;
+  return {
+    ...data,
+    lines: lines.data.map(({ products, product_variants, ...l }) => ({
+      ...l,
+      product: products?.name ?? "—",
+      listPrice: Number(products?.sales_price ?? 0),
+      variant: product_variants ? `${product_variants.attribute}: ${product_variants.value}` : null,
+      extra: Number(product_variants?.extra_price ?? 0),
+    })),
+  };
 }

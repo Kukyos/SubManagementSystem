@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { cycle, money } from "@/lib/format";
 import { addLine, createSubscription } from "@/services/subscription-actions";
-import type { Customer, Plan, Product, ProductVariant } from "@/types/models";
+import type { FormState } from "@/services/catalogue-actions";
+import type { Customer, Plan, Product, ProductVariant, QuotationTemplate } from "@/types/models";
 
 const termLabels = {
   immediate: "Due on receipt",
@@ -20,21 +21,43 @@ const termLabels = {
 export function NewSubscriptionForm({
   customers,
   plans,
+  templates,
   customerId,
+  templateId,
   today,
 }: {
   customers: Pick<Customer, "id" | "name" | "company">[];
   plans: Plan[];
+  templates: QuotationTemplate[];
   customerId?: string;
+  templateId?: string;
   today: string;
 }) {
   const [state, action, pending] = useActionState(createSubscription, null);
   const v = state?.values;
+  const [chosen, setChosen] = useState(v?.templateId ?? templateId ?? "");
+  const template = templates.find((t) => t.id === chosen);
 
   return (
     <form action={action} className="space-y-5 p-5">
       {state && !state.ok && <Notice>{state.error}</Notice>}
       <fieldset key={JSON.stringify(v)} disabled={pending} className="space-y-5">
+        {templates.length > 0 && (
+          <Field
+            label="Quotation template"
+            htmlFor="templateId"
+            hint={template ? "Plan, terms and lines come from the template." : "Optional. Start from a ready-made offer."}
+          >
+            <Select id="templateId" name="templateId" value={chosen} onChange={(e) => setChosen(e.target.value)}>
+              <option value="">No template</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
         <Field label="Customer" htmlFor="customerId">
           <Select id="customerId" name="customerId" required defaultValue={v?.customerId ?? customerId ?? ""}>
             <option value="" disabled>
@@ -48,8 +71,8 @@ export function NewSubscriptionForm({
             ))}
           </Select>
         </Field>
-        <Field label="Plan" htmlFor="planId" hint="Its product is added as the first line at the plan's minimum quantity.">
-          <Select id="planId" name="planId" required defaultValue={v?.planId ?? ""}>
+        <Field label="Plan" htmlFor="planId" hint={template ? undefined : "Its product is added as the first line at the plan's minimum quantity."}>
+          <Select id="planId" name="planId" required key={`plan-${chosen}`} disabled={!!template} defaultValue={template?.plan_id ?? v?.planId ?? ""}>
             <option value="" disabled>
               Pick a plan
             </option>
@@ -64,11 +87,21 @@ export function NewSubscriptionForm({
           <Field label="Starts" htmlFor="startDate" hint="Billing begins here once it's active.">
             <Input id="startDate" name="startDate" type="date" required defaultValue={v?.startDate ?? today} />
           </Field>
-          <Field label="Ends" htmlFor="expiryDate" hint="Blank: runs until closed.">
+          <Field
+            label="Ends"
+            htmlFor="expiryDate"
+            hint={template?.duration_periods ? `Blank: ${template.duration_periods} billing cycles from the start.` : "Blank: runs until closed."}
+          >
             <Input id="expiryDate" name="expiryDate" type="date" defaultValue={v?.expiryDate ?? ""} />
           </Field>
           <Field label="Payment terms" htmlFor="paymentTerms">
-            <Select id="paymentTerms" name="paymentTerms" defaultValue={v?.paymentTerms ?? "net_15"}>
+            <Select
+              id="paymentTerms"
+              name="paymentTerms"
+              key={`terms-${chosen}`}
+              disabled={!!template}
+              defaultValue={template?.payment_terms ?? v?.paymentTerms ?? "net_15"}
+            >
               {Object.entries(termLabels).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -88,16 +121,21 @@ export function NewSubscriptionForm({
   );
 }
 
+// Also used by quotation templates, which pass their own action and allow a fixed price.
 export function AddLineForm({
-  subscriptionId,
+  fields,
   products,
   variants,
+  lineAction = addLine,
+  withPrice,
 }: {
-  subscriptionId: string;
+  fields: Record<string, string>;
   products: Pick<Product, "id" | "name" | "sales_price">[];
   variants: ProductVariant[];
+  lineAction?: (state: FormState, formData: FormData) => Promise<FormState>;
+  withPrice?: boolean;
 }) {
-  const [state, action, pending] = useActionState(addLine, null);
+  const [state, action, pending] = useActionState(lineAction, null);
   const [productId, setProductId] = useState("");
   const [seen, setSeen] = useState(state);
   const options = variants.filter((v) => v.product_id === productId);
@@ -110,9 +148,11 @@ export function AddLineForm({
 
   return (
     <form action={action} className="space-y-3 border-t border-line p-5">
-      <input type="hidden" name="subscriptionId" value={subscriptionId} />
+      {Object.entries(fields).map(([k, v]) => (
+        <input key={k} type="hidden" name={k} value={v} />
+      ))}
       {state && !state.ok && <Notice>{state.error}</Notice>}
-      <div className="grid gap-3 sm:grid-cols-[2fr_1.5fr_6rem_auto] sm:items-end">
+      <div className={`grid gap-3 sm:items-end ${withPrice ? "sm:grid-cols-[2fr_1.5fr_6rem_8rem_auto]" : "sm:grid-cols-[2fr_1.5fr_6rem_auto]"}`}>
         <Field label="Product" htmlFor="productId">
           <Select id="productId" name="productId" required value={productId} onChange={(e) => setProductId(e.target.value)}>
             <option value="" disabled>
@@ -138,6 +178,11 @@ export function AddLineForm({
         <Field label="Qty" htmlFor="quantity">
           <Input id="quantity" name="quantity" type="number" min={1} step={1} defaultValue={1} className="tabular" />
         </Field>
+        {withPrice && (
+          <Field label="Unit price (₹)" htmlFor="unitPrice">
+            <Input id="unitPrice" name="unitPrice" type="number" min={0} step="0.01" placeholder="List price" className="tabular" />
+          </Field>
+        )}
         <Button type="submit" variant="secondary" disabled={pending}>
           {pending ? "Adding…" : "Add line"}
         </Button>

@@ -44,7 +44,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listTaxes()` | ✅ |
 | `listVariantOptions()`: every variant, for line pickers | ✅ |
 | `saveTax(state, formData)` (admin; one default at a time) | ✅ |
-| `listTemplates()`, `getTemplate(id)`, `saveTemplate(formData)` | ⬜ |
+| `listTemplates()` (with line and use counts), `getTemplate(id)` (with lines) | ✅ |
+| `saveTemplate(state, formData)`, `addTemplateLine(state, formData)`, `removeTemplateLine(id, templateId)` (admin; `services/catalogue-actions.ts`) | ✅ |
 | `listDiscounts(query)`, `getDiscount(id)`, `saveDiscount(formData)` | ⬜ |
 
 ## customers (`services/customers.ts`)
@@ -59,7 +60,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 |---|---|
 | `listSubscriptions(query)` (status, plan, customer filters), `subscriptionCounts()` | ✅ |
 | `getSubscription(id)` (lines, invoices, timeline), `getTimeline(entityId)` | ✅ |
-| `createSubscription(state, formData)` (blank; from template is T2.1) | ✅ |
+| `createSubscription(state, formData)`: blank, or from a `templateId` (plan, terms, lines, contract length) | ✅ |
 | `addLine(state, formData)`, `setLineQuantity(lineId, subId, formData)`, `removeLine(lineId, subId)`: unit price is computed on the server | ✅ |
 | `setStatus(state, formData)` (`id`, `status`, `reason`) | ✅ |
 | `renewSubscription(state, formData)`, `billNow(state, formData)` | ✅ |

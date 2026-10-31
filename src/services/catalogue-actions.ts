@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/services/auth";
-import type { ActionResult, BillingPeriod, ProductType } from "@/types/models";
+import { uuid } from "@/services/catalogue";
+import type { ActionResult, BillingPeriod, PaymentTerms, ProductType } from "@/types/models";
 
 export type FormState = (ActionResult & { values?: Record<string, string> }) | null;
 
@@ -195,4 +196,93 @@ export async function saveTax(_: FormState, formData: FormData): Promise<FormSta
   revalidatePath("/settings");
   revalidatePath("/products");
   return { ok: true, data: undefined, values: values.id ? values : undefined };
+}
+
+const paymentTerms: PaymentTerms[] = ["immediate", "net_7", "net_15", "net_30", "net_45", "net_60"];
+
+export async function saveTemplate(_: FormState, formData: FormData): Promise<FormState> {
+  const values = Object.fromEntries(
+    ["id", "name", "planId", "validityDays", "durationPeriods", "paymentTerms", "notes"].map((k) => [k, text(formData, k)]),
+  );
+  const fail = (error: string): FormState => ({ ok: false, error, values });
+
+  const denied = await adminOnly();
+  if (denied) return fail(denied);
+  if (!values.name) return fail("Give the template a name.");
+  if (!uuid.test(values.planId)) return fail("Pick the plan this template sells.");
+  const validity = Number(values.validityDays || 30);
+  if (!Number.isInteger(validity) || validity < 1 || validity > 365) return fail("A quotation stays valid for 1 to 365 days.");
+  const duration = values.durationPeriods ? Number(values.durationPeriods) : null;
+  if (duration !== null && (!Number.isInteger(duration) || duration < 1 || duration > 120))
+    return fail("Contract length is 1 to 120 billing cycles, or blank for open-ended.");
+  if (!paymentTerms.includes(values.paymentTerms as PaymentTerms)) return fail("Pick payment terms.");
+
+  const row = {
+    name: values.name,
+    plan_id: values.planId,
+    validity_days: validity,
+    duration_periods: duration,
+    payment_terms: values.paymentTerms as PaymentTerms,
+    notes: values.notes || null,
+  };
+  const supabase = await createClient();
+  if (values.id) {
+    const { error } = await supabase.from("quotation_templates").update(row).eq("id", values.id);
+    if (error) return fail("We couldn't save the template. Try again in a moment.");
+    revalidatePath("/templates");
+    revalidatePath(`/templates/${values.id}`);
+    return { ok: true, data: undefined, values };
+  }
+
+  const { data, error } = await supabase.from("quotation_templates").insert(row).select("id").single();
+  if (error) return fail("We couldn't create the template. Try again in a moment.");
+  // Start it with the plan's own product, like a new subscription.
+  const { data: plan } = await supabase.from("plans").select("product_id, min_quantity").eq("id", values.planId).single();
+  if (plan?.product_id)
+    await supabase.from("quotation_template_lines").insert({ template_id: data.id, product_id: plan.product_id, quantity: plan.min_quantity });
+  revalidatePath("/templates");
+  redirect(`/templates/${data.id}`);
+}
+
+export async function addTemplateLine(_: FormState, formData: FormData): Promise<FormState> {
+  const values = Object.fromEntries(["templateId", "productId", "variantId", "quantity", "unitPrice"].map((k) => [k, text(formData, k)]));
+  const fail = (error: string): FormState => ({ ok: false, error, values });
+
+  const denied = await adminOnly();
+  if (denied) return fail(denied);
+  if (!values.productId) return fail("Pick a product.");
+  const quantity = Number(values.quantity || 1);
+  if (!Number.isFinite(quantity) || quantity <= 0) return fail("Quantity has to be more than 0.");
+  const unit = values.unitPrice === "" ? null : price(values.unitPrice, "Unit price");
+  if (unit?.error) return fail(unit.error);
+
+  const supabase = await createClient();
+  if (values.variantId) {
+    const { data: variant } = await supabase.from("product_variants").select("product_id").eq("id", values.variantId).maybeSingle();
+    if (variant?.product_id !== values.productId) return fail("That variant belongs to another product.");
+  }
+  const { count } = await supabase
+    .from("quotation_template_lines")
+    .select("id", { count: "exact", head: true })
+    .eq("template_id", values.templateId);
+  const { error } = await supabase.from("quotation_template_lines").insert({
+    template_id: values.templateId,
+    product_id: values.productId,
+    variant_id: values.variantId || null,
+    quantity,
+    unit_price: unit?.value ?? null,
+    position: count ?? 0,
+  });
+  if (error) return fail("We couldn't add the line. Try again in a moment.");
+  revalidatePath(`/templates/${values.templateId}`);
+  revalidatePath("/templates");
+  return { ok: true, data: undefined };
+}
+
+export async function removeTemplateLine(id: string, templateId: string) {
+  if (await adminOnly()) return;
+  const supabase = await createClient();
+  await supabase.from("quotation_template_lines").delete().eq("id", id);
+  revalidatePath(`/templates/${templateId}`);
+  revalidatePath("/templates");
 }

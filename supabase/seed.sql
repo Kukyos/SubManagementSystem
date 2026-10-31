@@ -238,3 +238,31 @@ from public.invoices i where a.entity = 'invoices' and a.entity_id = i.id and a.
 update public.activity_log a set created_at = p.created_at
 from public.payments p where a.entity = 'invoices' and a.entity_id = p.invoice_id and a.action = 'payment';
 
+
+-- ---------------------------------------------------------------------------
+-- Quotation templates
+-- ---------------------------------------------------------------------------
+insert into public.quotation_templates (name, plan_id, validity_days, duration_periods, payment_terms, notes)
+select v.name, pl.id, v.validity, v.duration, v.terms::public.payment_terms, v.notes
+from (values
+  ('Sales team starter, 12 months', 'CRM, monthly', 15, 12, 'net_15', 'Five CRM seats with onboarding. Price held for the first year.'),
+  ('Finance pack, yearly', 'Books, yearly', 30, 1, 'net_30', 'Books and payroll together, billed once a year.'),
+  ('Support desk, 6 months', 'Helpdesk team', 21, 6, 'net_15', 'Three helpdesk agents with priority support for the first half-year.'),
+  ('Odoo rollout, quarterly', 'Odoo Standard, quarterly', 30, null, 'net_30', 'Odoo ERP on quarterly billing with a scanner for the warehouse.')
+) as v(name, plan, validity, duration, terms, notes)
+join public.plans pl on pl.name = v.plan;
+
+insert into public.quotation_template_lines (template_id, product_id, quantity, unit_price, position)
+select t.id, p.id, v.qty, v.price, v.pos
+from (values
+  ('Sales team starter, 12 months', 'Brightloop CRM seat', 5, null::numeric, 0),
+  ('Sales team starter, 12 months', 'Onboarding workshop', 1, 0, 1),
+  ('Finance pack, yearly', 'Brightloop Books', 1, null, 0),
+  ('Finance pack, yearly', 'Payroll module', 1, 22000, 1),
+  ('Support desk, 6 months', 'Helpdesk agent seat', 3, null, 0),
+  ('Support desk, 6 months', 'Priority support', 1, null, 1),
+  ('Odoo rollout, quarterly', 'Odoo ERP licence', 1, null, 0),
+  ('Odoo rollout, quarterly', 'Barcode scanner', 2, null, 1)
+) as v(template, product, qty, price, pos)
+join public.quotation_templates t on t.name = v.template
+join public.products p on p.name = v.product;
