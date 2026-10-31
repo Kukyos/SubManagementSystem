@@ -22,7 +22,7 @@ add a row to Requests instead of editing it.
 | S4 | Docs set (`docs/`) | B | ✅ |
 | S5 | Vercel project linked, env vars, first deploy | B | ✅ |
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ✅ |
-| S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | 🔨 admin + staff accounts and GST rates in; catalogue and volume next |
+| S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ✅ `supabase/seed.sql`: 688 customers, ~2,100 subscriptions, ~6,800 invoices, ~6,000 payments |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
 | S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | ⬜ |
