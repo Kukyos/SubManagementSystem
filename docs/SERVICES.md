@@ -35,11 +35,12 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 ## catalogue (`services/catalogue.ts`)
 | function | state |
 |---|---|
-| `listProducts(query)`, `getProduct(id)` (with variants; cost for staff) | ⬜ |
-| `saveProduct(formData)`, `archiveProduct(id)` | ⬜ |
-| `saveVariant(formData)`, `deleteVariant(id)` | ⬜ |
+| `listProducts(query)` (`show`: active / archived / all), `getProduct(id)` (with variants; cost for staff) | ✅ |
+| `saveProduct(state, formData)`, `archiveProduct(id, archived?)` (`services/catalogue-actions.ts`) | ✅ |
+| `saveVariant(state, formData)`, `deleteVariant(id, productId)` (`services/catalogue-actions.ts`) | ✅ |
 | `listPlans(query)`, `getPlan(id)`, `savePlan(formData)` | ⬜ |
-| `listTaxes()`, `saveTax(formData)` | ⬜ |
+| `listTaxes()` | ✅ |
+| `saveTax(formData)` | ⬜ |
 | `listTemplates()`, `getTemplate(id)`, `saveTemplate(formData)` | ⬜ |
 | `listDiscounts(query)`, `getDiscount(id)`, `saveDiscount(formData)` | ⬜ |
 

@@ -23,6 +23,7 @@ export type InvoiceStatus = Enums<"invoice_status">;
 export type BillingPeriod = Enums<"billing_period">;
 export type PaymentMethod = Enums<"payment_method">;
 export type PaymentTerms = Enums<"payment_terms">;
+export type ProductType = Enums<"product_type">;
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }

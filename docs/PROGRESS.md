@@ -9,6 +9,7 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 - **Live:** the landing page at https://managesubs.vercel.app, plus sign in,
   sign up, forgot password and reset (`/login`, `/signup`,
   `/forgot-password`, `/auth/reset`). Email links land on `/auth/callback`.
+  Products (`/products`, `/products/[id]`) on `main`.
 - **Built and ready to use:**
   - design tokens in `src/app/globals.css`
   - UI primitives in `src/components/ui/`: `Button`, `ButtonLink`,
@@ -25,12 +26,23 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
   (`src/app/portal/`, customers) both check the role on the server. Every
   screen has a stub page. Building a screen means replacing its stub and
   adding its service.
-- **Database:** live and tested (see below). No seed data yet (S7); one test
-  customer from checking sign-up.
+- **Database:** live and tested (see below). Seed (S7) started: demo admin
+  and staff (`cleochariaofficial+admin@` / `+staff@gmail.com`), four GST
+  rates (18% default, 12, 5, exempt) and one product. One test customer from
+  checking sign-up.
 - **Waiting on the user:** Razorpay test keys (T2.8).
 
 ### Log
 
+- Products page: list with search, active / archived filter and paging;
+  editor with variants (base + extra price shown per variant), archive and
+  restore. Staff see it read-only, with cost. Catalogue writes check for admin
+  in the action as well as in RLS, because RLS turns a staff write into a
+  silent no-op. Products are inserted or updated, never upserted (an upsert
+  reads `cost_price`). Reads in `services/catalogue.ts`, Server Actions in
+  `services/catalogue-actions.ts`, same split as auth.
+- Console error boundary (`src/app/(app)/error.tsx`) for any screen whose
+  data fails to load.
 - Shard hover: hot shards now circle their own spot on small orbits (each on
   its own tilted plane, speed and direction) instead of jittering, and the
   hover radius is wider (2 scene units).

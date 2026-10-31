@@ -34,7 +34,7 @@ add a row to Requests instead of editing it.
 | T1.1 | Landing page (shard loop scene) | B | ✅ |
 | T1.2 | Sign up, sign in, forgot / reset password | B | ✅ |
 | T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ✅ (every route stubbed) |
-| T1.4 | Products list + editor with variants | B | 🔨 |
+| T1.4 | Products list + editor with variants | B | ✅ |
 | T1.5 | Plans list + editor | B | ⬜ |
 | T1.6 | Customers list + detail | B | ⬜ |
 | T1.7 | Subscriptions list (filters, status pipeline) | B | ⬜ |
