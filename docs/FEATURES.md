@@ -8,9 +8,9 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 ### A new customer signs up
 | requirement | where | state |
 |---|---|---|
-| Account with email + password, one account per email | Supabase Auth, `/signup` | 🟡 |
-| Password > 8 chars, upper, lower, special character | signup form + server action + Auth policy | ⬜ |
-| Reset link to registered email | `/forgot-password`, `/auth/reset`, custom SMTP | ⬜ |
+| Account with email + password, one account per email | Supabase Auth, `/signup` | ✅ |
+| Password > 8 chars, upper, lower, special character | signup form + server action + Auth policy | ✅ |
+| Reset link to registered email | `/forgot-password`, `/auth/reset`, custom SMTP | ✅ |
 | Admin / staff / customer see different things | `profiles.role`, RLS, role-aware layouts | 🟡 |
 | Customers see only their own subscriptions and invoices | RLS + `/portal` | 🟡 |
 | Only admin adds staff | `/settings/team`, service-key server action | ⬜ |

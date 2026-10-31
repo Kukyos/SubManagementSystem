@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import type { UserRole } from "@/types/models";
 
 export type CurrentUser = {
@@ -56,4 +57,22 @@ export async function requireRole(...roles: UserRole[]): Promise<CurrentUser> {
   if (!user) redirect("/login");
   if (roles.length && !roles.includes(user.role)) redirect(homeFor(user.role));
   return user;
+}
+
+// Only same-site paths, so a crafted ?next= can't send people elsewhere.
+export function safeNext(next: unknown) {
+  return typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : null;
+}
+
+// Finishes an email link (sign-up confirmation, password reset). Supports both
+// the default ?code= links and ?token_hash= links from custom email templates.
+export async function completeAuthLink(params: URLSearchParams) {
+  const supabase = await createClient();
+  const code = params.get("code");
+  const tokenHash = params.get("token_hash");
+  const type = params.get("type") as EmailOtpType | null;
+
+  if (code) return !(await supabase.auth.exchangeCodeForSession(code)).error;
+  if (tokenHash && type) return !(await supabase.auth.verifyOtp({ token_hash: tokenHash, type })).error;
+  return false;
 }

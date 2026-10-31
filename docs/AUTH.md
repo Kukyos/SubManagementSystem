@@ -31,7 +31,7 @@ pre-existing customer record by signing up with its email.
 customers land on `/portal`.
 
 **Forgot password.** `resetPasswordForEmail` with a redirect to
-`/auth/reset`, which sets the new password with the same rules. Mail goes
+`/auth/callback?next=/auth/reset`, which sets the new password with the same rules. Mail goes
 through custom SMTP so it reaches any address, not only team members.
 
 **Adding staff (admin only).** Server action checks the caller is admin, then

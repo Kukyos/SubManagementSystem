@@ -21,7 +21,7 @@ add a row to Requests instead of editing it.
 | S3 | RLS, grants, billing run, finance summary, portal functions migration | B | ✅ |
 | S4 | Docs set (`docs/`) | B | ✅ |
 | S5 | Vercel project linked, env vars, first deploy | B | ✅ |
-| S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ⬜ |
+| S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ✅ |
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ⬜ |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
@@ -31,7 +31,7 @@ add a row to Requests instead of editing it.
 | # | Task | Owner | Status |
 |---|---|---|---|
 | T1.1 | Landing page (shard loop scene) | B | ✅ |
-| T1.2 | Sign up, sign in, forgot / reset password | B | ⬜ |
+| T1.2 | Sign up, sign in, forgot / reset password | B | ✅ |
 | T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ✅ (every route stubbed) |
 | T1.4 | Products list + editor with variants | B | ⬜ |
 | T1.5 | Plans list + editor | B | ⬜ |
@@ -60,7 +60,7 @@ add a row to Requests instead of editing it.
 
 | # | Task | Owner | Status |
 |---|---|---|---|
-| T3.1 | Invoice PDF + email send (Resend) | B | ⬜ |
+| T3.1 | Invoice PDF + email send (Gmail SMTP) | B | ⬜ |
 | T3.2 | Overdue reminder emails | B | ⬜ |
 | T3.3 | Revenue forecast | B | ⬜ |
 | T3.4 | Global search (⌘K) | B | ⬜ |

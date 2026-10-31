@@ -6,9 +6,9 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Where things stand (read this first in a new session)
 
-- **Live:** the landing page at https://managesubs.vercel.app. `Sign in` and
-  `Get started` point at `/login` and `/signup`, which are the next pages to
-  build (T1.2) and 404 until then.
+- **Live:** the landing page at https://managesubs.vercel.app, plus sign in,
+  sign up, forgot password and reset (`/login`, `/signup`,
+  `/forgot-password`, `/auth/reset`). Email links land on `/auth/callback`.
 - **Built and ready to use:**
   - design tokens in `src/app/globals.css`
   - UI primitives in `src/components/ui/`: `Button`, `ButtonLink`,
@@ -18,19 +18,30 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
     (`src/lib/format.ts`)
   - typed Supabase clients and generated DB types (`src/types/database.ts`,
     aliases in `models.ts`)
-  - `getCurrentUser` / `requireRole` / `signOut`
+  - `getCurrentUser` / `requireRole` / `signOut`, plus the auth actions
+    (`signIn`, `signUp`, `requestPasswordReset`, `updatePassword`) and the
+    password rules in `src/lib/password.ts`
 - **Shells:** console (`src/app/(app)/`, admin and staff) and portal
   (`src/app/portal/`, customers) both check the role on the server. Every
   screen has a stub page. Building a screen means replacing its stub and
   adding its service.
-- **Database:** live and tested (see below). It is empty: no seed data and no
-  users yet (S7).
-- **Waiting on the user:** a Gmail address and app password for SMTP (S6),
-  and Razorpay test keys (T2.8). `SUPABASE_SECRET_KEY` is needed locally and on
-  Vercel before staff creation (T1.11) works.
+- **Database:** live and tested (see below). No seed data yet (S7); one test
+  customer from checking sign-up.
+- **Waiting on the user:** Razorpay test keys (T2.8).
 
 ### Log
 
+- Auth pages: sign in, sign up, forgot password, choose a new password. They
+  share the landing scene, with the loop on the right and the form where the
+  headline was. Password rules (more than 8 characters, upper, lower, special)
+  live in `src/lib/password.ts`: the form checks them with a native `pattern`
+  and the server action checks them again. Signing up with an email that
+  already has an account says so (the brief wants one account per email).
+  `/auth/callback` handles both `?code=` and `?token_hash=` links.
+- **Decision: Gmail SMTP instead of Resend.** Supabase Auth sends through a
+  Gmail app password (custom SMTP, set in the dashboard), and invoice mail
+  will use the same account. Env names are `SMTP_*` in `.env.example`.
+- Commit rule simplified: one commit per page or fix, pushed when it's done.
 - Shard hover no longer parts the loop: shards under the pointer stay in
   place and spin fast and jitter instead, so the agitation follows the cursor
   without opening a hole in the shape.

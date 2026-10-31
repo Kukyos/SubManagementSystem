@@ -117,10 +117,10 @@ after a server-side role check.
   history shows who did the work. Merge small and often.
 - **Push at least once an hour, from everyone.** Work in progress goes on a
   branch; it still gets pushed.
-- **One thing per commit.** One page, one fix, one migration. If five pages
-  get finished in one sitting, they go out as five commits over the following
-  pushes, not one drop. Until they are pushed, their rows in `TASKS.md` say
-  📦 incoming so nobody starts on the same files.
+- **One thing per commit.** One page, one fix, one migration, pushed when it
+  is done. Don't split one change into several commits pushed in the same
+  minute. Until work is pushed, its rows in `TASKS.md` say 📦 incoming so
+  nobody starts on the same files.
 - Commit messages are short and plain, the way you'd say it to a teammate:
   "products page with variant editor", "fix rounding on subscription
   discounts". Code comments only where the why isn't obvious.
@@ -259,7 +259,7 @@ seconds against the full seed · `TASKS.md` ticked in the same push.
 - ⬜ Supabase GitHub integration: confirm it is not auto-deploying
   `supabase/` from this repo (migrations are applied directly).
 - ⬜ Supabase Auth: minimum password length 9, require lower, upper and symbol.
-- ⬜ Supabase Auth: custom SMTP (Resend) so reset links reach any address.
+- ✅ Supabase Auth: custom SMTP (Gmail) so reset links reach any address.
 - ⬜ Vercel project linked, production tracking `main`, env vars set.
 - ⬜ Razorpay test keys.
 - ⬜ Visual direction chosen; `DESIGN.md` filled.
