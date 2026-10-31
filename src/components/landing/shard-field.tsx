@@ -47,7 +47,7 @@ const FOG: [number, number] = [7, 17];
 const PIXEL_STEPS = [1.5, 1.25, 1, 0.85, 0.7];
 const SLOW_FRAME_MS = 24;
 // behind the console and portal the shards stay put and only turn, slowly
-const CALM_SPEED = 0.12;
+const CALM_SPEED = 0.6;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
