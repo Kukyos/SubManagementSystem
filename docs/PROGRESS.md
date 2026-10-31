@@ -4,6 +4,15 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Every email now matches the site: black page, dark card, the tetrahedron
+  logo, amber eyebrow, violet pill button, and the raw link under the button
+  for clients that block it. Mail clients drop SVG, so the logo is a PNG at
+  `public/email/logo.png`, loaded from the production URL.
+- **Decision: auth email templates live in `supabase/templates/`**
+  (`confirmation.html`, `recovery.html`) and get pasted into Supabase →
+  Authentication → Email Templates. They use `{{ .ConfirmationURL }}`, which
+  carries the PKCE code that `/auth/callback` exchanges. They copy the
+  markup of `emailLayout` in `src/lib/mailer.ts`; change both together.
 - Skeleton screens on every console and portal route (lists, detail pages,
   dashboard, billing, payments, settings), built from `ui/skeleton.tsx` and
   shaped like the page they stand in for. Without a `loading.tsx` a dynamic

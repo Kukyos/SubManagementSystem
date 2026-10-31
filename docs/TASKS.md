@@ -25,7 +25,7 @@ add a row to Requests instead of editing it.
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ✅ `supabase/seed.sql`: 688 customers, ~2,100 subscriptions, ~6,800 invoices, ~6,000 payments |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
-| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | 🔨 |
+| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | 🔨 templates in `supabase/templates/`; paste into Auth → Email Templates |
 
 ## Tier 1: the demo dies without these
 

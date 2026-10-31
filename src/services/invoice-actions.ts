@@ -120,6 +120,7 @@ export async function sendInvoice(_: FormState, formData: FormData): Promise<For
   const balance = Number(inv.total) - Number(inv.amount_paid);
   const overdue = invoiceDisplayStatus(inv.status, inv.due_date) === "overdue";
   const { html, text: plain } = emailLayout({
+    eyebrow: inv.status === "paid" ? "Receipt" : overdue ? "Overdue" : "New invoice",
     heading: inv.status === "paid" ? `Invoice ${inv.number}, paid` : `Invoice ${inv.number} for ${money(inv.total)}`,
     lines: [
       `Hi ${inv.customer.name.split(" ")[0]},`,
@@ -163,6 +164,7 @@ export async function sendOverdueReminders(_: FormState, formData: FormData): Pr
   const remind = async (c: (typeof customers)[number]) => {
     const oldest = c.invoices[0];
     const { html, text: plain } = emailLayout({
+      eyebrow: "Payment reminder",
       heading: `${money(c.balance)} is overdue`,
       lines: [
         `Hi ${c.name.split(" ")[0]},`,
