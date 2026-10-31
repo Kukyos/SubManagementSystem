@@ -4,6 +4,15 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Applied the three migrations to Supabase and renamed the files to the
+  versions Supabase recorded, so the GitHub integration treats them as already
+  applied.
+- Checked the billing rules against the live database (in a rolled-back
+  transaction): illegal transitions refused, missed periods caught up, re-run
+  bills nothing twice, variant extra price, product discount stopping at its
+  usage limit, GST on the discounted amount, partial then full payment
+  flipping the invoice to paid, overpayment refused.
+- Live at https://managesubs.vercel.app.
 - Scaffolded Next.js 16 (App Router, TypeScript, Tailwind v4) with Supabase
   SSR clients and `src/proxy.ts` for session refresh and the signed-out
   redirect.

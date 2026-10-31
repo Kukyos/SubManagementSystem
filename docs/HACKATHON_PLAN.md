@@ -13,7 +13,7 @@ the working state: what exists, what is being built, and what is next.
 | Problem statement | Subscription Management System (`materials/`, kept out of git) |
 | Working name | **Brightloop**: plans, subscriptions and recurring billing in one place |
 | Repository | https://github.com/Kukyos/SubManagementSystem |
-| Live URL | Vercel production, tracks `main`. **What is live is what is submitted.** |
+| Live URL | https://managesubs.vercel.app (tracks `main`). **What is live is what is submitted.** |
 | Stack | Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase (Postgres, Auth, RLS, pg_cron) · Vercel |
 
 ### The problem, in our own words

@@ -10,13 +10,13 @@ Lanes: **B** = Builder, **P** = Polisher. Status: ⬜ todo · 🔨 in progress �
 | # | Task | Owner | Status |
 |---|---|---|---|
 | S1 | Next.js scaffold, Supabase clients, session proxy | B | ✅ |
-| S2 | Schema + lifecycle triggers migration | B | ✅ written, ⬜ applied |
-| S3 | RLS, grants, billing run, finance summary, portal functions migration | B | ✅ written, ⬜ applied |
+| S2 | Schema + lifecycle triggers migration | B | ✅ |
+| S3 | RLS, grants, billing run, finance summary, portal functions migration | B | ✅ |
 | S4 | Docs set (`docs/`) | B | ✅ |
-| S5 | Vercel project linked, env vars, first deploy | B | ⬜ |
+| S5 | Vercel project linked, env vars, first deploy | B | ✅ |
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ⬜ |
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ⬜ |
-| S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | ⬜ |
+| S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ⬜ |
 
 ## Tier 1: the demo dies without these
