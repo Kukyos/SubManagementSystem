@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogoMark } from "@/components/brand/logo";
 import { INTRO_KEY } from "./intro";
 
-const MIN_MS = 1700;
+const MIN_MS = 1100;
 
 /*
   Intro screen in the reference's style: a turning mark, a two-line statement
@@ -13,7 +13,8 @@ const MIN_MS = 1700;
   and the hero's own entrance plays after it.
 */
 export function SiteLoader() {
-  const [pct, setPct] = useState(0);
+  // the counter is written straight to the DOM so React doesn't re-render every frame
+  const counterRef = useRef<HTMLSpanElement>(null);
   const [phase, setPhase] = useState<"loading" | "done" | "gone">("loading");
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export function SiteLoader() {
     const tick = () => {
       let p = Math.min(1, (performance.now() - start) / MIN_MS);
       if (!fontsReady) p = Math.min(p, 0.9);
-      setPct(Math.round((1 - Math.pow(1 - p, 2)) * 100));
+      if (counterRef.current) counterRef.current.textContent = String(Math.round((1 - Math.pow(1 - p, 2)) * 100));
       if (p < 1) {
         raf = requestAnimationFrame(tick);
         return;
@@ -46,8 +47,8 @@ export function SiteLoader() {
           try {
             sessionStorage.setItem(INTRO_KEY, "1");
           } catch {}
-        }, 650),
-        window.setTimeout(() => setPhase("gone"), 1600),
+        }, 300),
+        window.setTimeout(() => setPhase("gone"), 900),
       );
     };
     raf = requestAnimationFrame(tick);
@@ -63,7 +64,7 @@ export function SiteLoader() {
   return (
     <div
       aria-hidden
-      className="site-loader fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-black px-5 transition-opacity duration-700 ease-out-soft"
+      className="site-loader fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-black px-5 transition-opacity duration-500 ease-out-soft"
     >
       <LogoMark className="size-20 animate-[loader-spin_3s_ease-in-out_infinite] md:size-24" />
       <div className="mt-12 text-center text-[clamp(1.5rem,4.2vw,3.5rem)] leading-[1.2] font-normal tracking-[-0.04em]">
@@ -84,7 +85,9 @@ export function SiteLoader() {
             <span className="wipe [animation-duration:0.6s]">Completed</span>
           )}
         </span>
-        <span className="tabular text-[2rem] leading-none font-normal">{pct}</span>
+        <span ref={counterRef} className="tabular text-[2rem] leading-none font-normal">
+          0
+        </span>
       </div>
     </div>
   );

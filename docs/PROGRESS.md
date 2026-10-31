@@ -34,6 +34,13 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Landing timings tightened: intro loader minimum 1.1s (was 1.7s) with a
+  shorter hold and fade, its counter written to the DOM instead of
+  re-rendering React each frame, and the hero lead and buttons follow the
+  headline sooner. "Who it's for" cards dropped `backdrop-blur`, which was
+  re-blurring the live canvas every frame; a darker fill keeps them legible.
+  Measured on hardware GPU: 60fps steady, one dropped frame in a 6s full-page
+  scroll.
 - Shard field moved onto the GPU: positions, tumble, hover orbit, scatter
   and amber edges are computed in a vertex shader from instanced attributes
   written once; the CPU only updates a few uniforms per frame. Same look,

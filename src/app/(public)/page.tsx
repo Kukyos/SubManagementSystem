@@ -89,15 +89,15 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="eyebrow mt-10 overflow-hidden">
-              <span className="wipe [animation-delay:700ms] [animation-duration:1s]">
+              <span className="wipe [animation-delay:420ms] [animation-duration:0.9s]">
                 Stop chasing renewals. Start billing them.
               </span>
             </p>
-            <p className="rise mt-4 max-w-xl text-lead font-extralight [animation-delay:850ms]">
+            <p className="rise mt-4 max-w-xl text-lead font-extralight [animation-delay:500ms]">
               Plans, subscriptions, invoices and payments in one place. Brightloop bills every customer on time,
               applies the right taxes and discounts, and tells you exactly how much recurring revenue you have.
             </p>
-            <div className="rise mt-8 flex flex-wrap gap-3 [animation-delay:1000ms]">
+            <div className="rise mt-8 flex flex-wrap gap-3 [animation-delay:620ms]">
               <ButtonLink href="/signup" size="lg">
                 Get started
               </ButtonLink>
@@ -186,7 +186,7 @@ export default function LandingPage() {
           </h2>
           <div className="mt-16 grid gap-4 md:grid-cols-3">
             {roles.map((r) => (
-              <div key={r.who} className="reveal rounded-card border border-line bg-black/60 p-8 backdrop-blur-md">
+              <div key={r.who} className="reveal rounded-card border border-line bg-black/80 p-8">
                 <p className="text-2xl font-normal tracking-[-0.01em]">
                   {r.who} <span className="text-muted">{r.line}.</span>
                 </p>
