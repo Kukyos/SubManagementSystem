@@ -36,7 +36,7 @@ add a row to Requests instead of editing it.
 | T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ✅ (every route stubbed) |
 | T1.4 | Products list + editor with variants | B | ✅ |
 | T1.5 | Plans list + editor | B | ✅ |
-| T1.6 | Customers list + detail | B | ⬜ |
+| T1.6 | Customers list + detail | B | ✅ |
 | T1.7 | Subscriptions list (filters, status pipeline) | B | ⬜ |
 | T1.8 | Subscription editor + detail: lines, status actions, timeline | B | ⬜ |
 | T1.9 | Invoices list + detail: confirm, cancel, print | B | ⬜ |

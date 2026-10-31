@@ -8,9 +8,9 @@ const productColumns = "id, name, type, sales_price, tax_id, notes, is_active, c
 export const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Wildcards in what people type are matched literally.
-const likeTerm = (s: string) => `%${s.replace(/[%_\\]/g, "\\$&")}%`;
+export const likeTerm = (s: string) => `%${s.replace(/[%_\\]/g, "\\$&")}%`;
 
-export type ProductRow =Product & {
+export type ProductRow = Product & {
   tax: Pick<Tax, "name" | "rate"> | null;
   variantCount: number;
   costPrice: number | null;
@@ -131,6 +131,18 @@ export async function listPlans({
 export async function getPlan(id: string): Promise<Plan | null> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("plans").select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// For line pickers: every variant, grouped client-side under its product.
+export async function listVariantOptions(): Promise<ProductVariant[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select("id, product_id, attribute, value, extra_price")
+    .order("attribute")
+    .order("value");
   if (error) throw new Error(error.message);
   return data;
 }
