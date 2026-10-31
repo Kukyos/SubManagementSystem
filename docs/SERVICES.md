@@ -89,7 +89,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | function | state |
 |---|---|
 | `getFinanceSummary(from?, to?)` (numbers normalised from jsonb) | ✅ |
-| `search(term)` (customers, subscriptions, invoices) | ⬜ |
+| `search(term)` (customers, subscriptions, invoices; five each, numbers by prefix) | ✅ |
+| `quickSearch(term)` (`services/search-actions.ts`; staff only, for the ⌘K palette) | ✅ |
 
 ## exports (`services/exports.ts`)
 | function | state |

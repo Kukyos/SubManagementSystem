@@ -20,6 +20,8 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
 
 ## Ideas
 
+- Search on phones: the ⌘K box is hidden under 768px; a search icon in the
+  small-screen header would open the same palette.
 - Feed the dashboard's shard field from real subscriptions: colour by plan,
   dim when paused, pulse amber when an invoice is overdue.
 
@@ -39,6 +41,10 @@ this build. Move an idea into `TASKS.md` when someone takes it on.
   values back re-key their fieldset on the returned values.
 
 _Add them as they happen, in the same push as the fix._
+
+- The global `:focus-visible` ring in `globals.css` is unlayered, so it beats
+  every Tailwind utility (`focus:outline-none` does nothing). An element that
+  shows focus another way has to switch it off with an inline style.
 
 - `auth.admin.createUser({ app_metadata: { role } })` makes the profile as a
   customer: the sign-up trigger runs before the role is written. Demo admin and

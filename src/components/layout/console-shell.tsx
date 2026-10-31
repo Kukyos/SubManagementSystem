@@ -1,4 +1,5 @@
 import { Logo } from "@/components/brand/logo";
+import { CommandPalette } from "@/components/layout/command-palette";
 import { NavLink } from "@/components/layout/nav-link";
 import type { NavGroup } from "@/components/layout/nav-config";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -33,7 +34,9 @@ export function ConsoleShell({ user, groups, children }: { user: CurrentUser; gr
             <div className="md:hidden">
               <Logo href="/dashboard" />
             </div>
-            <div className="hidden text-sm text-faint md:block">Brightloop console</div>
+            <div className="hidden flex-1 md:block">
+              <CommandPalette pages={groups.flatMap((g) => g.items)} />
+            </div>
             <UserMenu user={user} />
           </div>
         </header>

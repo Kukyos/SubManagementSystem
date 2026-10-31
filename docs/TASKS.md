@@ -64,7 +64,7 @@ add a row to Requests instead of editing it.
 | T3.1 | Invoice PDF + email send (Gmail SMTP) | B | ⬜ |
 | T3.2 | Overdue reminder emails | B | ⬜ |
 | T3.3 | Revenue forecast | B | ⬜ |
-| T3.4 | Global search (⌘K) | B | ⬜ |
+| T3.4 | Global search (⌘K) | B | ✅ pages, customers, subscriptions, invoices |
 | T3.5 | CSV export on lists | B | ✅ customers, subscriptions, invoices, payments; current filters, every page |
 | T3.6 | Light theme (the app is dark-first) | B | ⬜ |
 | T3.7 | Showcase README with screenshots | B | ⬜ |

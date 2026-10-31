@@ -4,6 +4,10 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Global search: ⌘K / Ctrl+K, or the search box in the console header, opens
+  a palette that jumps to any console page and finds customers (name, email,
+  company), subscriptions and invoices (number, or customer name). Arrow keys
+  and Enter; only the newest answer is shown while typing.
 - CSV export on customers, subscriptions, invoices and payments. The button
   passes the list's filters to `/export/[list]`, which walks every page
   (1,000 rows a request) through the same list services, so the file is
