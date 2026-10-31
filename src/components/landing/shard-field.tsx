@@ -31,7 +31,7 @@ const PALETTE: [string, number][] = [
   ["#5b8cff", 0.06],
 ];
 
-const HOVER_RADIUS = 2.5;
+const HOVER_RADIUS = 2;
 const ORBIT = 0.09;
 const ORBIT_SPEED = 7;
 const HYPER_SPIN = 14;
