@@ -54,7 +54,7 @@ export function ShardField() {
 
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const small = window.innerWidth < 768;
-      const COUNT = small ? 1600 : 5200;
+      const COUNT = small ? 900 : 2800;
 
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -104,10 +104,22 @@ export function ShardField() {
       const color = new THREE.Color();
       const amber = new THREE.Color("#ffb829");
       const RIM = [amber.r, amber.g, amber.b];
+      // Random phases per load, so the dense clumps and thin patches land somewhere new each visit.
+      const p1 = Math.random() * Math.PI * 2;
+      const p2 = Math.random() * Math.PI * 2;
+      const p3 = Math.random() * Math.PI * 2;
+      const density = (u: number, v: number) => {
+        const d = 0.5 + 0.25 * Math.sin(3 * u + p1) + 0.15 * Math.sin(5 * u + 2 * v + p2) + 0.1 * Math.sin(2 * v + p3);
+        return 0.1 + 0.9 * d * d;
+      };
       for (let i = 0; i < COUNT; i++) {
-        // torus shell, slightly thick so it reads as a volume
-        const u = Math.random() * Math.PI * 2;
-        const v = Math.random() * Math.PI * 2;
+        // torus shell, slightly thick so it reads as a volume; rejection sampling makes it patchy
+        let u = 0;
+        let v = 0;
+        do {
+          u = Math.random() * Math.PI * 2;
+          v = Math.random() * Math.PI * 2;
+        } while (Math.random() > density(u, v));
         const r = 0.62 * (0.82 + Math.random() * 0.22);
         loop[i * 3] = (R + r * Math.cos(v)) * Math.cos(u);
         loop[i * 3 + 1] = r * Math.sin(v);
