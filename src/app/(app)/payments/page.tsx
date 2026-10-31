@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { Pager } from "@/components/ui/pager";
 import { date, money, moneyCompact } from "@/lib/format";
 import { methodLabel } from "@/lib/status";
+import { ActionButton } from "@/components/sales/action-button";
 import { requireRole } from "@/services/auth";
+import { sendOverdueReminders } from "@/services/invoice-actions";
 import { listPayments, overdueAging, paymentMethods } from "@/services/payments";
 import type { PaymentMethod } from "@/types/models";
 
 export const metadata = { title: "Payments" };
+// Sending reminders to every overdue customer can take a while.
+export const maxDuration = 120;
 
 const pageSize = 25;
 
@@ -28,7 +33,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
 
   return (
     <>
-      <PageHeader eyebrow="Billing" title="Payments" description="Every payment recorded against an invoice, and what is still overdue." />
+      <PageHeader
+        eyebrow="Billing"
+        title="Payments"
+        description="Every payment recorded against an invoice, and what is still overdue."
+        actions={<ExportLink list="payments" params={{ q: search, method, from, to }} />}
+      />
 
       <Card className="mb-8">
         <CardHeader
@@ -48,6 +58,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             )
           }
         />
+        {aging.count > 0 && (
+          // A second click to confirm: this emails real customers.
+          <details className="group border-b border-line px-5 py-3">
+            <summary className="cursor-pointer list-none text-sm text-muted hover:text-fg group-open:text-fg">
+              Email reminders to {aging.customers} customer{aging.customers === 1 ? "" : "s"}…
+            </summary>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <p className="text-xs text-muted">
+                One email each, listing what they owe past due with a link to pay.
+              </p>
+              <ActionButton action={sendOverdueReminders} fields={{}} label="Send reminders" busy="Sending…" variant="primary" />
+            </div>
+          </details>
+        )}
         {aging.count === 0 ? (
           <p className="px-5 py-6 text-sm text-muted">Nothing overdue. Every confirmed invoice is inside its payment terms.</p>
         ) : (
@@ -62,7 +86,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
                     </span>
                   </div>
                   {/* Older debt reads hotter: amber through to pink. */}
-                  <div className="mt-1.5 h-1.5 rounded-full bg-white/[0.06]">
+                  <div className="mt-1.5 h-1.5 rounded-full bg-ink/[0.06]">
                     <div
                       className={`h-full rounded-full ${["bg-amber/60", "bg-amber", "bg-pink/70", "bg-pink"][i]}`}
                       style={{ width: `${(b.amount / worst) * 100}%` }}
@@ -132,7 +156,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
-                <tr key={p.id} className="hover:bg-white/[0.02]">
+                <tr key={p.id} className="hover:bg-ink/[0.02]">
                   <td className="px-5 py-3 text-muted">{date(p.paid_on)}</td>
                   <td className="px-5 py-3">
                     {p.invoice ? (

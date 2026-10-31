@@ -73,7 +73,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listInvoices(query)` (status incl. overdue, customer, search), `invoiceCounts()` | ✅ |
 | `getInvoice(id)` (lines, payments, timeline) | ✅ |
 | `setInvoiceStatus(state, formData)`, `confirmDrafts(ids)` (`services/invoice-actions.ts`) | ✅ |
-| `sendInvoice(id)` (email with PDF) | ⬜ |
+| `sendInvoice(state, formData)` (`id`; email with the PDF attached, stamps `sent_at`; `services/invoice-actions.ts`) | ✅ |
+| `invoicePdfResponse(id, as)` (`services/invoice-files.ts`): the PDF for `GET /invoices/[id]/pdf` (staff) and `GET /portal/invoices/[id]/pdf` (own invoices, no drafts) | ✅ |
 | `runBilling(state, formData)` (`asOf`; `services/invoice-actions.ts`) | ✅ |
 | `listBillingRuns(limit?)`, `billingDue()` (due subscriptions, draft invoices) | ✅ |
 
@@ -81,15 +82,24 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | function | state |
 |---|---|
 | `listPayments(query)` (method, date range, customer or invoice search) | ✅ |
-| `overdueAging()`: overdue balance in 30-day buckets, oldest invoices | ✅ |
+| `overdueAging()`: overdue balance in 30-day buckets, oldest invoices, customer count | ✅ |
 | `recordPayment(state, formData)` (`services/invoice-actions.ts`) | ✅ |
+| `overdueByCustomer()`: overdue invoices grouped per customer, longest owing first | ✅ |
+| `sendOverdueReminders(state, formData)` (`services/invoice-actions.ts`): one email per overdue customer | ✅ |
 | `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` | ⬜ |
 
 ## reports (`services/reports.ts`)
 | function | state |
 |---|---|
 | `getFinanceSummary(from?, to?)` (numbers normalised from jsonb) | ✅ |
-| `search(term)` (customers, subscriptions, invoices) | ⬜ |
+| `revenueForecast(months?)`: expected billing per month from active and confirmed subscriptions (with tax, before discounts) | ✅ |
+| `search(term)` (customers, subscriptions, invoices; five each, numbers by prefix) | ✅ |
+| `quickSearch(term)` (`services/search-actions.ts`; staff only, for the ⌘K palette) | ✅ |
+
+## exports (`services/exports.ts`)
+| function | state |
+|---|---|
+| `exportCsv(list, params)`: customers, subscriptions, invoices or payments as CSV, taking the list page's query string; served by `GET /export/[list]` (staff only) | ✅ |
 
 ## portal (`services/portal.ts`)
 | function | state |

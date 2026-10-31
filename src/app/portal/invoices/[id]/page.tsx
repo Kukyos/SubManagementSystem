@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { InvoiceDocument } from "@/components/sales/invoice-document";
 import { PrintButton } from "@/components/sales/payment-form";
 import { InvoiceBadge } from "@/components/ui/badge";
+import { buttonClass } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { date, money } from "@/lib/format";
@@ -75,7 +76,10 @@ export default async function Page({
                 {inv.status === "paid" ? `Paid in full on ${date(inv.paid_at)}. Thank you.` : "This invoice was cancelled. Nothing to pay."}
               </p>
             )}
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a href={`/portal/invoices/${inv.id}/pdf`} target="_blank" rel="noopener" className={buttonClass({ variant: "secondary", size: "sm" })}>
+                Download PDF
+              </a>
               <PrintButton />
             </div>
           </Card>

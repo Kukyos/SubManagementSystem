@@ -79,7 +79,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <table className="w-full text-sm">
                 <tbody className="divide-y divide-line">
                   {customer.subscriptions.map((s) => (
-                    <tr key={s.id} className="hover:bg-white/[0.02]">
+                    <tr key={s.id} className="hover:bg-ink/[0.02]">
                       <td className="px-5 py-3">
                         <Link href={`/subscriptions/${s.id}`} className="font-medium hover:text-accent-hover">
                           {s.number}
@@ -117,7 +117,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <table className="w-full text-sm">
                 <tbody className="divide-y divide-line">
                   {customer.invoices.map((i) => (
-                    <tr key={i.id} className="hover:bg-white/[0.02]">
+                    <tr key={i.id} className="hover:bg-ink/[0.02]">
                       <td className="px-5 py-3">
                         <Link href={`/invoices/${i.id}`} className="font-medium hover:text-accent-hover">
                           {i.number}

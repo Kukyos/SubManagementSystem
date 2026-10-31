@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StatusTabs } from "@/components/sales/status-tabs";
 import { SubscriptionBadge } from "@/components/ui/badge";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
@@ -37,7 +38,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         eyebrow="Sales"
         title="Subscriptions"
         description="Every deal from first draft to closed. Click a status to see just those."
-        actions={<ButtonLink href="/subscriptions/new">New subscription</ButtonLink>}
+        actions={
+          <>
+            <ExportLink list="subscriptions" params={{ q: search, status, plan: planId }} />
+            <ButtonLink href="/subscriptions/new">New subscription</ButtonLink>
+          </>
+        }
       />
 
       <StatusTabs
@@ -82,7 +88,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((s) => (
-                <tr key={s.id} className="hover:bg-white/[0.02]">
+                <tr key={s.id} className="hover:bg-ink/[0.02]">
                   <td className="px-5 py-3">
                     <Link href={`/subscriptions/${s.id}`} className="tabular font-medium hover:text-accent-hover">
                       {s.number}

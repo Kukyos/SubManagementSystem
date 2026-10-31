@@ -5,6 +5,7 @@ import { PaymentForm, PrintButton } from "@/components/sales/payment-form";
 import { InvoiceDocument } from "@/components/sales/invoice-document";
 import { Timeline } from "@/components/sales/timeline";
 import { InvoiceBadge } from "@/components/ui/badge";
+import { buttonClass } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { date, money } from "@/lib/format";
@@ -12,7 +13,7 @@ import { today } from "@/lib/forms";
 import { invoiceDisplayStatus, methodLabel } from "@/lib/status";
 import { requireRole } from "@/services/auth";
 import { uuid } from "@/services/catalogue";
-import { setInvoiceStatus } from "@/services/invoice-actions";
+import { sendInvoice, setInvoiceStatus } from "@/services/invoice-actions";
 import { getInvoice } from "@/services/invoices";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -67,8 +68,21 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             {(inv.status === "draft" || (inv.status === "confirmed" && Number(inv.amount_paid) === 0)) && (
               <ActionButton action={setInvoiceStatus} fields={{ id: inv.id, status: "cancelled" }} label="Cancel invoice" busy="Cancelling…" variant="danger" />
             )}
+            {(inv.status === "confirmed" || inv.status === "paid") && (
+              <ActionButton
+                action={sendInvoice}
+                fields={{ id: inv.id }}
+                label={inv.sent_at ? "Send again" : "Email to customer"}
+                busy="Sending…"
+                variant={inv.sent_at || inv.status === "paid" ? "secondary" : "primary"}
+              />
+            )}
+            <a href={`/invoices/${inv.id}/pdf`} target="_blank" rel="noopener" className={buttonClass({ variant: "secondary", size: "sm" })}>
+              PDF
+            </a>
             <PrintButton />
             <p className="w-full text-xs text-faint">
+              {inv.sent_at && <>Emailed to {inv.customer.email} on {date(inv.sent_at)}. </>}
               {inv.status === "draft"
                 ? "Drafts can still change. Confirming locks the lines and starts the payment clock."
                 : inv.status === "cancelled"

@@ -64,6 +64,7 @@ export type Aging = {
   buckets: { label: string; count: number; amount: number }[];
   total: number;
   count: number;
+  customers: number;
   oldest: OverdueInvoice[];
 };
 
@@ -104,6 +105,40 @@ export async function overdueAging(): Promise<Aging> {
     buckets,
     total: rows.reduce((n, r) => n + r.balance, 0),
     count: rows.length,
+    customers: new Set(rows.map((r) => r.customer?.id)).size,
     oldest: rows.slice(0, 8),
   };
+}
+
+export type OverdueCustomer = {
+  id: string;
+  name: string;
+  email: string;
+  balance: number;
+  invoices: { id: string; number: string; due_date: string; balance: number; daysLate: number }[];
+};
+
+// Overdue invoices grouped per customer, the customer owing longest first. For reminder emails.
+export async function overdueByCustomer(): Promise<OverdueCustomer[]> {
+  const supabase = await createClient();
+  const now = today();
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("id, number, due_date, total, amount_paid, customers(id, name, email)")
+    .eq("status", "confirmed")
+    .lt("due_date", now)
+    .order("due_date");
+  if (error) throw new Error(error.message);
+
+  const nowMs = Date.parse(now);
+  const byCustomer = new Map<string, OverdueCustomer>();
+  for (const i of data) {
+    if (!i.customers) continue;
+    const c = byCustomer.get(i.customers.id) ?? { ...i.customers, balance: 0, invoices: [] };
+    const balance = Number(i.total) - Number(i.amount_paid);
+    c.balance += balance;
+    c.invoices.push({ id: i.id, number: i.number, due_date: i.due_date, balance, daysLate: Math.round((nowMs - Date.parse(i.due_date)) / 86_400_000) });
+    byCustomer.set(c.id, c);
+  }
+  return [...byCustomer.values()];
 }

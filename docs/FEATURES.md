@@ -36,7 +36,7 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 |---|---|---|
 | Invoices generated from subscriptions, details pre-filled | `bill_subscription`, `run_billing` | 🟡 |
 | Taxes calculated from admin rules | `taxes`, line tax rate | 🟡 |
-| Confirm, cancel, send, print | invoice detail page, print stylesheet; email is T3.1 | 🟡 |
+| Confirm, cancel, send, print | invoice detail page: email with PDF attached, PDF download, print stylesheet | ✅ |
 | Draft → Confirmed → Paid | invoice trigger | 🟡 |
 | Nothing billed twice or skipped | unique period index + catch-up loop | 🟡 |
 
@@ -70,9 +70,9 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 | Customer pause / resume / cancel within plan rules | "manage their own subscriptions" taken literally | 🟡 |
 | MRR, 12-month invoiced vs collected, new vs churned, top plans | the questions the finance lead actually asks | 🟡 |
 | Status timeline on every subscription and invoice | "anyone on the team can see where it stands" | 🟡 |
-| Invoice PDF / print view and email delivery | send and print, done properly | ⬜ |
-| Overdue reminders (dunning) | chase before it becomes lost revenue | ⬜ |
-| Revenue forecast from active subscriptions | next months' expected billing | ⬜ |
-| Global search (customers, subscriptions, invoices) | thousands of rows need a way in | ⬜ |
-| CSV export of any list | finance always wants a spreadsheet | ⬜ |
-| Dark mode | | ⬜ |
+| Invoice PDF / print view and email delivery | send and print, done properly | ✅ |
+| Overdue reminders (dunning) | chase before it becomes lost revenue | ✅ |
+| Revenue forecast from active subscriptions | next months' expected billing | ✅ |
+| Global search (customers, subscriptions, invoices) | thousands of rows need a way in | ✅ |
+| CSV export of any list | finance always wants a spreadsheet | ✅ |
+| Light theme (dark is the default) | people who work in daylight | ✅ |

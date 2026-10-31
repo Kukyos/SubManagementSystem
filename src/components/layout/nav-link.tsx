@@ -15,7 +15,7 @@ export function NavLink({ href, label, exact, className }: { href: string; label
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
-        active ? "bg-white/[0.06] text-fg" : "text-muted hover:bg-white/[0.03] hover:text-fg",
+        active ? "bg-ink/[0.06] text-fg" : "text-muted hover:bg-ink/[0.03] hover:text-fg",
         className,
       )}
     >
@@ -23,7 +23,7 @@ export function NavLink({ href, label, exact, className }: { href: string; label
         aria-hidden
         className={cn(
           "size-1.5 shrink-0 [clip-path:polygon(50%_0,100%_100%,0_100%)]",
-          active ? "bg-amber" : "bg-white/20",
+          active ? "bg-amber" : "bg-ink/20",
         )}
       />
       {label}

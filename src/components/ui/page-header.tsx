@@ -26,7 +26,7 @@ export function PageHeader({
 export function EmptyState({ title, body, action }: { title: string; body?: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-line px-6 py-16 text-center">
-      <span aria-hidden className="size-6 bg-white/15 [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
+      <span aria-hidden className="size-6 bg-ink/15 [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
       <p className="text-sm font-medium">{title}</p>
       {body && <p className="max-w-sm text-sm text-muted">{body}</p>}
       {action}

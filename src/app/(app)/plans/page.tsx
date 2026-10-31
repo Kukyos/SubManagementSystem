@@ -61,7 +61,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
-                <tr key={p.id} className="hover:bg-white/[0.02]">
+                <tr key={p.id} className="hover:bg-ink/[0.02]">
                   <td className="px-5 py-3">
                     <Link href={`/plans/${p.id}`} className="font-medium hover:text-accent-hover">
                       {p.name}

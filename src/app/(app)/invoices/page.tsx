@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StatusTabs } from "@/components/sales/status-tabs";
 import { InvoiceBadge } from "@/components/ui/badge";
 import { Button, buttonClass } from "@/components/ui/button";
+import { ExportLink } from "@/components/ui/export-link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
@@ -38,11 +39,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         title="Invoices"
         description="Created by the billing run as drafts. Confirm them to send, then record what comes in."
         actions={
-          drafts.length > 0 && (
-            <form action={confirmDrafts.bind(null, drafts)}>
-              <Button>Confirm {drafts.length} draft{drafts.length === 1 ? "" : "s"} below</Button>
-            </form>
-          )
+          <>
+            <ExportLink list="invoices" params={{ q: search, status, customer: customerId }} />
+            {drafts.length > 0 && (
+              <form action={confirmDrafts.bind(null, drafts)}>
+                <Button>Confirm {drafts.length} draft{drafts.length === 1 ? "" : "s"} below</Button>
+              </form>
+            )}
+          </>
         }
       />
 
@@ -90,7 +94,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
               {rows.map((i) => {
                 const due = Number(i.total) - Number(i.amount_paid);
                 return (
-                  <tr key={i.id} className="hover:bg-white/[0.02]">
+                  <tr key={i.id} className="hover:bg-ink/[0.02]">
                     <td className="px-5 py-3">
                       <Link href={`/invoices/${i.id}`} className="tabular font-medium hover:text-accent-hover">
                         {i.number}

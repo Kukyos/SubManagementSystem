@@ -4,6 +4,54 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Light theme for the console and portal: a sun / moon button in the header,
+  remembered in a `theme` cookie and read on the server. Tokens switch on the
+  shell's `data-theme`; hard-coded `white/…` overlays became an `ink` token,
+  and the chart's gridlines and labels use tokens too. Landing and auth stay
+  dark.
+- Fixed a hydration mismatch on the dashboard charts: Node printed compact
+  money as `₹25.0L` and browsers as `₹25L`. `moneyCompact` now sets its
+  minimum fraction digits.
+- Overdue reminders: "Email reminders to N customers…" on the Payments
+  overdue card (asks twice) sends each customer one email listing what's past
+  due, oldest first, with a link to their invoices. Five at a time over a
+  pooled connection; the page allows 120 seconds for the run.
+- Invoice PDF and email. Console invoices have "Email to customer" (confirmed
+  or paid; "Send again" once `sent_at` is set) and a PDF link; the portal has
+  "Download PDF". The email is one short message with a "View and pay" button
+  to the portal and the PDF attached.
+- **Decision: `pdf-lib` for PDF, `nodemailer` for email.** pdf-lib is pure
+  JS and runs in a serverless function with no browser; the PDF is drawn by
+  hand to match the on-screen invoice. Its built-in Helvetica has no ₹, so
+  the PDF prints `Rs.`. nodemailer sends through the Gmail account in
+  `SMTP_*`. Without those env vars the send button says email isn't set up
+  instead of failing. Shared pieces are `lib/invoice-pdf.ts` and
+  `lib/mailer.ts` (one email layout for everything we send).
+- Revenue forecast on the dashboard: expected billing for this month and the
+  next five. It walks each active subscription's periods the way
+  `bill_subscription` does (from `next_invoice_date`, one cycle at a time,
+  month ends clamped like Postgres, stopping at expiry); periods already due
+  count in this month. Confirmed subscriptions show apart (amber) from their
+  start date. With tax, before discounts, so it reads against Invoiced.
+  **Decision: computed in the service, not SQL.** It is a projection, not a
+  billing rule, and ~2,000 subscriptions is one query.
+- Global search: ⌘K / Ctrl+K, or the search box in the console header, opens
+  a palette that jumps to any console page and finds customers (name, email,
+  company), subscriptions and invoices (number, or customer name). Arrow keys
+  and Enter; only the newest answer is shown while typing.
+- CSV export on customers, subscriptions, invoices and payments. The button
+  passes the list's filters to `/export/[list]`, which walks every page
+  (1,000 rows a request) through the same list services, so the file is
+  exactly what the screen shows. UTF-8 with a BOM for Excel; cells that look
+  like formulas are prefixed with `'`.
+- Signed-in shells line up: the portal header and page share one 1440px
+  container (the landing's width) instead of a narrower 1152px one that left
+  wide black margins, with the nav beside the logo. Console header and page
+  share the same gutters. Settings puts Team and Taxes side by side on wide
+  screens; portal profile puts billing details beside the password card.
+  Layout markup moved from `(app)/layout.tsx` and `portal/layout.tsx` into
+  `components/layout/console-shell.tsx` and `portal-shell.tsx`; the layouts
+  keep the role check.
 - Customer portal: overview with balance and pause / resume / cancel (cancel
   asks twice), invoices with the same printable document as the console
   (moved to `components/sales/invoice-document.tsx`), plans with one-step

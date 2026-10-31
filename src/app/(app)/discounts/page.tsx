@@ -74,7 +74,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
               {rows.map((d) => {
                 const live = liveness(d, now);
                 return (
-                  <tr key={d.id} className="hover:bg-white/[0.02]">
+                  <tr key={d.id} className="hover:bg-ink/[0.02]">
                     <td className="px-5 py-3">
                       <Link href={`/discounts/${d.id}`} className="font-medium hover:text-accent-hover">
                         {d.name}

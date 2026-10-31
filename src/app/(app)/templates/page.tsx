@@ -48,7 +48,7 @@ export default async function Page() {
             </thead>
             <tbody className="divide-y divide-line">
               {templates.map((t) => (
-                <tr key={t.id} className="hover:bg-white/[0.02]">
+                <tr key={t.id} className="hover:bg-ink/[0.02]">
                   <td className="px-5 py-3">
                     <Link href={`/templates/${t.id}`} className="font-medium hover:text-accent-hover">
                       {t.name}

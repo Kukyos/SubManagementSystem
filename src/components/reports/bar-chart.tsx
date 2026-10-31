@@ -52,8 +52,8 @@ export function MonthlyBars({
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={title} onMouseLeave={() => setHover(null)}>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={pad.left} x2={W - pad.right} y1={y(t)} y2={y(t)} stroke="rgb(255 255 255 / 0.08)" />
-            <text x={pad.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-[rgb(255_255_255/0.38)] text-[10px]">
+            <line x1={pad.left} x2={W - pad.right} y1={y(t)} y2={y(t)} stroke="var(--color-line)" />
+            <text x={pad.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-faint text-[10px]">
               {fmt(t)}
             </text>
           </g>
@@ -62,13 +62,13 @@ export function MonthlyBars({
           const x0 = pad.left + i * slot + (slot - groupW) / 2;
           return (
             <g key={m}>
-              {hover === i && <rect x={pad.left + i * slot} y={pad.top} width={slot} height={plotH} fill="rgb(255 255 255 / 0.04)" />}
+              {hover === i && <rect x={pad.left + i * slot} y={pad.top} width={slot} height={plotH} className="fill-ink/[0.04]" />}
               {series.map((s, j) => {
                 const v = s.values[i] ?? 0;
                 const h = Math.max(0, pad.top + plotH - y(v));
                 return h > 0 ? <BarUp key={s.key} x={x0 + j * (barW + gap)} y={y(v)} w={barW} h={h} fill={s.color} /> : null;
               })}
-              <text x={pad.left + i * slot + slot / 2} y={H - 8} textAnchor="middle" className="fill-[rgb(255_255_255/0.38)] text-[10px]">
+              <text x={pad.left + i * slot + slot / 2} y={H - 8} textAnchor="middle" className="fill-faint text-[10px]">
                 {monthFmt.format(asDate(m))}
               </text>
               {/* Hit target: the whole month column, not just the bars. */}
