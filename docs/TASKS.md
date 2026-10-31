@@ -25,7 +25,7 @@ add a row to Requests instead of editing it.
 | S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ✅ `supabase/seed.sql`: 688 customers, ~2,100 subscriptions, ~6,800 invoices, ~6,000 payments |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
-| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | ⬜ |
+| S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | 🔨 |
 
 ## Tier 1: the demo dies without these
 
@@ -75,17 +75,17 @@ Small, contained, inside existing pages. Rows get added as pages land.
 
 | # | Task | Page | Owner | Status |
 |---|---|---|---|---|
-| P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | P | ⬜ |
+| P1 | Password strength meter (colour bar + checklist of the four rules) | Sign up, reset | B | 🔨 |
 | P2 | Show / hide password toggle (a shard: solid while hidden, wireframe when shown) | Sign in, sign up, reset | P | ✅ |
-| P3 | Friendly empty states with a next action | All lists | P | ⬜ |
+| P3 | Friendly empty states with a next action | All lists | B | 🔨 |
 | P4 | Skeleton loaders matching each list's layout | All lists | B | ✅ every console and portal route, detail pages too |
-| P5 | Inline field errors with focus on first invalid field | All forms | P | ⬜ |
-| P6 | Mobile pass: tables become cards under 640px | All lists | P | ⬜ |
+| P5 | Inline field errors with focus on first invalid field | All forms | B | 🔨 |
+| P6 | Mobile pass: tables become cards under 640px | All lists | B | 🔨 |
 | P7 | Mobile pass: hero type size, nav collapses to a menu button under 1024px, check the loop sits well behind text | Landing | P | ⬜ |
 | P8 | Hover states: CTA arrow nudge, nav link underline that grows from the left | Landing | P | ⬜ |
 | P9 | Lifecycle chips light up one after another when they scroll into view | Landing | P | ⬜ |
 | P10 | "Who it's for" cards: hover lift and a small coloured shard per role | Landing | P | ⬜ |
-| P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | P | ⬜ |
+| P11 | Favicon and social preview image from the logo mark (`src/app/icon.svg`, `opengraph-image`) | Landing | B | 🔨 |
 | P12 | Lighthouse pass on the live URL: contrast, labels, LCP; check `prefers-reduced-motion` freezes the scene | Landing | P | ⬜ |
 | P13 | Shard loop: shards under the pointer orbit their spot and swell, flicks swing them wider; parallax background shards; amber edges, denser field | Landing | P | ✅ |
 | P14 | Intro loader: turning mark, two-line statement, LOADING and percentage, once per session | Landing | P | ✅ |
