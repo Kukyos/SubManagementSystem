@@ -43,6 +43,9 @@ the same email, or creates one.
 `tax_id` · `notes` · `is_active`.
 `cost_price` is not readable by customers; staff read it through
 `product_costs()`.
+**Always list product columns explicitly.** `select('*')` on products, an
+embed like `products(*)`, or `.insert().select()` without a column list asks
+for `cost_price` and fails for every role, admin included.
 
 **product_variants**: `id` · `product_id` · `attribute` (e.g. Brand) ·
 `value` (e.g. Odoo) · `extra_price` (e.g. 560). Unique per product +

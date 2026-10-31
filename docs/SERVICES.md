@@ -14,6 +14,9 @@ Conventions:
 - Lists take `{ page, pageSize, search, filters, sort }` and return
   `{ rows, total }`. Pagination is server-side; no list loads everything.
 - Types live in `src/types/models.ts` and match `SCHEMA.md`.
+- Products are always selected with an explicit column list (never `*`,
+  never `products(*)` in an embed). See the note on `cost_price` in
+  `SCHEMA.md`.
 
 State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 

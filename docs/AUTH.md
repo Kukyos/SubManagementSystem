@@ -21,7 +21,9 @@ The UI hides what a role cannot do; the database refuses it anyway.
 **Sign-up (public).** Email + password + name (+ company). Always creates a
 `customer`. Email is unique (Supabase Auth). Password: more than 8 characters,
 with an uppercase letter, a lowercase letter and a special character, checked
-in the form, in the server action, and by Supabase Auth's password policy.
+in the form and in the server action. Supabase Auth enforces the minimum
+length (9); its character presets that include symbols also force a digit,
+which the brief does not ask for, so the character rules are ours.
 Email confirmation is on, which is also what stops someone claiming a
 pre-existing customer record by signing up with its email.
 
