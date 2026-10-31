@@ -13,7 +13,7 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 | Reset link to registered email | `/forgot-password`, `/auth/reset`, custom SMTP | ✅ |
 | Admin / staff / customer see different things | `profiles.role`, RLS, role-aware layouts | 🟡 |
 | Customers see only their own subscriptions and invoices | RLS + `/portal` | 🟡 |
-| Only admin adds staff | `/settings/team`, service-key server action | ⬜ |
+| Only admin adds staff | `/settings`, service-key server action | ✅ |
 
 ### Launching a new plan
 | requirement | where | state |
@@ -27,16 +27,16 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 | requirement | where | state |
 |---|---|---|
 | Quotation templates with plan, product lines, validity days | `quotation_templates`, `/templates` | 🟡 |
-| Subscription number, customer, plan, start, expiry, payment terms | `subscriptions` | 🟡 |
-| Lines: product, quantity, unit price, taxes, amount | `subscription_lines` | 🟡 |
-| Draft → Quotation → Confirmed → Active → Closed, visible to the team | lifecycle trigger, status pipeline view, activity timeline | 🟡 |
+| Subscription number, customer, plan, start, expiry, payment terms | `subscriptions`, `/subscriptions/new` | ✅ |
+| Lines: product, quantity, unit price, taxes, amount | `subscription_lines`, subscription page | ✅ |
+| Draft → Quotation → Confirmed → Active → Closed, visible to the team | lifecycle trigger, status tabs, pipeline bar, activity timeline | ✅ |
 
 ### Billing day
 | requirement | where | state |
 |---|---|---|
 | Invoices generated from subscriptions, details pre-filled | `bill_subscription`, `run_billing` | 🟡 |
 | Taxes calculated from admin rules | `taxes`, line tax rate | 🟡 |
-| Confirm, cancel, send, print | invoice detail page, print stylesheet, email | ⬜ |
+| Confirm, cancel, send, print | invoice detail page, print stylesheet; email is T3.1 | 🟡 |
 | Draft → Confirmed → Paid | invoice trigger | 🟡 |
 | Nothing billed twice or skipped | unique period index + catch-up loop | 🟡 |
 

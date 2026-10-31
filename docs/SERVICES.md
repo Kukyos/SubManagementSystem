@@ -30,7 +30,8 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `requestPasswordReset(state, formData)`, `updatePassword(state, formData)` | ✅ |
 | `safeNext(next)`: same-site `?next=` paths only | ✅ |
 | `completeAuthLink(searchParams)`: finishes a confirmation or reset link | ✅ |
-| `inviteStaff(formData)` (admin) | ⬜ |
+| `inviteStaff(state, formData)` (admin; `services/auth-actions.ts`) | ✅ |
+| `listTeam()`: admin and staff profiles | ✅ |
 
 ## catalogue (`services/catalogue.ts`)
 | function | state |
@@ -41,52 +42,60 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `listPlans(query)` (with active subscription count), `getPlan(id)`, `savePlan(state, formData)` | ✅ |
 | `listProductOptions(keepId?)`: active products for pickers, plus the one already chosen | ✅ |
 | `listTaxes()` | ✅ |
-| `saveTax(formData)` | ⬜ |
-| `listTemplates()`, `getTemplate(id)`, `saveTemplate(formData)` | ⬜ |
-| `listDiscounts(query)`, `getDiscount(id)`, `saveDiscount(formData)` | ⬜ |
+| `listVariantOptions()`: every variant, for line pickers | ✅ |
+| `saveTax(state, formData)` (admin; one default at a time) | ✅ |
+| `listTemplates()` (with line and use counts), `getTemplate(id)` (with lines) | ✅ |
+| `saveTemplate(state, formData)`, `addTemplateLine(state, formData)`, `removeTemplateLine(id, templateId)` (admin; `services/catalogue-actions.ts`) | ✅ |
+| `listDiscounts(query)` (product and subscription counts), `getDiscount(id)` (with covered products), `listDiscountOptions()` (live subscription-scope) | ✅ |
+| `saveDiscount(state, formData)` (admin; replaces covered products) | ✅ |
 
 ## customers (`services/customers.ts`)
 | function | state |
 |---|---|
-| `listCustomers(query)`, `getCustomer(id)` (with subs, invoices, balance) | ⬜ |
-| `saveCustomer(formData)` | ⬜ |
+| `listCustomers(query)` (active subs, outstanding, overdue), `getCustomer(id)` (with subs, invoices, balance) | ✅ |
+| `listCustomerOptions()`: names for pickers | ✅ |
+| `saveCustomer(state, formData)` (`services/customer-actions.ts`) | ✅ |
 
 ## subscriptions (`services/subscriptions.ts`)
 | function | state |
 |---|---|
-| `listSubscriptions(query)` (status, plan, customer, date filters) | ⬜ |
-| `getSubscription(id)` (lines, discounts, invoices, timeline) | ⬜ |
-| `createSubscription(formData)` (blank or from template) | ⬜ |
-| `saveLines(id, lines)` | ⬜ |
-| `setStatus(id, status, reason?)` | ⬜ |
-| `renewSubscription(id)`, `billNow(id)` | ⬜ |
-| `attachDiscount(id, discountId)`, `detachDiscount(id, discountId)` | ⬜ |
+| `listSubscriptions(query)` (status, plan, customer filters), `subscriptionCounts()` | ✅ |
+| `getSubscription(id)` (lines, invoices, timeline), `getTimeline(entityId)` | ✅ |
+| `createSubscription(state, formData)`: blank, or from a `templateId` (plan, terms, lines, contract length) | ✅ |
+| `addLine(state, formData)`, `setLineQuantity(lineId, subId, formData)`, `removeLine(lineId, subId)`: unit price is computed on the server | ✅ |
+| `setStatus(state, formData)` (`id`, `status`, `reason`) | ✅ |
+| `renewSubscription(state, formData)`, `billNow(state, formData)` | ✅ |
+| `attachDiscount(state, formData)`, `detachDiscount(id, discountId)` | ✅ |
 
 ## invoices (`services/invoices.ts`)
 | function | state |
 |---|---|
-| `listInvoices(query)` (status, overdue, customer, date filters) | ⬜ |
-| `getInvoice(id)` (lines, payments, timeline) | ⬜ |
-| `setInvoiceStatus(id, status)`, `confirmDrafts(ids)` | ⬜ |
+| `listInvoices(query)` (status incl. overdue, customer, search), `invoiceCounts()` | ✅ |
+| `getInvoice(id)` (lines, payments, timeline) | ✅ |
+| `setInvoiceStatus(state, formData)`, `confirmDrafts(ids)` (`services/invoice-actions.ts`) | ✅ |
 | `sendInvoice(id)` (email with PDF) | ⬜ |
-| `runBilling(asOf?)` | ⬜ |
+| `runBilling(state, formData)` (`asOf`; `services/invoice-actions.ts`) | ✅ |
+| `listBillingRuns(limit?)`, `billingDue()` (due subscriptions, draft invoices) | ✅ |
 
 ## payments (`services/payments.ts`)
 | function | state |
 |---|---|
-| `listPayments(query)` | ⬜ |
-| `recordPayment(formData)` | ⬜ |
+| `listPayments(query)` (method, date range, customer or invoice search) | ✅ |
+| `overdueAging()`: overdue balance in 30-day buckets, oldest invoices | ✅ |
+| `recordPayment(state, formData)` (`services/invoice-actions.ts`) | ✅ |
 | `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` | ⬜ |
 
 ## reports (`services/reports.ts`)
 | function | state |
 |---|---|
-| `getFinanceSummary(from?, to?)` | ⬜ |
+| `getFinanceSummary(from?, to?)` (numbers normalised from jsonb) | ✅ |
 | `search(term)` (customers, subscriptions, invoices) | ⬜ |
 
 ## portal (`services/portal.ts`)
 | function | state |
 |---|---|
-| `myOverview()` (subscriptions, open invoices, balance) | ⬜ |
-| `subscribe(planId, quantity, variantId?)` | ⬜ |
-| `subscriptionAction(id, 'pause' \| 'resume' \| 'cancel')` | ⬜ |
+| `myOverview()` (customer record, subscriptions without drafts, open invoices, balance, overdue) | ✅ |
+| `listMyInvoices({ page })` (no drafts), `listPortalPlans()` (open for sign-up today, with variants and tax rate) | ✅ |
+| `subscribe(state, formData)` → `portal_subscribe`, lands on the first invoice (`services/portal-actions.ts`) | ✅ |
+| `subscriptionAction(state, formData)` (`id`, `action`: pause / resume / cancel) | ✅ |
+| `updateMyProfile(state, formData)` (name, phone, company, address, city, GSTIN; not email) | ✅ |

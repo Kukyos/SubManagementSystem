@@ -1,4 +1,4 @@
-import type { InvoiceStatus, SubscriptionStatus } from "@/types/models";
+import type { InvoiceStatus, PaymentMethod, SubscriptionStatus } from "@/types/models";
 
 // One label and colour per status, used by badges, board columns, charts and shards.
 type StatusStyle = { label: string; text: string; dot: string; hex: string };
@@ -30,3 +30,12 @@ export function invoiceDisplayStatus(status: InvoiceStatus, dueDate: string): In
 
 // Shard palette, in order. Plans and chart series take colours from here.
 export const shardPalette = ["#ffb829", "#8052ff", "#2fd3a7", "#edebff", "#ff7a9c", "#5b8cff"];
+
+export const methodLabel: Record<PaymentMethod, string> = {
+  bank_transfer: "Bank transfer",
+  upi: "UPI",
+  card: "Card",
+  cheque: "Cheque",
+  cash: "Cash",
+  online: "Online",
+};

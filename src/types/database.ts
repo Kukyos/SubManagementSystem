@@ -58,6 +58,50 @@ export type Database = {
           },
         ]
       }
+      billing_runs: {
+        Row: {
+          as_of: string
+          created_at: string
+          duration_ms: number
+          failed: Json
+          id: string
+          invoices_created: number
+          ran_by: string | null
+          subscriptions_billed: number
+          subscriptions_closed: number
+        }
+        Insert: {
+          as_of: string
+          created_at?: string
+          duration_ms?: number
+          failed?: Json
+          id?: string
+          invoices_created?: number
+          ran_by?: string | null
+          subscriptions_billed?: number
+          subscriptions_closed?: number
+        }
+        Update: {
+          as_of?: string
+          created_at?: string
+          duration_ms?: number
+          failed?: Json
+          id?: string
+          invoices_created?: number
+          ran_by?: string | null
+          subscriptions_billed?: number
+          subscriptions_closed?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_runs_ran_by_fkey"
+            columns: ["ran_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null

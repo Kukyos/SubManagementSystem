@@ -4,6 +4,45 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- Customer portal: overview with balance and pause / resume / cancel (cancel
+  asks twice), invoices with the same printable document as the console
+  (moved to `components/sales/invoice-document.tsx`), plans with one-step
+  subscribe, and profile. Drafts never show in the portal.
+- **Decision: Stripe instead of Razorpay** for online payment (T2.8).
+- **Decision: no chart library.** The dashboard's charts are hand-drawn SVG
+  (`components/reports/bar-chart.tsx`): grouped monthly bars with a hover
+  tooltip and a table view. Invoiced is the accent violet, collected a darker
+  teal (`#1fa982`); the brighter brand teal fails the lightness band for chart
+  fills on the dark surface.
+- Billing run page, payments list with overdue aging, finance dashboard.
+- **Decision: `billing_runs` table.** `run_billing` logs every run (console
+  or nightly) so the billing page can show history; migration
+  `20261031063429_billing_runs.sql`.
+- Quotation templates, taxes in Settings, discounts with attach / detach on
+  subscriptions. Seeded four templates and six discounts.
+- Seed (`supabase/seed.sql`): nine more products with variants, ten more
+  plans (monthly, yearly, quarterly, a weekly trial that closes itself), 688
+  customers across ten cities, ~2,100 subscriptions over 18 months. Invoices
+  come from `bill_subscription` itself, so they follow the real rules; then
+  ~96% of past-due invoices are paid, a few part paid, the rest overdue.
+  Timeline entries are moved back to when each event happened. Emails use the
+  reserved `.example` domain so reminder mail can never reach a real inbox.
+- Customers, subscriptions, invoices and payments screens, and the team list
+  with "add staff" in Settings. Walked the whole flow in the browser: new
+  subscription, minimum-quantity refusal shown from the trigger, variant line,
+  confirm, activate, bill now, confirm invoice, part payment, balance, invoice
+  flips to Paid on its own.
+- **Decision: database messages reach the screen.** Lifecycle and payment
+  triggers raise `check_violation` with a sentence for people; actions pass
+  those through and hide every other database error.
+- **Decision: admin sets a first password for new staff** instead of an email
+  invite (see `AUTH.md`).
+- **Decision: line prices are computed on the server** (plan price for the
+  plan's own product, list price otherwise, plus the variant's extra). The form
+  never sends a price.
+- Input and Select carry `w-full`; a width passed in needs `!` to win
+  (`!w-40`). Fixed the filter selects on products and plans.
+
 ### Where things stand (read this first in a new session)
 
 - **Live:** the landing page at https://managesubs.vercel.app, plus sign in,

@@ -135,6 +135,12 @@ deleted. **Overdue** = confirmed and `due_date` before today.
 `recorded_by`.
 Only against confirmed invoices, never more than the amount still due.
 
+**billing_runs**: one row per billing run, from the console or the nightly
+job. `as_of` · `ran_by` (null = nightly job) · `subscriptions_billed` ·
+`invoices_created` · `subscriptions_closed` · `failed` (jsonb list of
+`{subscription, id, error}`) · `duration_ms` · `created_at`.
+Written only by `run_billing`; staff read it.
+
 **activity_log**: `entity` (table name) · `entity_id` · `action` (created,
 status, payment) · `from_status` / `to_status` · `message` · `actor_id` ·
 `created_at`. Written by triggers; the status timeline on subscription and
@@ -144,7 +150,7 @@ invoice pages.
 
 | function | who | does |
 |---|---|---|
-| `run_billing(as_of)` | staff, pg_cron nightly 00:30 UTC | Invoices every due active subscription up to `as_of`, then closes expired auto-close plans. Returns counts and any per-subscription failures |
+| `run_billing(as_of)` | staff, pg_cron nightly 00:30 UTC | Invoices every due active subscription up to `as_of`, then closes expired auto-close plans. Logs a `billing_runs` row; returns its id, the counts and any per-subscription failures |
 | `bill_now(subscription_id)` | staff | Bills one subscription up to today |
 | `finance_summary(from, to)` | staff | Active subs, MRR, collected, invoiced, outstanding, overdue, status breakdown, 12-month series, top plans |
 | `portal_subscribe(plan, qty, variant)` | customer | Creates an active subscription and its first confirmed invoice; returns the invoice id |

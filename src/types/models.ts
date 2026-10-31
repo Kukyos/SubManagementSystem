@@ -16,6 +16,7 @@ export type Invoice = Tables<"invoices">;
 export type InvoiceLine = Tables<"invoice_lines">;
 export type Payment = Tables<"payments">;
 export type ActivityEntry = Tables<"activity_log">;
+export type BillingRun = Tables<"billing_runs">;
 
 export type UserRole = Enums<"user_role">;
 export type SubscriptionStatus = Enums<"subscription_status">;
@@ -24,6 +25,8 @@ export type BillingPeriod = Enums<"billing_period">;
 export type PaymentMethod = Enums<"payment_method">;
 export type PaymentTerms = Enums<"payment_terms">;
 export type ProductType = Enums<"product_type">;
+export type DiscountType = Enums<"discount_type">;
+export type DiscountScope = Enums<"discount_scope">;
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }

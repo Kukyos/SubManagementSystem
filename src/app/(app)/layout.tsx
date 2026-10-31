@@ -12,7 +12,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line bg-surface md:flex">
+      <aside className="sticky top-0 hidden h-screen print:!hidden w-60 shrink-0 flex-col border-r border-line bg-surface md:flex">
         <div className="px-5 py-5">
           <Logo href="/dashboard" />
         </div>
@@ -31,7 +31,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-line bg-bg/80 px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-20 flex h-16 print:hidden items-center justify-between gap-4 border-b border-line bg-bg/80 px-4 backdrop-blur md:px-8">
           <div className="md:hidden">
             <Logo href="/dashboard" />
           </div>
@@ -40,13 +40,13 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
         </header>
 
         {/* Small screens: the sidebar becomes a scrollable strip. */}
-        <nav className="flex gap-1 overflow-x-auto border-b border-line px-3 py-2 md:hidden" aria-label="Main">
+        <nav className="flex gap-1 overflow-x-auto border-b border-line px-3 py-2 md:hidden print:hidden" aria-label="Main">
           {groups.flatMap((g) => g.items).map((item) => (
             <NavLink key={item.href} {...item} className="shrink-0" />
           ))}
         </nav>
 
-        <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+        <main className="flex-1 px-4 py-8 md:px-8 print:p-0">{children}</main>
       </div>
     </div>
   );

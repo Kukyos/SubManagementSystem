@@ -22,7 +22,7 @@ add a row to Requests instead of editing it.
 | S4 | Docs set (`docs/`) | B | ✅ |
 | S5 | Vercel project linked, env vars, first deploy | B | ✅ |
 | S6 | Supabase Auth settings: password policy, custom SMTP, redirect URLs | B | ✅ |
-| S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | 🔨 admin + staff accounts and GST rates in; catalogue and volume next |
+| S7 | Seed: catalogue, demo accounts, thousands of subscriptions with history | B | ✅ `supabase/seed.sql`: 688 customers, ~2,100 subscriptions, ~6,800 invoices, ~6,000 payments |
 | S8 | SQL checks: lifecycle, double billing, discounts, RLS per role | B | 🔨 billing rules pass; RLS per role after seed |
 | S9 | `DESIGN.md` from chosen theme; tokens + fonts live | B | ✅ |
 | S10 | Branded auth emails (confirm sign-up, reset password): logo, dark layout, one button, plain-text fallback, tidy spacing | B | ⬜ |
@@ -36,26 +36,26 @@ add a row to Requests instead of editing it.
 | T1.3 | App shell: sidebar, header, role-aware nav, sign out | B | ✅ (every route stubbed) |
 | T1.4 | Products list + editor with variants | B | ✅ |
 | T1.5 | Plans list + editor | B | ✅ |
-| T1.6 | Customers list + detail | B | ⬜ |
-| T1.7 | Subscriptions list (filters, status pipeline) | B | ⬜ |
-| T1.8 | Subscription editor + detail: lines, status actions, timeline | B | ⬜ |
-| T1.9 | Invoices list + detail: confirm, cancel, print | B | ⬜ |
-| T1.10 | Record payment | B | ⬜ |
-| T1.11 | Team page: admin adds staff | B | ⬜ |
+| T1.6 | Customers list + detail | B | ✅ |
+| T1.7 | Subscriptions list (filters, status pipeline) | B | ✅ |
+| T1.8 | Subscription editor + detail: lines, status actions, timeline | B | ✅ |
+| T1.9 | Invoices list + detail: confirm, cancel, print | B | ✅ |
+| T1.10 | Record payment | B | ✅ |
+| T1.11 | Team page: admin adds staff | B | ✅ (in Settings) |
 
 ## Tier 2: what makes it a product
 
 | # | Task | Owner | Status |
 |---|---|---|---|
-| T2.1 | Quotation templates + "new from template" | B | ⬜ |
-| T2.2 | Taxes settings | B | ⬜ |
-| T2.3 | Discounts list + editor, attach to subscriptions | B | ⬜ |
-| T2.4 | Billing run page: run now, result report, history | B | ⬜ |
-| T2.5 | Finance dashboard: KPIs, charts, date range | B | ⬜ |
-| T2.6 | Customer portal: overview, subscriptions, invoices | B | ⬜ |
-| T2.7 | Portal: subscribe to a plan | B | ⬜ |
-| T2.8 | Portal: pay invoice online (Razorpay test) | B | ⬜ |
-| T2.9 | Overdue view + payments list | B | ⬜ |
+| T2.1 | Quotation templates + "new from template" | B | ✅ |
+| T2.2 | Taxes settings | B | ✅ (in Settings) |
+| T2.3 | Discounts list + editor, attach to subscriptions | B | ✅ |
+| T2.4 | Billing run page: run now, result report, history | B | ✅ |
+| T2.5 | Finance dashboard: KPIs, charts, date range | B | ✅ |
+| T2.6 | Customer portal: overview, subscriptions, invoices | B | ✅ (plus profile) |
+| T2.7 | Portal: subscribe to a plan | B | ✅ |
+| T2.8 | Portal: pay invoice online (Stripe test) | B | ⬜ needs Stripe test keys |
+| T2.9 | Overdue view + payments list | B | ✅ (aging on Payments; list filter on Invoices) |
 
 ## Tier 3: what makes it memorable
 

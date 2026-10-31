@@ -35,8 +35,11 @@ customers land on `/portal`.
 through custom SMTP so it reaches any address, not only team members.
 
 **Adding staff (admin only).** Server action checks the caller is admin, then
-creates the user with the service key and `app_metadata.role = 'staff'`. The
-new staff member gets an invite / reset link to set their own password.
+creates the user with the service key, `app_metadata.role = 'staff'` and a
+first password the admin picks (same rules). The role is set at creation, so
+the sign-up trigger makes a staff profile and no customer record. They change
+the password with Forgot password. An emailed invite was ruled out: its link
+carries the session in the URL fragment, which the server callback can't read.
 
 **Session.** Cookie-based via `@supabase/ssr`. `src/proxy.ts` refreshes it on
 every request and redirects signed-out visitors to `/login?next=…`. Pages
