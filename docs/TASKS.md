@@ -93,6 +93,7 @@ Small, contained, inside existing pages. Rows get added as pages land.
 | P16 | Nav links: letters roll up on hover, grey to white | Landing | P | ✅ |
 | P17 | Stronger text shadow over the shard field | Landing, auth headings | B | ✅ |
 | P18 | Pay button on each unpaid row of the portal invoices list | Portal invoices | B | ✅ |
+| P19 | Landing shard field behind the signed-in console and portal (dark theme) | Console, portal | P | ✅ |
 
 ## Requests
 
