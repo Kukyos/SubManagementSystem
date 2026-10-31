@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PayNowButton } from "@/components/portal/portal-forms";
 import { InvoiceDocument } from "@/components/sales/invoice-document";
 import { PrintButton } from "@/components/sales/payment-form";
 import { InvoiceBadge } from "@/components/ui/badge";
@@ -67,9 +68,9 @@ export default async function Page({
                 <p className="text-xs text-faint">Balance due{display === "overdue" ? ", overdue" : ""}</p>
                 <p className={`tabular mt-1 text-3xl font-light ${display === "overdue" ? "text-pink" : ""}`}>{money(due)}</p>
                 <p className="mt-1 text-xs text-muted">Due {date(inv.due_date)}</p>
-                <p id="pay" className="mt-4 text-sm text-muted">
-                  Online payment is coming soon. Until then, pay by bank transfer or UPI quoting {inv.number}.
-                </p>
+                <div id="pay">
+                  <PayNowButton invoiceId={inv.id} amount={due} />
+                </div>
               </>
             ) : (
               <p className="text-sm text-muted">

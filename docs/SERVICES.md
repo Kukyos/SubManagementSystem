@@ -86,7 +86,7 @@ State: ✅ implemented · ⬜ planned (signature agreed, not written yet).
 | `recordPayment(state, formData)` (`services/invoice-actions.ts`) | ✅ |
 | `overdueByCustomer()`: overdue invoices grouped per customer, longest owing first | ✅ |
 | `sendOverdueReminders(state, formData)` (`services/invoice-actions.ts`): one email per overdue customer | ✅ |
-| `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` | ⬜ |
+| `createGatewayOrder(invoiceId)`, `verifyGatewayPayment(payload)` (`services/gateway-actions.ts`; Razorpay orders, signature check, capture, then an `online` payment written with the service key) | ✅ |
 
 ## reports (`services/reports.ts`)
 | function | state |

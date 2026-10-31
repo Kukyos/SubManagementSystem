@@ -4,6 +4,13 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- **Decision: back to Razorpay** for online payment (reverses the Stripe
+  call below; Razorpay is the preferred gateway). "Pay now" on a portal
+  invoice creates a Razorpay order for the balance due, opens Checkout, then
+  the server checks the signature, reads the amount back from Razorpay,
+  captures if needed and records an `online` payment. The trigger flips the
+  invoice to paid. A repeated callback is ignored by the unique payment id.
+  Env: `RAZORPAY_API_KEY` (key id) and `RAZORPAY_SECRET`.
 - The initials circle in the header is a link: customers go to their
   profile, staff and admins to Settings (where the team list is).
 - Light theme for the console and portal: a sun / moon button in the header,

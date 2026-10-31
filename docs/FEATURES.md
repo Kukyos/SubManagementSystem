@@ -65,7 +65,7 @@ add on top. ✅ built · 🟡 data layer done, screen pending · ⬜ not started
 | feature | why it matters | state |
 |---|---|---|
 | Nightly billing with pg_cron + "Run billing now" with a result report | billing day actually runs itself | 🟡 |
-| Online payment in the portal (Razorpay test mode), signature-verified | customers pay without emailing anyone | ⬜ |
+| Online payment in the portal (Razorpay test mode), signature-verified | customers pay without emailing anyone | ✅ |
 | Self-service subscribe from the portal | sign-up to paying customer with no staff involved | 🟡 |
 | Customer pause / resume / cancel within plan rules | "manage their own subscriptions" taken literally | 🟡 |
 | MRR, 12-month invoiced vs collected, new vs churned, top plans | the questions the finance lead actually asks | 🟡 |

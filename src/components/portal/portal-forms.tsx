@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { Notice } from "@/components/auth/forms";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { money } from "@/lib/format";
+import { createGatewayOrder, verifyGatewayPayment } from "@/services/gateway-actions";
 import { subscribe, updateMyProfile } from "@/services/portal-actions";
 import type { Customer, ProductVariant } from "@/types/models";
 
@@ -115,5 +117,86 @@ export function ProfileForm({ customer }: { customer: Customer }) {
         {pending ? "Saving…" : "Save details"}
       </Button>
     </form>
+  );
+}
+
+type RazorpayResponse = { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
+type RazorpayCheckout = { open(): void; on(event: "payment.failed", cb: (r: { error: { description?: string } }) => void): void };
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => RazorpayCheckout;
+  }
+}
+
+function loadCheckout() {
+  if (window.Razorpay) return Promise.resolve(true);
+  return new Promise<boolean>((resolve) => {
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
+export function PayNowButton({ invoiceId, amount }: { invoiceId: string; amount: number }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState<"" | "opening" | "verifying">("");
+  const [error, setError] = useState("");
+  const [paid, setPaid] = useState(0);
+
+  async function pay() {
+    setError("");
+    setBusy("opening");
+    const [loaded, order] = await Promise.all([loadCheckout(), createGatewayOrder(invoiceId)]);
+    if (!order.ok) return (setBusy(""), setError(order.error));
+    if (!loaded || !window.Razorpay) return (setBusy(""), setError("The payment window didn't load. Check your connection and try again."));
+
+    const o = order.data;
+    const checkout = new window.Razorpay({
+      key: o.keyId,
+      order_id: o.orderId,
+      amount: o.amount,
+      currency: o.currency,
+      name: "Brightloop Software",
+      description: `Invoice ${o.invoiceNumber}`,
+      prefill: { name: o.name, email: o.email },
+      notes: { invoice: o.invoiceNumber },
+      theme: { color: "#8052ff" },
+      modal: { ondismiss: () => setBusy("") },
+      handler: async (r: RazorpayResponse) => {
+        setBusy("verifying");
+        const res = await verifyGatewayPayment({
+          invoiceId,
+          orderId: r.razorpay_order_id,
+          paymentId: r.razorpay_payment_id,
+          signature: r.razorpay_signature,
+        });
+        setBusy("");
+        if (!res.ok) return setError(res.error);
+        setPaid(res.data.amount);
+        router.refresh();
+      },
+    });
+    checkout.on("payment.failed", (r) => setError(r.error.description || "The payment was declined. Nothing was charged."));
+    checkout.open();
+  }
+
+  if (paid) {
+    return (
+      <p role="status" className="mt-4 rounded-field border border-teal/30 bg-teal/[0.06] px-3.5 py-3 text-sm text-teal">
+        Payment of {money(paid)} received. Thank you.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      {error && <Notice>{error}</Notice>}
+      <Button type="button" onClick={pay} disabled={!!busy} className="w-full">
+        {busy === "opening" ? "Opening checkout…" : busy === "verifying" ? "Confirming payment…" : `Pay ${money(amount)} now`}
+      </Button>
+      <p className="text-xs text-faint">Card, UPI or netbanking through Razorpay. You can also pay by bank transfer quoting the invoice number.</p>
+    </div>
   );
 }

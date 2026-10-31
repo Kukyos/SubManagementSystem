@@ -54,7 +54,7 @@ add a row to Requests instead of editing it.
 | T2.5 | Finance dashboard: KPIs, charts, date range | B | ✅ |
 | T2.6 | Customer portal: overview, subscriptions, invoices | B | ✅ (plus profile) |
 | T2.7 | Portal: subscribe to a plan | B | ✅ |
-| T2.8 | Portal: pay invoice online (Stripe test) | B | ⬜ needs Stripe test keys |
+| T2.8 | Portal: pay invoice online (Razorpay test) | B | ✅ Pay now on portal invoices; needs `RAZORPAY_API_KEY` / `RAZORPAY_SECRET` on Vercel |
 | T2.9 | Overdue view + payments list | B | ✅ (aging on Payments; list filter on Invoices) |
 
 ## Tier 3: what makes it memorable
@@ -67,7 +67,7 @@ add a row to Requests instead of editing it.
 | T3.4 | Global search (⌘K) | B | ✅ pages, customers, subscriptions, invoices |
 | T3.5 | CSV export on lists | B | ✅ customers, subscriptions, invoices, payments; current filters, every page |
 | T3.6 | Light theme (the app is dark-first) | B | ✅ console and portal; toggle in the header |
-| T3.7 | Showcase README with screenshots | B | ⬜ |
+| T3.7 | Showcase README with screenshots | B | ✅ |
 
 ## Polish
 

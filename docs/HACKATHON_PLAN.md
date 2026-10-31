@@ -261,5 +261,5 @@ seconds against the full seed · `TASKS.md` ticked in the same push.
 - ⬜ Supabase Auth: minimum password length 9, require lower, upper and symbol.
 - ✅ Supabase Auth: custom SMTP (Gmail) so reset links reach any address.
 - ⬜ Vercel project linked, production tracking `main`, env vars set.
-- ⬜ Razorpay test keys.
+- ✅ Razorpay test keys.
 - ⬜ Visual direction chosen; `DESIGN.md` filled.
