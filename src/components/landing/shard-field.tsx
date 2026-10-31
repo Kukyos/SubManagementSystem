@@ -163,7 +163,7 @@ const FRAGMENT = /* glsl */ `
   }
 `;
 
-export function ShardField() {
+export function ShardField({ ring: showRing = true }: { ring?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -284,6 +284,7 @@ export function ShardField() {
       const ring = new THREE.Mesh(ringGeometry, ringMaterial);
       // instances are placed in the shader, so the base geometry's bounds mean nothing
       ring.frustumCulled = false;
+      ring.visible = showRing;
       spin.add(ring);
 
       // Background layer: larger, dimmer shards spread through the whole view, each with its own depth.
@@ -503,7 +504,7 @@ export function ShardField() {
       disposed = true;
       cleanup();
     };
-  }, []);
+  }, [showRing]);
 
   return (
     <canvas

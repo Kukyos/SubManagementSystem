@@ -12,9 +12,9 @@ import type { CurrentUser } from "@/services/auth";
 export function PortalShell({ user, children, theme }: { user: CurrentUser; theme: Theme; children: React.ReactNode }) {
   return (
     <div data-shell data-theme={theme} className="bg-bg text-fg min-h-screen">
-      {/* the landing's shard field; the light theme keeps a plain background */}
+      {/* the landing's floating shards, without the loop; the light theme keeps a plain background */}
       <div className="print:hidden [[data-theme=light]_&]:hidden">
-        <ShardField />
+        <ShardField ring={false} />
       </div>
       <header className="sticky top-0 z-20 border-b border-line bg-bg/80 backdrop-blur print:hidden">
         <div className={cn(shell, "flex h-16 items-center justify-between gap-4")}>
@@ -37,7 +37,7 @@ export function PortalShell({ user, children, theme }: { user: CurrentUser; them
           ))}
         </nav>
       </header>
-      <main data-shards="loop-right" className={cn(shell, "relative z-10 py-10")}>{children}</main>
+      <main className={cn(shell, "relative z-10 py-10")}>{children}</main>
     </div>
   );
 }

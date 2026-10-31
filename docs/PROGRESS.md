@@ -138,8 +138,8 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
-- Console and portal now sit over the landing's shard field, loop on the
-  right. Cards stay opaque so tables read cleanly; the light theme keeps its
+- Console and portal now sit over the landing's floating shards. The loop
+  was tried on the right and taken out: it crowded the data. Cards stay opaque so tables read cleanly; the light theme keeps its
   plain background (the shards are lit for black).
 - Landing timings tightened: intro loader minimum 1.1s (was 1.7s) with a
   shorter hold and fade, its counter written to the DOM instead of
