@@ -4,6 +4,9 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ## 2026-10-31
 
+- **Decision: list tables on phones are CSS only.** Under 640px a table
+  with `table-cards` hides its header and stacks each row as a card; every
+  `td` carries `data-label` with its column name. New list tables need both.
 - Deleted the scaffold's `src/app/favicon.ico`. The tab icon is now
   `src/app/icon.svg` (the tetrahedron on a dark tile), with `apple-icon.png`
   for home screens and a generated `opengraph-image.tsx` for link previews.

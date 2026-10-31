@@ -31,7 +31,7 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className="group space-y-1.5">
+    <div className="group/field space-y-1.5">
       <label htmlFor={htmlFor} className="block text-xs font-medium text-muted">
         {label}
       </label>
@@ -41,7 +41,7 @@ export function Field({
           {error}
         </p>
       ) : (
-        hint && <p className="text-xs text-faint transition-colors group-has-[:user-invalid]:text-pink">{hint}</p>
+        hint && <p className="text-xs text-faint transition-colors group-has-[:user-invalid]/field:text-pink">{hint}</p>
       )}
     </div>
   );
