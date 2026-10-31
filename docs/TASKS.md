@@ -37,8 +37,8 @@ add a row to Requests instead of editing it.
 | T1.4 | Products list + editor with variants | B | ✅ |
 | T1.5 | Plans list + editor | B | ✅ |
 | T1.6 | Customers list + detail | B | ✅ |
-| T1.7 | Subscriptions list (filters, status pipeline) | B | ⬜ |
-| T1.8 | Subscription editor + detail: lines, status actions, timeline | B | ⬜ |
+| T1.7 | Subscriptions list (filters, status pipeline) | B | ✅ |
+| T1.8 | Subscription editor + detail: lines, status actions, timeline | B | ✅ |
 | T1.9 | Invoices list + detail: confirm, cancel, print | B | ⬜ |
 | T1.10 | Record payment | B | ⬜ |
 | T1.11 | Team page: admin adds staff | B | ⬜ |

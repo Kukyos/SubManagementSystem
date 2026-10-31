@@ -32,7 +32,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
 
       <form className="mb-4 flex flex-wrap gap-2" role="search">
         <Input name="q" defaultValue={search} placeholder="Search by name" aria-label="Search plans" className="max-w-xs" />
-        <Select name="show" defaultValue={show} aria-label="Which plans" className="w-40">
+        <Select name="show" defaultValue={show} aria-label="Which plans" className="!w-40">
           <option value="active">Active</option>
           <option value="archived">Archived</option>
           <option value="all">All</option>
