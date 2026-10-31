@@ -31,6 +31,9 @@ Newest first. What shipped, decisions taken, and anything moved or deleted.
 
 ### Log
 
+- Shard hover no longer parts the loop: shards under the pointer stay in
+  place and spin fast and jitter instead, so the agitation follows the cursor
+  without opening a hole in the shape.
 - Shard loop follows the reference's hover more closely: shards under the
   pointer push outward and turn white, then cool back over about a second;
   shards edge-on to the camera turn amber so the outline holds at any angle.

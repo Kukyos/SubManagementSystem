@@ -8,7 +8,8 @@ import { useEffect, useRef } from "react";
   as the page scrolls the field eases between those states, so the loop breaks
   apart over the "how it runs today" section and pulls back together after.
   Shards edge-on to the camera turn amber so the outline reads at any angle,
-  and the pointer pushes nearby shards out and lights them white for a moment.
+  and shards under the pointer stay put but spin and jitter hard, lit white,
+  calming down over about a second.
 */
 
 type Pose = { scatter: number; x: number; scale: number };
@@ -31,7 +32,9 @@ const PALETTE: [string, number][] = [
 ];
 
 const HOVER_RADIUS = 0.7;
-const HOVER_PUSH = 0.32;
+const JITTER = 0.05;
+const JITTER_SPEED = 22;
+const HYPER_SPIN = 14;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
@@ -92,7 +95,7 @@ export function ShardField() {
       const normal = new Float32Array(COUNT * 3);
       const base = new Float32Array(COUNT * 3);
       const heat = new Float32Array(COUNT);
-      const push = new Float32Array(COUNT * 3);
+      const phase = new Float32Array(COUNT * 3);
 
       const R = 2.35;
       const color = new THREE.Color();
@@ -121,6 +124,7 @@ export function ShardField() {
         for (let k = 0; k < 3; k++) {
           rot[i * 3 + k] = Math.random() * Math.PI * 2;
           rotSpeed[i * 3 + k] = (Math.random() - 0.5) * (floater[i] ? 0.5 : 1.4);
+          phase[i * 3 + k] = Math.random() * Math.PI * 2;
         }
 
         let pick = Math.random();
@@ -233,7 +237,7 @@ export function ShardField() {
         }
         const { origin: ro, direction: rd } = raycaster.ray;
         const cool = Math.pow(0.18, dt);
-        const settle = 1 - Math.pow(0.08, dt);
+        const t = now / 1000;
         const col = colors.array as Float32Array;
 
         for (let i = 0; i < COUNT; i++) {
@@ -257,19 +261,17 @@ export function ShardField() {
             const d = Math.sqrt(qx * qx + qy * qy + qz * qz);
             if (d < HOVER_RADIUS) {
               const k = 1 - d / HOVER_RADIUS;
-              const pull = k * k;
-              if (pull > h) h = pull;
-              const inv = (HOVER_PUSH * pull) / (d || 1);
-              push[j] += (qx * inv - push[j]) * 0.25;
-              push[j + 1] += (qy * inv - push[j + 1]) * 0.25;
-              push[j + 2] += (qz * inv - push[j + 2]) * 0.25;
+              if (k * k > h) h = k * k;
             }
           }
           heat[i] = h;
-          push[j] -= push[j] * settle;
-          push[j + 1] -= push[j + 1] * settle;
-          push[j + 2] -= push[j + 2] * settle;
-          dummy.position.set(px + push[j], py + push[j + 1], pz + push[j + 2]);
+          // Hot shards buzz around their own spot instead of moving out of the way.
+          const buzz = JITTER * h;
+          dummy.position.set(
+            px + Math.sin(t * JITTER_SPEED + phase[j]) * buzz,
+            py + Math.sin(t * JITTER_SPEED * 1.13 + phase[j + 1]) * buzz,
+            pz + Math.sin(t * JITTER_SPEED * 0.87 + phase[j + 2]) * buzz,
+          );
 
           // Edge-on shards go amber; the band fades as the loop breaks up.
           let rim = 0;
@@ -285,9 +287,10 @@ export function ShardField() {
             col[j + c] = tinted + (1 - tinted) * h;
           }
           if (!reduceMotion) {
-            rot[j] += rotSpeed[j] * dt;
-            rot[j + 1] += rotSpeed[j + 1] * dt;
-            rot[j + 2] += rotSpeed[j + 2] * dt;
+            const spinUp = 1 + h * HYPER_SPIN;
+            rot[j] += rotSpeed[j] * dt * spinUp;
+            rot[j + 1] += rotSpeed[j + 1] * dt * spinUp;
+            rot[j + 2] += rotSpeed[j + 2] * dt * spinUp;
           }
           dummy.rotation.set(rot[j], rot[j + 1], rot[j + 2]);
           dummy.scale.setScalar(size[i] * (1 + s * 0.35 + heat[i] * 0.4));
